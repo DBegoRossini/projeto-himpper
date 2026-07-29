@@ -36,39 +36,28 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
 
-  const getPreferredTheme = () => {
-    const stored = localStorage.getItem(STORAGE_KEYS.theme);
+  const getPreferredTheme = () => "light";
 
-    if (stored === "light" || stored === "dark") {
-      return stored;
-    }
+  const applyTheme = () => {
+    const nextTheme = "light";
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
-
-  const applyTheme = theme => {
-    html.dataset.impperTheme = theme;
-    localStorage.setItem(STORAGE_KEYS.theme, theme);
+    html.dataset.impperTheme = nextTheme;
+    localStorage.setItem(STORAGE_KEYS.theme, nextTheme);
 
     document
       .querySelectorAll("[data-impper-theme-icon]")
       .forEach(icon => {
-        icon.textContent = theme === "dark" ? "☀" : "☾";
+        icon.textContent = "☾";
       });
 
     document.dispatchEvent(
       new CustomEvent("impper:themechange", {
-        detail: { theme }
+        detail: { theme: nextTheme }
       })
     );
   };
 
-  const toggleTheme = () => {
-    const current = html.dataset.impperTheme || getPreferredTheme();
-    applyTheme(current === "dark" ? "light" : "dark");
-  };
+  const toggleTheme = () => applyTheme("light");
 
   const ensureToastRegion = () => {
     let region = document.querySelector(".imp-toast-region");
@@ -382,7 +371,7 @@
     init(options = {}) {
       if (state.initialized) return;
 
-      if (options.theme === "light" || options.theme === "dark") {
+      if (options.theme === "light") {
         applyTheme(options.theme);
       } else {
         applyTheme(getPreferredTheme());

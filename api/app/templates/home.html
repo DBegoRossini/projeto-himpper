@@ -12,11 +12,132 @@
     {% endblock %}
 
     {% block main %}
-        <div class="home_fluxos">
-            {% for fluxo in fluxos %}
-                <div class="home_fluxo">
-                     <a></a>
+        <main class="imp-page-content">
+        <section class="imp-stack imp-gap-6">
+          <div>
+            <span class="imp-kicker">Central</span>
+            <h2 class="imp-title">Sistema corporativo</h2>
+            <p class="imp-subtitle">
+              Visão rápida do que depende de você e do status das solicitações abertas.
+            </p>
+            <hr class="imp-brand-rule">
+          </div>
+
+          <div class="imp-grid imp-grid--4">
+            <article class="imp-stat">
+              <div class="imp-stat__icon">▤</div>
+              <div>
+                <span class="imp-stat__label">Solicitações abertas</span>
+                <strong class="imp-stat__value"></strong>
+              </div>
+            </article>
+
+            <article class="imp-stat">
+              <div class="imp-stat__icon">◷</div>
+              <div>
+                <span class="imp-stat__label">Em aprovação</span>
+                <strong class="imp-stat__value"></strong>
+              </div>
+            </article>
+
+            <article class="imp-stat">
+              <div class="imp-stat__icon">✓</div>
+              <div>
+                <span class="imp-stat__label">Aprovadas</span>
+                <strong class="imp-stat__value"></strong>
+              </div>
+            </article>
+
+            <article class="imp-stat">
+              <div class="imp-stat__icon">×</div>
+              <div>
+                <span class="imp-stat__label">Pendências</span>
+                <strong class="imp-stat__value"></strong>
+              </div>
+            </article>
+          </div>
+
+          <div class="imp-grid imp-grid--2">
+            <article class="imp-card imp-card--accent imp-dashboard-card">
+              <header class="imp-card__header">
+                <div>
+                  <h3 class="imp-card__title">Minhas tarefas</h3>
+                  <p class="imp-card__subtitle">
+                    Atividades sob sua responsabilidade neste momento.
+                  </p>
                 </div>
-            {% endfor %}
-        </div>
+
+                <span class="imp-badge imp-badge--warning" id="myTasksCount">
+                  0 pendentes
+                </span>
+              </header>
+
+              <div class="imp-card__body">
+                <div class="imp-table-wrap imp-table-wrap--scrollable">
+                  <table class="imp-table">
+                    <thead>
+                      <tr>
+                        <th>Tarefa</th>
+                        <th>Fluxo</th>
+                        <th>Prazo</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="myTasksRows"></tbody>
+                  </table>
+                </div>
+                <p class="imp-subtitle imp-hidden" id="myTasksEmptyState">
+                  Nenhuma tarefa sob sua responsabilidade no momento.
+                </p>
+              </div>
+
+              <footer class="imp-card__footer">
+                <a class="imp-btn imp-btn--neutral" href="#">
+                  Ver todas as tarefas
+                </a>
+              </footer>
+            </article>
+
+            <article class="imp-card imp-card--accent-orange imp-dashboard-card">
+              <header class="imp-card__header">
+                <div>
+                  <h3 class="imp-card__title">Minhas solicitações</h3>
+                  <p class="imp-card__subtitle">
+                    Acompanhe os fluxos abertos por você e seus status atuais.
+                  </p>
+                </div>
+
+                <span class="imp-badge imp-badge--success" id="myRequestsCount">
+                  0 em andamento
+                </span>
+              </header>
+
+              <div class="imp-card__body">
+                <div class="imp-table-wrap imp-table-wrap--scrollable">
+                  <table class="imp-table">
+                    <thead>
+                      <tr>
+                        <th>Protocolo</th>
+                        <th>Tipo</th>
+                        <th>Abertura</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="myRequestsRows"></tbody>
+                  </table>
+                </div>
+                <p class="imp-subtitle imp-hidden" id="myRequestsEmptyState">
+                  Você ainda não possui solicitações cadastradas.
+                </p>
+              </div>
+
+              <footer class="imp-card__footer">
+                <a class="imp-btn" href="./novasolicitacao.html">
+                  Abrir nova solicitação
+                </a>
+              </footer>
+            </article>
+          </div>
+        </section>
+      </main>
     {% endblock %}
