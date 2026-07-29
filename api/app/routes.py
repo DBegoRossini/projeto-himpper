@@ -14,14 +14,14 @@ def index(*, context):
 
 @app.route("/flow/addFlow")
 @auth.login_required
-def add_flow():
+def add_flow(context):
     formAddFlow = FormFlows()
     if formAddFlow.validate_on_submit():
         flow = Flows(
             nome=formAddFlow.nome.data,
             area_responsavel=formAddFlow.area_responsavel.data,
-            atualizado_por=auth['user']['id'],
-            criado_por=auth['user']['id']
+            atualizado_por=context['user']['id'],
+            criado_por=context['user']['id']
         )
         database.session.add(flow)
         database.session.commit()
@@ -33,7 +33,13 @@ def add_flow():
         title="Adicionar Fluxo"
     )
 
-
+@app.route("/novasolicitacao")
+@auth.login_required
+def novasolicitacao(context):
+    return render_template(
+        'novasolicitacao.html',
+        user=context['user']
+    )
 #@app.route("/flow/<id_fluxo>")
 #@auth.login_required
 #render_template(url_for('flow.html', id_fluxo=id_fluxo))
