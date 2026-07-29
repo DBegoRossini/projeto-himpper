@@ -76,10 +76,21 @@
     data-impper-close-sidebar
     aria-label="Fechar menu"
     ></button>
-    <main>
-        {% block main %}
-        {% endblock %}
-    </main>
+
+    <div class="imp-page">
+      <header class="imp-topbar">
+        <div class="imp-topbar__left">
+          <div>
+            {% block topBar %}
+            {% endblock %}
+          </div>
+        </div>
+      </header>
+        <main>
+            {% block main %}
+            {% endblock %}
+        </main>
+    </div>
     <footer>
     </footer>
 </body>

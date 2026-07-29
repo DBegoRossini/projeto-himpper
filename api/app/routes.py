@@ -7,7 +7,7 @@ from app.models import Usuario, Acessos, Flows
 @auth.login_required
 def index(*, context):
     return render_template(
-        'index.html',
+        'home.html',
         user=context['user'],
         title="Flask Web App Sample",
     )
