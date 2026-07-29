@@ -1,0 +1,37 @@
+# Variáveis de ambiente
+.env
+.env.*
+
+# Ambiente virtual Python
+.venv/
+venv/
+env/
+
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Banco de dados local (SQLite, etc.)
+*.db
+*.sqlite3
+
+# Flask / instância
+instance/
+
+# Logs
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Distribuição / build
+dist/
+build/
+*.egg-info/
+flask_session/

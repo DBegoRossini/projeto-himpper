@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block titulo %}
+        Solicitações
+        {% endblock %}
+    </title>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap"
+    rel="stylesheet"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-ui.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-bootstrap.css') }}"/>
+    <script defer src="{{ url_for('static', filename='dist/impper-ui.js') }}"></script>
+</head>
+<body>
+    <div class="imp-shell" data-impper-shell>
+    <aside class="imp-sidebar">
+    <div class="imp-sidebar__brand">
+        <img
+        class="imp-logo"
+        src="{{ url_for('static', filename='assets/logos/impper-logo-branco.png') }}"
+        alt="Grupo Impper"
+        >
+    </div>
+
+    <nav class="imp-sidebar__nav" aria-label="Navegação principal">
+        <ul class="imp-nav">
+        <li>
+            <a class="imp-nav__link is-active" href="./test.html">
+            <span class="imp-nav__icon" aria-hidden="true">⌂</span>
+            <span class="imp-nav__label">Início</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="imp-nav__link" href="#">
+            <span class="imp-nav__icon" aria-hidden="true">▤</span>
+            <span class="imp-nav__label">Solicitações</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="imp-nav__link" href="./novasolicitacao.html">
+            <span class="imp-nav__icon" aria-hidden="true">＋</span>
+            <span class="imp-nav__label">Nova solicitação</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="imp-nav__link" href="#">
+            <span class="imp-nav__icon" aria-hidden="true">▥</span>
+            <span class="imp-nav__label">Relatórios</span>
+            </a>
+        </li>
+        </ul>
+    </nav>
+
+    <div class="imp-sidebar__footer">
+        <button
+        type="button"
+        class="imp-btn imp-w-full"
+        data-impper-toggle-sidebar
+        >
+        <span aria-hidden="true">⇤</span>
+        <span class="imp-sidebar__footer-label">Recolher menu</span>
+        </button>
+    </div>
+    </aside>
+
+    <button
+    type="button"
+    class="imp-sidebar-backdrop"
+    data-impper-close-sidebar
+    aria-label="Fechar menu"
+    ></button>
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
+    <footer>
+    </footer>
+</body>
+</html>

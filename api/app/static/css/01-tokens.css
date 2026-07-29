@@ -1,0 +1,150 @@
+/*
+ * IMPPER UI — TOKENS DE IDENTIDADE VISUAL
+ * Versão 1.0.0
+ *
+ * Paleta oficial:
+ * #604c4c | #8b19db | #ca2d2d | #d47810 | #666666
+ */
+
+:root {
+  /* Cores oficiais */
+  --imp-brown: #604c4c;
+  --imp-brown-rgb: 96, 76, 76;
+
+  --imp-purple: #8b19db;
+  --imp-purple-rgb: 139, 25, 219;
+
+  --imp-red: #ca2d2d;
+  --imp-red-rgb: 202, 45, 45;
+
+  --imp-orange: #d47810;
+  --imp-orange-rgb: 212, 120, 16;
+
+  --imp-gray: #666666;
+  --imp-gray-rgb: 102, 102, 102;
+
+  /* Cores semânticas */
+  --imp-primary: var(--imp-purple);
+  --imp-primary-rgb: var(--imp-purple-rgb);
+  --imp-secondary: var(--imp-brown);
+  --imp-secondary-rgb: var(--imp-brown-rgb);
+  --imp-accent: var(--imp-orange);
+  --imp-accent-rgb: var(--imp-orange-rgb);
+  --imp-danger: var(--imp-red);
+  --imp-danger-rgb: var(--imp-red-rgb);
+  --imp-neutral: var(--imp-gray);
+
+  --imp-success: #27805f;
+  --imp-success-rgb: 39, 128, 95;
+  --imp-info: #376c8f;
+  --imp-info-rgb: 55, 108, 143;
+  --imp-warning: var(--imp-orange);
+  --imp-warning-rgb: var(--imp-orange-rgb);
+
+  /* Superfícies */
+  --imp-page: #f6f5f7;
+  --imp-surface: #ffffff;
+  --imp-surface-soft: #fbfafc;
+  --imp-surface-strong: #f0edf2;
+  --imp-overlay: rgba(35, 28, 36, 0.58);
+
+  /* Texto */
+  --imp-text: #302c31;
+  --imp-text-soft: #686169;
+  --imp-text-muted: #817982;
+  --imp-text-inverse: #ffffff;
+
+  /* Bordas */
+  --imp-border: #ded9e0;
+  --imp-border-strong: #c8c1ca;
+
+  /* Tipografia */
+  --imp-font-heading:
+    "Montserrat",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  --imp-font-body:
+    "Daikon",
+    "Daikon Light",
+    "Avenir Next",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  --imp-weight-light: 300;
+  --imp-weight-regular: 400;
+  --imp-weight-medium: 500;
+  --imp-weight-semibold: 600;
+  --imp-weight-bold: 700;
+
+  /* Escala tipográfica */
+  --imp-text-xs: 0.75rem;
+  --imp-text-sm: 0.875rem;
+  --imp-text-md: 1rem;
+  --imp-text-lg: 1.125rem;
+  --imp-text-xl: 1.35rem;
+  --imp-text-2xl: clamp(1.65rem, 2vw, 2.15rem);
+  --imp-text-3xl: clamp(2rem, 4vw, 3rem);
+
+  /* Espaçamento */
+  --imp-space-1: 0.25rem;
+  --imp-space-2: 0.5rem;
+  --imp-space-3: 0.75rem;
+  --imp-space-4: 1rem;
+  --imp-space-5: 1.25rem;
+  --imp-space-6: 1.5rem;
+  --imp-space-8: 2rem;
+  --imp-space-10: 2.5rem;
+  --imp-space-12: 3rem;
+
+  /* Formas */
+  --imp-radius-sm: 0.45rem;
+  --imp-radius-md: 0.75rem;
+  --imp-radius-lg: 1.05rem;
+  --imp-radius-xl: 1.5rem;
+  --imp-radius-pill: 999px;
+
+  /* Sombras */
+  --imp-shadow-xs: 0 1px 2px rgba(47, 38, 49, 0.05);
+  --imp-shadow-sm: 0 5px 16px rgba(47, 38, 49, 0.08);
+  --imp-shadow-md: 0 16px 38px rgba(47, 38, 49, 0.12);
+  --imp-shadow-lg: 0 24px 60px rgba(47, 38, 49, 0.18);
+
+  /* Movimento */
+  --imp-transition-fast: 130ms ease;
+  --imp-transition: 190ms ease;
+  --imp-transition-slow: 280ms ease;
+
+  /* Layout */
+  --imp-sidebar-width: 17rem;
+  --imp-sidebar-collapsed-width: 4.75rem;
+  --imp-topbar-height: 4.5rem;
+
+  color-scheme: light;
+}
+
+[data-impper-theme="dark"] {
+  --imp-page: #211d22;
+  --imp-surface: #2c272d;
+  --imp-surface-soft: #332d34;
+  --imp-surface-strong: #3a333b;
+
+  --imp-text: #f7f4f7;
+  --imp-text-soft: #d4ccd5;
+  --imp-text-muted: #ada3ae;
+  --imp-text-inverse: #ffffff;
+
+  --imp-border: #4a424b;
+  --imp-border-strong: #5a505b;
+
+  --imp-overlay: rgba(8, 6, 8, 0.72);
+
+  --imp-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --imp-shadow-sm: 0 5px 16px rgba(0, 0, 0, 0.22);
+  --imp-shadow-md: 0 16px 38px rgba(0, 0, 0, 0.3);
+  --imp-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
+
+  color-scheme: dark;
+}

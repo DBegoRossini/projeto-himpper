@@ -1,0 +1,87 @@
+/*
+ * UTILITÁRIOS
+ */
+
+.imp-bg-primary {
+  background: var(--imp-primary) !important;
+}
+
+.imp-bg-secondary {
+  background: var(--imp-secondary) !important;
+}
+
+.imp-bg-accent {
+  background: var(--imp-accent) !important;
+}
+
+.imp-bg-danger {
+  background: var(--imp-danger) !important;
+}
+
+.imp-text-primary {
+  color: var(--imp-primary) !important;
+}
+
+.imp-text-secondary {
+  color: var(--imp-secondary) !important;
+}
+
+.imp-text-accent {
+  color: var(--imp-accent) !important;
+}
+
+.imp-text-danger {
+  color: var(--imp-danger) !important;
+}
+
+.imp-text-center {
+  text-align: center !important;
+}
+
+.imp-text-right {
+  text-align: right !important;
+}
+
+.imp-w-full {
+  width: 100% !important;
+}
+
+.imp-hidden {
+  display: none !important;
+}
+
+.imp-m-0 {
+  margin: 0 !important;
+}
+
+.imp-mt-2 {
+  margin-top: var(--imp-space-2) !important;
+}
+
+.imp-mt-4 {
+  margin-top: var(--imp-space-4) !important;
+}
+
+.imp-mt-6 {
+  margin-top: var(--imp-space-6) !important;
+}
+
+.imp-mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.imp-mb-4 {
+  margin-bottom: var(--imp-space-4) !important;
+}
+
+.imp-gap-2 {
+  gap: var(--imp-space-2) !important;
+}
+
+.imp-gap-4 {
+  gap: var(--imp-space-4) !important;
+}
+
+.imp-gap-6 {
+  gap: var(--imp-space-6) !important;
+}

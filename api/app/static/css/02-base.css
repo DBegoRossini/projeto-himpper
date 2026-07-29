@@ -1,0 +1,145 @@
+/*
+ * BASE TIPOGRÁFICA
+ *
+ * Para evitar conflitos com sistemas existentes, os estilos globais
+ * são aplicados somente dentro de um elemento com a classe .impper-app.
+ */
+
+.impper-app,
+.impper-app *,
+.impper-app *::before,
+.impper-app *::after {
+  box-sizing: border-box;
+}
+
+.impper-app {
+  min-height: 100%;
+  margin: 0;
+  background: var(--imp-page);
+  color: var(--imp-text);
+  font-family: var(--imp-font-body);
+  font-size: var(--imp-text-md);
+  font-weight: var(--imp-weight-light);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.impper-app button,
+.impper-app input,
+.impper-app select,
+.impper-app textarea {
+  font: inherit;
+}
+
+.impper-app img,
+.impper-app svg {
+  display: block;
+  max-width: 100%;
+}
+
+.impper-app a {
+  color: var(--imp-primary);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.impper-app a:hover {
+  color: color-mix(in srgb, var(--imp-primary) 80%, #000000);
+}
+
+.impper-app h1,
+.impper-app h2,
+.impper-app h3,
+.impper-app h4,
+.impper-app h5,
+.impper-app h6,
+.imp-title,
+.imp-heading {
+  margin-top: 0;
+  color: var(--imp-text);
+  font-family: var(--imp-font-heading);
+  font-weight: var(--imp-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.impper-app p {
+  margin-top: 0;
+}
+
+.imp-display {
+  margin: 0;
+  font-family: var(--imp-font-heading);
+  font-size: var(--imp-text-3xl);
+  font-weight: var(--imp-weight-bold);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+
+.imp-title {
+  margin: 0;
+  font-size: var(--imp-text-2xl);
+}
+
+.imp-heading {
+  margin: 0;
+  font-size: var(--imp-text-xl);
+}
+
+.imp-subtitle {
+  margin: var(--imp-space-2) 0 0;
+  color: var(--imp-text-soft);
+  font-size: var(--imp-text-md);
+}
+
+.imp-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--imp-space-2);
+  margin-bottom: var(--imp-space-3);
+  color: var(--imp-primary);
+  font-family: var(--imp-font-heading);
+  font-size: var(--imp-text-xs);
+  font-weight: var(--imp-weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.imp-kicker::before {
+  width: 1.75rem;
+  height: 0.18rem;
+  border-radius: var(--imp-radius-pill);
+  background: var(--imp-accent);
+  content: "";
+}
+
+.imp-muted {
+  color: var(--imp-text-muted);
+}
+
+.imp-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  clip-path: inset(50%) !important;
+}
+
+.imp-logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 2.75rem;
+  object-fit: contain;
+}
+
+.imp-logo--sm {
+  height: 2rem;
+}
+
+.imp-logo--lg {
+  height: 4.5rem;
+}
