@@ -16,6 +16,7 @@
     <script defer src="{{ url_for('static', filename='dist/impper-ui.js') }}"></script>
 </head>
 <body class="impper-app">
+    
     <div class="imp-shell" data-impper-shell>
     <aside class="imp-sidebar">
     <div class="imp-sidebar__brand">
@@ -29,7 +30,7 @@
     <nav class="imp-sidebar__nav" aria-label="Navegação principal">
         <ul class="imp-nav">
         <li>
-            <a class="imp-nav__link is-active" href="./test.html">
+            <a class="imp-nav__link is-active" href="{{ url_for('index') }}">
             <span class="imp-nav__icon" aria-hidden="true">⌂</span>
             <span class="imp-nav__label">Início</span>
             </a>
@@ -43,7 +44,7 @@
         </li>
 
         <li>
-            <a class="imp-nav__link" href="./novasolicitacao.html">
+            <a class="imp-nav__link" href="{{ url_for('novasolicitacao') }}">
             <span class="imp-nav__icon" aria-hidden="true">＋</span>
             <span class="imp-nav__label">Nova solicitação</span>
             </a>
@@ -86,7 +87,7 @@
           </div>
         </div>
       </header>
-        <main>
+        <main class="imp-page-content">
             {% block main %}
             {% endblock %}
         </main>
