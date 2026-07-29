@@ -31,7 +31,6 @@ Thumbs.db
 .idea/
 
 # Distribuição / build
-dist/
 build/
 *.egg-info/
 flask_session/

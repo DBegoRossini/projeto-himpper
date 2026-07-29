@@ -1,0 +1,138 @@
+/*
+ * IMPPER UI — ADAPTADOR PARA BOOTSTRAP 5
+ *
+ * Ordem de importação:
+ * 1. bootstrap.min.css
+ * 2. impper-ui.css
+ * 3. impper-bootstrap.css
+ */
+
+.impper-app {
+  --bs-primary: var(--imp-primary);
+  --bs-primary-rgb: var(--imp-primary-rgb);
+  --bs-secondary: var(--imp-secondary);
+  --bs-secondary-rgb: var(--imp-secondary-rgb);
+  --bs-danger: var(--imp-danger);
+  --bs-danger-rgb: var(--imp-danger-rgb);
+  --bs-warning: var(--imp-warning);
+  --bs-warning-rgb: var(--imp-warning-rgb);
+  --bs-success: var(--imp-success);
+  --bs-success-rgb: var(--imp-success-rgb);
+
+  --bs-body-bg: var(--imp-page);
+  --bs-body-color: var(--imp-text);
+  --bs-border-color: var(--imp-border);
+  --bs-font-sans-serif: var(--imp-font-body);
+  --bs-border-radius: var(--imp-radius-md);
+  --bs-border-radius-lg: var(--imp-radius-lg);
+}
+
+.impper-app .btn {
+  min-height: 2.65rem;
+  border-radius: var(--imp-radius-md);
+  font-family: var(--imp-font-body);
+  font-size: var(--imp-text-sm);
+  font-weight: var(--imp-weight-medium);
+}
+
+.impper-app .btn-primary {
+  --bs-btn-bg: var(--imp-primary);
+  --bs-btn-border-color: var(--imp-primary);
+  --bs-btn-hover-bg:
+    color-mix(in srgb, var(--imp-primary) 84%, #000000);
+  --bs-btn-hover-border-color:
+    color-mix(in srgb, var(--imp-primary) 84%, #000000);
+  --bs-btn-active-bg:
+    color-mix(in srgb, var(--imp-primary) 78%, #000000);
+  --bs-btn-active-border-color:
+    color-mix(in srgb, var(--imp-primary) 78%, #000000);
+}
+
+.impper-app .btn-secondary {
+  --bs-btn-bg: var(--imp-secondary);
+  --bs-btn-border-color: var(--imp-secondary);
+  --bs-btn-hover-bg:
+    color-mix(in srgb, var(--imp-secondary) 84%, #000000);
+  --bs-btn-hover-border-color:
+    color-mix(in srgb, var(--imp-secondary) 84%, #000000);
+}
+
+.impper-app .btn-warning {
+  --bs-btn-bg: var(--imp-accent);
+  --bs-btn-border-color: var(--imp-accent);
+  --bs-btn-color: #ffffff;
+  --bs-btn-hover-color: #ffffff;
+}
+
+.impper-app .form-label {
+  color: var(--imp-text);
+  font-size: var(--imp-text-sm);
+  font-weight: var(--imp-weight-medium);
+}
+
+.impper-app .form-control,
+.impper-app .form-select,
+.impper-app .input-group-text {
+  min-height: 2.8rem;
+  border-color: var(--imp-border);
+  border-radius: var(--imp-radius-md);
+  background-color: var(--imp-surface);
+  color: var(--imp-text);
+  box-shadow: var(--imp-shadow-xs);
+}
+
+.impper-app .input-group > :not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.impper-app .input-group > :not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.impper-app .form-control:focus,
+.impper-app .form-select:focus {
+  border-color: var(--imp-primary);
+  box-shadow: 0 0 0 0.22rem rgba(var(--imp-primary-rgb), 0.12);
+}
+
+.impper-app .card {
+  border-color: var(--imp-border);
+  border-radius: var(--imp-radius-lg);
+  background: var(--imp-surface);
+  box-shadow: var(--imp-shadow-sm);
+}
+
+.impper-app .table {
+  --bs-table-bg: var(--imp-surface);
+  --bs-table-color: var(--imp-text);
+  --bs-table-border-color: var(--imp-border);
+  --bs-table-hover-bg: rgba(var(--imp-primary-rgb), 0.035);
+  --bs-table-hover-color: var(--imp-text);
+}
+
+.impper-app .modal-content {
+  border-color: var(--imp-border);
+  border-radius: var(--imp-radius-xl);
+  background: var(--imp-surface);
+  color: var(--imp-text);
+  box-shadow: var(--imp-shadow-lg);
+}
+
+.impper-app .dropdown-menu {
+  border-color: var(--imp-border);
+  border-radius: var(--imp-radius-md);
+  background: var(--imp-surface);
+  box-shadow: var(--imp-shadow-md);
+}
+
+.impper-app .dropdown-item {
+  color: var(--imp-text);
+}
+
+.impper-app .dropdown-item:hover,
+.impper-app .dropdown-item:focus {
+  background: rgba(var(--imp-primary-rgb), 0.08);
+  color: var(--imp-primary);
+}
