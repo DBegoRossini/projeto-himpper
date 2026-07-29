@@ -124,27 +124,3 @@
 
   color-scheme: light;
 }
-
-[data-impper-theme="dark"] {
-  --imp-page: #211d22;
-  --imp-surface: #2c272d;
-  --imp-surface-soft: #332d34;
-  --imp-surface-strong: #3a333b;
-
-  --imp-text: #f7f4f7;
-  --imp-text-soft: #d4ccd5;
-  --imp-text-muted: #ada3ae;
-  --imp-text-inverse: #ffffff;
-
-  --imp-border: #4a424b;
-  --imp-border-strong: #5a505b;
-
-  --imp-overlay: rgba(8, 6, 8, 0.72);
-
-  --imp-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --imp-shadow-sm: 0 5px 16px rgba(0, 0, 0, 0.22);
-  --imp-shadow-md: 0 16px 38px rgba(0, 0, 0, 0.3);
-  --imp-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
-
-  color-scheme: dark;
-}
