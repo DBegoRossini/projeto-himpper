@@ -1,7 +1,7 @@
 from app import app, auth, database
 from flask import render_template, redirect, url_for
 from app.forms import FormFlows
-from app.models import Usuario, Acessos, Flows
+from app.models import Usuario, Acessos, flows
 
 @app.route("/")
 @auth.login_required
@@ -17,7 +17,7 @@ def index(*, context):
 def add_flow(context):
     formAddFlow = FormFlows()
     if formAddFlow.validate_on_submit():
-        flow = Flows(
+        flow = flows(
             nome=formAddFlow.nome.data,
             area_responsavel=formAddFlow.area_responsavel.data,
             atualizado_por=context['user']['id'],
@@ -36,10 +36,18 @@ def add_flow(context):
 @app.route("/novasolicitacao")
 @auth.login_required
 def novasolicitacao(context):
+    fluxos = flows.query.all()
     return render_template(
         'novasolicitacao.html',
+        user=context['user'],
+        fluxos=fluxos
+    )
+@app.route("/flow/<id_fluxo>")
+@auth.login_required
+def ini_flow(id_fluxo, context):
+    fluxo = flows.query.get(id_fluxo)
+    name = fluxo.nome
+    return render_template(f'{name}/inicio.html', 
         user=context['user']
     )
-#@app.route("/flow/<id_fluxo>")
-#@auth.login_required
-#render_template(url_for('flow.html', id_fluxo=id_fluxo))
+

@@ -29,7 +29,7 @@
     <nav class="imp-sidebar__nav" aria-label="Navegação principal">
         <ul class="imp-nav">
         <li>
-            <a class="imp-nav__link is-active" href="./test.html">
+            <a class="imp-nav__link is-active" href="{{ url_for('index') }}">
             <span class="imp-nav__icon" aria-hidden="true">⌂</span>
             <span class="imp-nav__label">Início</span>
             </a>
@@ -86,7 +86,7 @@
           </div>
         </div>
       </header>
-        <main>
+        <main class="imp-page-content">
             {% block main %}
             {% endblock %}
         </main>

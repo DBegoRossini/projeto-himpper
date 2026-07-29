@@ -38,7 +38,7 @@
 						0 fluxos
 					</span>
 				</header>
-
+				{% if fluxos|length == 0 %}
 				<div class="imp-card__body imp-stack imp-gap-6">
 					<div class="imp-grid imp-grid--4" id="flowHighlights"></div>
 					<div class="imp-grid imp-request-grid" id="flowCards"></div>
@@ -50,9 +50,35 @@
 						</p>
 					</div>
 				</div>
+				{% else %}
+				   {% for fluxo in fluxos %}
+				      <article class="imp-card imp-request-card">
+                    <header class="imp-card__header">
+                        <div>
+                            <div class="imp-request-card__meta">
+                                <span>{{ fluxo.area_responsavel }}</span>
+                            </div>
+                            <h3 class="imp-card__title">{{ fluxo.nome }}</h3>
+                        </div>
+                    </header>
+
+                    <div class="imp-card__body">
+                        <p class="imp-request-card__description">
+                            {{ fluxo.descricao }}
+                        </p>
+                    </div>
+
+                    <footer class="imp-card__footer">
+                        <a class="imp-btn" href="{{ url_for('ini_flow', id_fluxo=fluxo.id) }}">
+							Iniciar solicitação
+                        </a>
+                    </footer>
+                </article>
+				   {% endfor %}
+				   {% endif %}
 
 				<footer class="imp-card__footer">
-					<a class="imp-btn imp-btn--neutral" href="./test.html">
+					<a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
 						Voltar ao início
 					</a>
 				</footer>
