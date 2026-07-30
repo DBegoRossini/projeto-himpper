@@ -1,0 +1,303 @@
+/*
+ * Formulários reutilizáveis
+ */
+
+.imp-form-page {
+  width: min(100%, 76rem);
+}
+
+.imp-form-shell {
+  width: 100%;
+}
+
+.imp-form {
+  display: grid;
+  gap: var(--imp-space-6);
+}
+
+.imp-form-section {
+  display: grid;
+  gap: var(--imp-space-6);
+  padding: clamp(1.25rem, 2vw, 2rem);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-xl);
+  background: var(--imp-surface);
+  box-shadow: var(--imp-shadow-sm);
+}
+
+.imp-form-section__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--imp-space-4);
+  align-items: start;
+}
+
+.imp-form-section__number {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(var(--imp-primary-rgb), 0.12);
+  color: var(--imp-primary);
+  font-family: var(--imp-font-heading);
+  font-size: var(--imp-text-md);
+  font-weight: var(--imp-weight-bold);
+}
+
+.imp-form-section__copy > *:last-child {
+  margin-bottom: 0;
+}
+
+.imp-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--imp-space-5);
+}
+
+.imp-field--full {
+  grid-column: 1 / -1;
+}
+
+.imp-form-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--imp-space-3);
+}
+
+.imp-form-counter {
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-xs);
+}
+
+.imp-choice-grid {
+  display: grid;
+  gap: var(--imp-space-3);
+}
+
+.imp-choice-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.imp-choice-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.imp-choice-grid--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.imp-choice {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.imp-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.imp-choice__content {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: var(--imp-space-3);
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-lg);
+  background: var(--imp-surface);
+  box-shadow: var(--imp-shadow-xs);
+  transition:
+    border-color var(--imp-transition-fast),
+    box-shadow var(--imp-transition-fast),
+    transform var(--imp-transition-fast),
+    background-color var(--imp-transition-fast);
+}
+
+.imp-choice__dot {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(var(--imp-primary-rgb), 0.34);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 0.22rem #ffffff;
+  transition:
+    border-color var(--imp-transition-fast),
+    background-color var(--imp-transition-fast);
+}
+
+.imp-choice__text {
+  color: var(--imp-text);
+  font-size: var(--imp-text-sm);
+  font-weight: var(--imp-weight-medium);
+}
+
+.imp-choice:hover .imp-choice__content {
+  border-color: var(--imp-border-strong);
+  transform: translateY(-1px);
+}
+
+.imp-choice input:focus-visible + .imp-choice__content {
+  outline: 3px solid rgba(var(--imp-primary-rgb), 0.18);
+  outline-offset: 2px;
+}
+
+.imp-choice input:checked + .imp-choice__content {
+  border-color: rgba(var(--imp-primary-rgb), 0.42);
+  background: rgba(var(--imp-primary-rgb), 0.08);
+  box-shadow: 0 0 0 0.2rem rgba(var(--imp-primary-rgb), 0.1);
+}
+
+.imp-choice input:checked + .imp-choice__content .imp-choice__dot {
+  border-color: var(--imp-primary);
+  background: var(--imp-primary);
+}
+
+.imp-choice input:disabled + .imp-choice__content {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.imp-upload {
+  position: relative;
+}
+
+.imp-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.imp-upload__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--imp-space-4);
+  padding: 1rem 1.1rem;
+  border: 1px dashed rgba(var(--imp-primary-rgb), 0.4);
+  border-radius: var(--imp-radius-lg);
+  background: linear-gradient(180deg, rgba(var(--imp-primary-rgb), 0.04), rgba(var(--imp-primary-rgb), 0.01));
+  cursor: pointer;
+  transition:
+    border-color var(--imp-transition-fast),
+    background-color var(--imp-transition-fast);
+}
+
+.imp-upload__label:hover {
+  border-color: var(--imp-primary);
+}
+
+.imp-upload__copy {
+  display: grid;
+  gap: var(--imp-space-1);
+}
+
+.imp-upload__copy span {
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-sm);
+}
+
+.imp-upload__action {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--imp-radius-md);
+  background: var(--imp-primary);
+  color: #ffffff;
+  font-size: var(--imp-text-sm);
+  font-weight: var(--imp-weight-medium);
+}
+
+.imp-file-name {
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-xs);
+}
+
+.imp-form-panel {
+  display: grid;
+  gap: var(--imp-space-5);
+  padding: var(--imp-space-5);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-lg);
+  background: var(--imp-surface-soft);
+}
+
+.imp-form-panel[hidden] {
+  display: none !important;
+}
+
+.imp-form-message {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-md);
+  background: var(--imp-surface-soft);
+  color: var(--imp-text);
+}
+
+.imp-form-message--error {
+  border-color: rgba(var(--imp-danger-rgb), 0.35);
+  background: rgba(var(--imp-danger-rgb), 0.08);
+  color: var(--imp-danger);
+}
+
+.imp-form-message--success {
+  border-color: rgba(var(--imp-success-rgb), 0.32);
+  background: rgba(var(--imp-success-rgb), 0.08);
+  color: var(--imp-success);
+}
+
+.imp-form-message--info {
+  border-color: rgba(var(--imp-info-rgb), 0.3);
+  background: rgba(var(--imp-info-rgb), 0.08);
+  color: var(--imp-info);
+}
+
+.imp-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--imp-space-4);
+  padding: 0.25rem;
+}
+
+.imp-form-note {
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-sm);
+}
+
+@media (max-width: 70rem) {
+  .imp-choice-grid--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 56rem) {
+  .imp-form-grid,
+  .imp-choice-grid--two,
+  .imp-choice-grid--three,
+  .imp-choice-grid--four {
+    grid-template-columns: 1fr;
+  }
+
+  .imp-form-actions {
+    align-items: stretch;
+  }
+
+  .imp-form-actions .imp-cluster {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
