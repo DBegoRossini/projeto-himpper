@@ -12,19 +12,11 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Banco de dados local (SQLite, etc.)
-*.db
-*.sqlite3
 
-# Flask / instância
-instance/
 
 # Logs
 *.log
 
-# Arquivos de sistema
-.DS_Store
-Thumbs.db
 
 # IDEs
 .vscode/
