@@ -24,6 +24,7 @@ class flows(database.Model):
     area_responsavel = database.Column(database.String(100), nullable=False)
     atualizado_por = database.Column(database.Integer, database.ForeignKey('Usuario.id'), nullable=False)
     descricao = database.Column(database.String(400), nullable=True)
+    alias = database.Column(database.String(100), nullable=True)
     atualizado_em = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     criado_em = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     criado_por = database.Column(database.Integer, database.ForeignKey('Usuario.id'), nullable=False)

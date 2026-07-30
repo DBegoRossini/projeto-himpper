@@ -343,13 +343,7 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--imp-gray) 92%, #000000) 0%,
-      var(--imp-gray) 58%,
-      color-mix(in srgb, var(--imp-gray) 82%, var(--imp-purple)) 100%
-    );
+  background: var(--imp-gray);
   color: var(--imp-text-inverse);
   box-shadow: 7px 0 24px rgba(var(--imp-gray-rgb), 0.13);
 }
@@ -363,9 +357,36 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.13);
 }
 
+.imp-sidebar__toggle {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--imp-radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color var(--imp-transition-fast),
+    transform var(--imp-transition-fast);
+}
+
+.imp-sidebar__toggle:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.imp-sidebar__toggle-icon {
+  display: inline-block;
+  transition: opacity var(--imp-transition-fast);
+}
+
 .imp-sidebar__brand .imp-logo {
   max-width: 10rem;
   filter: brightness(0) invert(1);
+  transition: opacity var(--imp-transition-fast);
 }
 
 .imp-sidebar__nav {
@@ -424,28 +445,20 @@
   white-space: nowrap;
 }
 
-.imp-sidebar__footer {
-  padding: var(--imp-space-4);
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
-}
-
 .imp-shell.is-sidebar-collapsed .imp-sidebar__brand {
   justify-content: center;
   padding-inline: var(--imp-space-2);
 }
 
 .imp-shell.is-sidebar-collapsed .imp-sidebar__brand .imp-logo {
-  width: 2.35rem;
-  object-fit: cover;
-  object-position: left;
+  display: none;
 }
 
 .imp-shell.is-sidebar-collapsed .imp-nav__link {
   justify-content: center;
 }
 
-.imp-shell.is-sidebar-collapsed .imp-nav__label,
-.imp-shell.is-sidebar-collapsed .imp-sidebar__footer-label {
+.imp-shell.is-sidebar-collapsed .imp-nav__label {
   display: none;
 }
 
@@ -533,8 +546,7 @@
     justify-content: flex-start;
   }
 
-  .imp-shell.is-sidebar-collapsed .imp-nav__label,
-  .imp-shell.is-sidebar-collapsed .imp-sidebar__footer-label {
+  .imp-shell.is-sidebar-collapsed .imp-nav__label {
     display: inline;
   }
 }

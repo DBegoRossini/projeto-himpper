@@ -47,7 +47,7 @@ def novasolicitacao(context):
 def ini_flow(id_fluxo, context):
     fluxo = flows.query.get(id_fluxo)
     name = fluxo.nome
-    return render_template(f'{name}/inicio.html', 
+    return render_template(f'{name}.html', 
         user=context['user']
     )
 

@@ -16,9 +16,18 @@
     <script defer src="{{ url_for('static', filename='dist/impper-ui.js') }}"></script>
 </head>
 <body class="impper-app">
+    
     <div class="imp-shell" data-impper-shell>
     <aside class="imp-sidebar">
     <div class="imp-sidebar__brand">
+        <button
+        type="button"
+        class="imp-sidebar__toggle"
+        data-impper-toggle-sidebar
+        aria-label="Recolher menu"
+        >
+        <span class="imp-sidebar__toggle-icon" aria-hidden="true">⇤</span>
+        </button>
         <img
         class="imp-logo"
         src="{{ url_for('static', filename='assets/logos/impper-logo-branco.png') }}"
@@ -27,23 +36,25 @@
     </div>
 
     <nav class="imp-sidebar__nav" aria-label="Navegação principal">
+        {% set current_endpoint = request.endpoint or '' %}
         <ul class="imp-nav">
         <li>
-            <a class="imp-nav__link is-active" href="{{ url_for('index') }}">
+            <a class="imp-nav__link{% if current_endpoint == 'index' %} is-active{% endif %}" href="{{ url_for('index') }}">
+
             <span class="imp-nav__icon" aria-hidden="true">⌂</span>
             <span class="imp-nav__label">Início</span>
             </a>
         </li>
 
         <li>
-            <a class="imp-nav__link" href="#">
+            <a class="imp-nav__link{% if current_endpoint == 'add_flow' %} is-active{% endif %}" href="#">
             <span class="imp-nav__icon" aria-hidden="true">▤</span>
             <span class="imp-nav__label">Solicitações</span>
             </a>
         </li>
 
         <li>
-            <a class="imp-nav__link" href="{{ url_for('novasolicitacao') }}">
+            <a class="imp-nav__link{% if current_endpoint == 'novasolicitacao' %} is-active{% endif %}" href="{{ url_for('novasolicitacao') }}">
             <span class="imp-nav__icon" aria-hidden="true">＋</span>
             <span class="imp-nav__label">Nova solicitação</span>
             </a>
@@ -58,16 +69,6 @@
         </ul>
     </nav>
 
-    <div class="imp-sidebar__footer">
-        <button
-        type="button"
-        class="imp-btn imp-w-full"
-        data-impper-toggle-sidebar
-        >
-        <span aria-hidden="true">⇤</span>
-        <span class="imp-sidebar__footer-label">Recolher menu</span>
-        </button>
-    </div>
     </aside>
 
     <button

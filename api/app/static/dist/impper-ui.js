@@ -95,12 +95,39 @@
   const getShell = () =>
     document.querySelector("[data-impper-shell], .imp-shell");
 
+  const syncSidebarToggleState = () => {
+    const shell = getShell();
+
+    if (!shell) return;
+
+    const collapsed = shell.classList.contains(
+      "is-sidebar-collapsed"
+    );
+    const label = collapsed ? "Abrir menu" : "Recolher menu";
+    const icon = collapsed ? "⇥" : "⇤";
+
+    document
+      .querySelectorAll("[data-impper-toggle-sidebar]")
+      .forEach(button => {
+        button.setAttribute("aria-label", label);
+
+        const iconElement = button.querySelector(
+          ".imp-sidebar__toggle-icon"
+        );
+
+        if (iconElement) {
+          iconElement.textContent = icon;
+        }
+      });
+  };
+
   const closeMobileSidebar = () => {
     const shell = getShell();
 
     if (shell) {
       shell.classList.remove("is-sidebar-open");
       document.body.style.overflow = "";
+      syncSidebarToggleState();
     }
   };
 
@@ -125,6 +152,8 @@
       STORAGE_KEYS.sidebar,
       String(collapsed)
     );
+
+    syncSidebarToggleState();
   };
 
   const restoreSidebar = () => {
@@ -139,6 +168,8 @@
       "is-sidebar-collapsed",
       collapsed
     );
+
+    syncSidebarToggleState();
   };
 
   const openModal = id => {
