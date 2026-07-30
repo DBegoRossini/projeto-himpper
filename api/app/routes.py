@@ -1,4 +1,4 @@
-from app import app, auth, database
+from . import app, auth, database
 from flask import render_template, redirect, url_for
 from app.forms import FormFlows
 from app.models import Usuario, Acessos, flows

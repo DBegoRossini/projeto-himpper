@@ -1,12 +1,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
-from api import app_config
+import app_config
+import os
 
 app = Flask(__name__)
 app.config.from_object(app_config)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance'))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "database.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializa a extensão
@@ -22,4 +26,4 @@ if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET"
         redirect_uri=app.config["REDIRECT_URI"]
     )
 
-from api.app import routes 
+from app import routes 
