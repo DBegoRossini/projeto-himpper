@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
-from api import app_config
+import app_config
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -22,4 +22,4 @@ if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET"
         redirect_uri=app.config["REDIRECT_URI"]
     )
 
-from api.app import routes 
+from app import routes
