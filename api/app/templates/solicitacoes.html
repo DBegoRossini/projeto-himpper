@@ -1,0 +1,198 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+	Solicitações
+{% endblock %}
+
+{% block topBar %}
+	<h1 class="imp-heading">Solicitações</h1>
+	<p class="imp-subtitle imp-topbar__subtitle">
+		Acompanhe as solicitações abertas por você e consulte o estágio atual de cada fluxo.
+	</p>
+{% endblock %}
+
+{% block main %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
+
+	<section class="imp-stack imp-gap-6 imp-request-page">
+		<div>
+			<span class="imp-kicker">Minhas solicitações</span>
+			<h2 class="imp-title">Solicitações abertas pelo usuário logado</h2>
+			<p class="imp-subtitle">
+				Filtre por texto ou status para localizar rapidamente cada processo aberto em seu nome.
+			</p>
+			<hr class="imp-brand-rule">
+		</div>
+
+		<div class="imp-request-summary" data-request-summary>
+			<article class="imp-stat imp-request-stat">
+				<div class="imp-stat__icon">▤</div>
+				<div>
+					<span class="imp-stat__label">Total de solicitações</span>
+					<strong class="imp-stat__value" data-summary-total>{{ solicitacoes|length }}</strong>
+				</div>
+			</article>
+
+			<article class="imp-stat imp-request-stat">
+				<div class="imp-stat__icon">◷</div>
+				<div>
+					<span class="imp-stat__label">Em andamento</span>
+					<strong class="imp-stat__value" data-summary-open>{{ abertas_count }}</strong>
+				</div>
+			</article>
+
+			<article class="imp-stat imp-request-stat">
+				<div class="imp-stat__icon">⌕</div>
+				<div>
+					<span class="imp-stat__label">Resultado atual</span>
+					<strong class="imp-stat__value" data-summary-visible>{{ solicitacoes|length }}</strong>
+				</div>
+			</article>
+		</div>
+
+		<article class="imp-card imp-card--accent-orange imp-request-panel">
+			<header class="imp-card__header imp-request-panel__header">
+				<div>
+					<h3 class="imp-card__title">Acompanhamento</h3>
+					<p class="imp-card__subtitle">
+						Consulte protocolo, tipo de fluxo, etapa atual e status da solicitação.
+					</p>
+				</div>
+
+			</header>
+
+			<div class="imp-card__body imp-stack imp-gap-5">
+				<div class="imp-request-toolbar">
+					<label class="imp-field imp-request-toolbar__search" for="requestSearch">
+						<span class="imp-label">Buscar solicitação</span>
+						<input
+							id="requestSearch"
+							type="search"
+							class="imp-input"
+							placeholder="Pesquise por protocolo, tipo, área ou etapa"
+							data-request-search
+						>
+					</label>
+
+					<label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
+						<span class="imp-label">Status</span>
+						<select id="requestStatusFilter" class="imp-select" data-request-status-filter>
+							<option value="">Todos</option>
+							<option value="Em andamento">Em andamento</option>
+							<option value="Finalizada">Finalizada</option>
+							<option value="Cancelada">Cancelada</option>
+							<option value="Pendente">Pendente</option>
+						</select>
+					</label>
+				</div>
+
+				{% if solicitacoes %}
+					<div class="imp-table-wrap imp-request-table-wrap">
+						<table class="imp-table imp-request-table" data-request-table>
+							<thead>
+								<tr>
+									<th>Protocolo</th>
+									<th>Tipo</th>
+									<th>Área</th>
+									<th>Abertura</th>
+									<th>Etapa atual</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for solicitacao in solicitacoes %}
+									{% set abertura_label = solicitacao.abertura.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura else '-' %}
+									<tr
+										class="imp-request-row"
+										data-request-row
+										data-request-id="{{ solicitacao.id }}"
+										data-status="{{ solicitacao.status_label }}"
+										data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
+									>
+										<td data-label="Protocolo">
+											<span class="imp-request-row__primary">{{ solicitacao.protocolo }}</span>
+										</td>
+										<td data-label="Tipo">{{ solicitacao.tipo }}</td>
+										<td data-label="Área">{{ solicitacao.area }}</td>
+										<td data-label="Abertura">{{ abertura_label }}</td>
+										<td data-label="Etapa atual">{{ solicitacao.etapa }}</td>
+										<td data-label="Status">
+											<span class="imp-badge imp-badge--{{ solicitacao.status_variant }}">
+												{{ solicitacao.status_label }}
+											</span>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+
+					<div class="imp-request-mobile-list" data-request-mobile-list>
+						{% for solicitacao in solicitacoes %}
+							{% set abertura_label = solicitacao.abertura.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura else '-' %}
+							<article
+								class="imp-card imp-request-mobile-card"
+								data-request-row
+								data-request-id="{{ solicitacao.id }}"
+								data-status="{{ solicitacao.status_label }}"
+								data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
+							>
+								<div class="imp-card__body imp-stack imp-gap-4">
+									<div class="imp-request-mobile-card__top">
+										<div>
+											<p class="imp-kicker imp-request-mobile-card__kicker">{{ solicitacao.protocolo }}</p>
+											<h3 class="imp-card__title">{{ solicitacao.tipo }}</h3>
+										</div>
+										<span class="imp-badge imp-badge--{{ solicitacao.status_variant }}">
+											{{ solicitacao.status_label }}
+										</span>
+									</div>
+
+									<dl class="imp-request-mobile-card__meta">
+										<div>
+											<dt>Área</dt>
+											<dd>{{ solicitacao.area }}</dd>
+										</div>
+										<div>
+											<dt>Abertura</dt>
+											<dd>{{ abertura_label }}</dd>
+										</div>
+										<div>
+											<dt>Etapa atual</dt>
+											<dd>{{ solicitacao.etapa }}</dd>
+										</div>
+									</dl>
+								</div>
+							</article>
+						{% endfor %}
+					</div>
+
+					<div class="imp-request-empty imp-hidden" data-request-empty>
+						<p class="imp-title imp-mb-4">Nenhum resultado para os filtros aplicados</p>
+						<p class="imp-subtitle imp-m-0">
+							Ajuste a busca ou limpe o filtro de status para visualizar outras solicitações.
+						</p>
+					</div>
+				{% else %}
+					<div class="imp-request-empty">
+						<p class="imp-title imp-mb-4">Nenhuma solicitação encontrada</p>
+						<p class="imp-subtitle imp-m-0">
+							Quando você abrir uma nova solicitação, ela aparecerá aqui automaticamente.
+						</p>
+					</div>
+				{% endif %}
+			</div>
+
+			<footer class="imp-card__footer">
+				<a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+					Voltar ao início
+				</a>
+				<a class="imp-btn" href="{{ url_for('novasolicitacao') }}">
+					Abrir nova solicitação
+				</a>
+			</footer>
+		</article>
+	</section>
+
+	<script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
+{% endblock %}

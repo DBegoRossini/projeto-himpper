@@ -47,7 +47,14 @@
         </li>
 
         <li>
-            <a class="imp-nav__link{% if current_endpoint == 'add_flow' %} is-active{% endif %}" href="#">
+            <a class="imp-nav__link" href="#">
+            <span class="imp-nav__icon" aria-hidden="true">✉</span>
+            <span class="imp-nav__label">Caixa de entrada</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="imp-nav__link{% if current_endpoint == 'solicitacoes' %} is-active{% endif %}" href="{{ url_for('solicitacoes') }}">
             <span class="imp-nav__icon" aria-hidden="true">▤</span>
             <span class="imp-nav__label">Solicitações</span>
             </a>

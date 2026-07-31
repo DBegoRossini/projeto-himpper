@@ -1,0 +1,126 @@
+/*
+ * Tela de solicitacoes
+ */
+
+.imp-request-page {
+  width: min(100%, 88rem);
+}
+
+.imp-request-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--imp-space-5);
+}
+
+.imp-request-stat {
+  min-height: 7.5rem;
+}
+
+.imp-request-panel {
+  overflow: hidden;
+}
+
+.imp-request-panel__header {
+  align-items: center;
+}
+
+.imp-request-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(14rem, 0.8fr);
+  gap: var(--imp-space-4);
+  align-items: end;
+}
+
+.imp-request-toolbar__search,
+.imp-request-toolbar__filter {
+  margin: 0;
+}
+
+.imp-request-table-wrap {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: var(--imp-radius-xl);
+}
+
+.imp-request-table {
+  min-width: 60rem;
+}
+
+.imp-request-table tbody tr td {
+  white-space: nowrap;
+}
+
+.imp-request-table tbody tr td:nth-child(2),
+.imp-request-table tbody tr td:nth-child(5) {
+  white-space: normal;
+}
+
+.imp-request-row__primary {
+  font-family: var(--imp-font-heading);
+  font-weight: var(--imp-weight-bold);
+  color: var(--imp-text);
+}
+
+.imp-request-mobile-list {
+  display: none;
+  gap: var(--imp-space-4);
+}
+
+.imp-request-mobile-card {
+  border: 1px solid var(--imp-border);
+}
+
+.imp-request-mobile-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--imp-space-4);
+}
+
+.imp-request-mobile-card__kicker {
+  margin-bottom: var(--imp-space-2);
+}
+
+.imp-request-mobile-card__meta {
+  display: grid;
+  gap: var(--imp-space-3);
+  margin: 0;
+}
+
+.imp-request-mobile-card__meta div {
+  display: grid;
+  gap: var(--imp-space-1);
+}
+
+.imp-request-mobile-card__meta dt {
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-xs);
+  font-weight: var(--imp-weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.imp-request-mobile-card__meta dd {
+  margin: 0;
+  color: var(--imp-text);
+}
+
+@media (max-width: 72rem) {
+  .imp-request-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .imp-request-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 56rem) {
+  .imp-request-table-wrap {
+    display: none;
+  }
+
+  .imp-request-mobile-list {
+    display: grid;
+  }
+}
