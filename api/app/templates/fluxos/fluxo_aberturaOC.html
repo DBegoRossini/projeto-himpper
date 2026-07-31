@@ -4,15 +4,6 @@
     Abertura de OC
 {% endblock %}
 
-{% block extra_styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/06-forms.css') }}"/>
-{% endblock %}
-
-{% block extra_scripts %}
-    <script defer src="{{ url_for('static', filename='js/forms.js') }}"></script>
-    <script defer src="{{ url_for('static', filename='js/formulario-oc.js') }}"></script>
-{% endblock %}
-
 {% block topBar %}
     <h1 class="imp-heading">Abertura de OC</h1>
     <p class="imp-subtitle imp-topbar__subtitle">
@@ -21,6 +12,8 @@
 {% endblock %}
 
 {% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/06-forms.css') }}"/>
+
     <section class="imp-stack imp-gap-6 imp-form-page">
         <div>
             <span class="imp-kicker">Ordem de compra</span>
@@ -37,7 +30,6 @@
 
                 <section class="imp-form-section">
                     <div class="imp-form-section__head">
-                        <div class="imp-form-section__number">1</div>
                         <div class="imp-form-section__copy">
                             <h3 class="imp-card__title">Dados da solicitação</h3>
                             <p class="imp-card__subtitle">
@@ -111,7 +103,6 @@
 
                 <section class="imp-form-section">
                     <div class="imp-form-section__head">
-                        <div class="imp-form-section__number">2</div>
                         <div class="imp-form-section__copy">
                             <h3 class="imp-card__title">Fornecedor e documento</h3>
                             <p class="imp-card__subtitle">
@@ -156,7 +147,6 @@
 
                 <section class="imp-form-section">
                     <div class="imp-form-section__head">
-                        <div class="imp-form-section__number">3</div>
                         <div class="imp-form-section__copy">
                             <h3 class="imp-card__title">Pagamento</h3>
                             <p class="imp-card__subtitle">
@@ -312,4 +302,7 @@
             </form>
         </div>
     </section>
+
+    <script defer src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/formulario-oc.js') }}"></script>
 {% endblock %}

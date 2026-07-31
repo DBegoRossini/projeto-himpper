@@ -4,6 +4,7 @@ from identity.flask import Auth
 import app_config
 import os
 
+
 app = Flask(__name__)
 app.config.from_object(app_config)
 
