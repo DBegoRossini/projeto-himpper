@@ -1,12 +1,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
+import os
 import app_config
 
 app = Flask(__name__)
 app.config.from_object(app_config)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance'))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "database.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializa a extensão
