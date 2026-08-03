@@ -158,7 +158,10 @@
 }
 
 .imp-card--accent {
-  border-top: 0.28rem solid var(--imp-primary);
+  border-top: 0.28rem solid var(--imp-accent);
+  box-shadow:
+    0 -0.8rem 1.6rem rgba(var(--imp-primary-rgb), 0.12),
+    var(--imp-shadow-sm);
 }
 
 .imp-card--accent-orange {
@@ -244,7 +247,7 @@
   inset: 0 auto auto 0;
   width: 100%;
   height: 0.3rem;
-  background: linear-gradient(90deg, var(--imp-primary), var(--imp-accent));
+  background: var(--imp-accent);
 }
 
 .imp-request-card__meta {
@@ -773,7 +776,7 @@
   background:
     linear-gradient(
       90deg,
-      var(--imp-purple) 0 42%,
+      var(--imp-brand) 0 42%,
       var(--imp-orange) 42% 72%,
       var(--imp-red) 72% 100%
     );

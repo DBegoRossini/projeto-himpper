@@ -3,7 +3,7 @@
  * Versão 1.0.0
  *
  * Paleta oficial:
- * #604c4c | #8b19db | #ca2d2d | #d47810 | #666666
+ * #604c4c | #71696a | #ca2d2d | #d47810 | #666666
  */
 
 :root {
@@ -11,8 +11,8 @@
   --imp-brown: #604c4c;
   --imp-brown-rgb: 96, 76, 76;
 
-  --imp-purple: #8b19db;
-  --imp-purple-rgb: 139, 25, 219;
+  --imp-brand: #71696a;
+  --imp-brand-rgb: 113, 105, 106;
 
   --imp-red: #ca2d2d;
   --imp-red-rgb: 202, 45, 45;
@@ -24,8 +24,8 @@
   --imp-gray-rgb: 102, 102, 102;
 
   /* Cores semânticas */
-  --imp-primary: var(--imp-purple);
-  --imp-primary-rgb: var(--imp-purple-rgb);
+  --imp-primary: var(--imp-brand);
+  --imp-primary-rgb: var(--imp-brand-rgb);
   --imp-secondary: var(--imp-brown);
   --imp-secondary-rgb: var(--imp-brown-rgb);
   --imp-accent: var(--imp-orange);
