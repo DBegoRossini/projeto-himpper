@@ -211,3 +211,26 @@
     window.ImpperForms.init(document);
   });
 })();
+
+async function enviarFormulario(document, id_fluxo, id_etapa) {
+  const form = document.querySelector('form');
+  const fields = Array.from(form.querySelectorAll('input, textarea, select'))
+      .filter(f => f.id);
+  const formData = new FormData();
+  fields.forEach(field => {
+    if (field.type === 'file'){
+      Array.from(field.files || []).forEach(file => {
+        if (file.size > 0) formData.append(field.id, file);
+      });
+    } else if (field.type !== 'radio' || field.checked){
+      formData.append(field.id, field.value);
+    }
+  });
+  
+   const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
+      method: 'POST',
+      body: formData
+    });
+  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}`;
+  return formData;
+}

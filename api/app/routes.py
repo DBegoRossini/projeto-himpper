@@ -1,14 +1,20 @@
+import requests
 from . import app, auth, database
-from flask import render_template, redirect, url_for
+from flask import json, render_template, redirect, url_for, jsonify, request
 from app.forms import FormFlows
 from app.models import flows, Chamada, Etapas, Execucao
 
 @app.route("/")
 @auth.login_required
 def index(*, context):
+    user = context['user']
+    nome = user.get("name")
+    email=user.get("email")
     return render_template(
         'home.html',
-        user=context['user'],
+        user=user,
+        nome=nome,
+        email=email,
         title="Flask Web App Sample",
     )
 
@@ -105,5 +111,50 @@ def ini_flow(id_fluxo, context):
     fluxo = flows.query.get(id_fluxo)
     name = fluxo.nome
     return render_template(f'fluxos/{name}.html', 
-        user=context['user']
+        user=context['user'],
+        context=context
+    )
+
+
+@app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
+@auth.login_required
+def submit_flow(id_fluxo, id_etapa, context):
+    form_data = {}
+    if request.method == "POST":
+        form_data = dict(request.form)
+        files = {}
+        for key in request.files:
+            files[key] = request.files.getlist(key)
+        user = context['user']
+        nome = user.get("name")
+
+        url = f"https://impper.app.n8n.cloud/webhook-test/{id_etapa}"
+        data = {
+        "id_fluxo": id_fluxo,
+        "solicitante": nome,
+        **form_data 
+        }
+
+        files = []
+        for key in request.files:
+            for file in request.files.getlist(key):
+                if file.filename:
+                    files.append((key, (file.filename, file.stream, file.content_type)))
+
+        try:
+            resp = requests.post(
+            url,
+            data=data, 
+            files=files if files else None, 
+            timeout=10
+        )
+            print("STATUS:", resp.status_code, "BODY:", resp.text)
+        except requests.exceptions.RequestException as e:
+            print("ERRO DE CONEXÃO:", repr(e))
+
+    return render_template(
+        'novasolicitacao.html',
+        user=context,
+        fluxos=flows.query.all(),
+        message="Solicitação enviada com sucesso!" if request.method == "POST" else None
     )
