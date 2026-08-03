@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block main %}
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/06-forms.css') }}"/>
 
     <section class="imp-stack imp-gap-6 imp-form-page">
@@ -21,7 +22,6 @@
             <p class="imp-subtitle">
                 Use este formulário quando a nota fiscal, o recibo ou outro documento de cobrança já tiver sido emitido.
             </p>
-            <hr class="imp-brand-rule">
         </div>
 
         <div class="imp-form-shell">
@@ -293,9 +293,10 @@
                         Revise os dados antes de enviar. Campos marcados com * são obrigatórios.
                     </div>
                     <div class="imp-cluster">
-                        <a class="imp-btn imp-btn--neutral" href="{{ url_for('novasolicitacao') }}">Voltar</a>
-                        <button id="submitButton" class="imp-btn imp-btn--accent" type="submit">
-                            <span id="submitLabel">Enviar solicitação</span>
+                        <a class="imp-btn imp-btn--neutral" href="{{ url_for('novasolicitacao' ) }}">Voltar</a>
+                        <button type="button" id="submitButton" class="imp-btn imp-btn--accent" onclick="enviarFormulario(document, 2, 'ordem-de-compra')">
+                            <span class="imp-spinner imp-spinner--sm imp-spinner--light" id="submitSpinner" hidden></span>
+                        <span id="submitLabel">Enviar solicitação</span>
                         </button>
                     </div>
                 </div>

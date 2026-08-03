@@ -11,14 +11,14 @@
   --imp-brown: #604c4c;
   --imp-brown-rgb: 96, 76, 76;
 
-  --imp-purple: #8b19db;
-  --imp-purple-rgb: 139, 25, 219;
+  --imp-purple: #641C24;
+  --imp-purple-rgb: 53, 107, 112;
 
   --imp-red: #ca2d2d;
   --imp-red-rgb: 202, 45, 45;
 
-  --imp-orange: #d47810;
-  --imp-orange-rgb: 212, 120, 16;
+  --imp-orange: #8C3F3F;
+  --imp-orange-rgb: 180, 134, 79;
 
   --imp-gray: #666666;
   --imp-gray-rgb: 102, 102, 102;
@@ -321,7 +321,6 @@
 }
 
 .imp-shell {
-  --imp-header-height: calc(var(--imp-topbar-height) - 0.5rem);
   display: grid;
   min-height: 100vh;
   grid-template-columns: var(--imp-sidebar-width) minmax(0, 1fr);
@@ -344,18 +343,17 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  background: var(--imp-gray);
+  background: var(--imp-primary);
   color: var(--imp-text-inverse);
   box-shadow: 7px 0 24px rgba(var(--imp-gray-rgb), 0.13);
 }
 
 .imp-sidebar__brand {
   display: flex;
-  height: var(--imp-header-height);
-  flex: 0 0 var(--imp-header-height);
+  min-height: var(--imp-topbar-height);
   align-items: center;
   gap: var(--imp-space-3);
-  padding: 0 var(--imp-space-4);
+  padding: var(--imp-space-4) var(--imp-space-5);
   border-bottom: 1px solid rgba(255, 255, 255, 0.13);
 }
 
@@ -387,7 +385,6 @@
 
 .imp-sidebar__brand .imp-logo {
   max-width: 10rem;
-  max-height: calc(var(--imp-header-height) - 1rem);
   filter: brightness(0) invert(1);
   transition: opacity var(--imp-transition-fast);
 }
@@ -474,12 +471,11 @@
   top: 0;
   z-index: 30;
   display: flex;
-  height: var(--imp-header-height);
-  min-height: var(--imp-header-height);
+  min-height: var(--imp-topbar-height);
   align-items: center;
   justify-content: space-between;
   gap: var(--imp-space-4);
-  padding: 0 clamp(1rem, 3vw, 1.5rem);
+  padding: var(--imp-space-3) clamp(1rem, 3vw, 2rem);
   border-bottom: 1px solid var(--imp-border);
   background:
     color-mix(in srgb, var(--imp-surface) 92%, transparent);
@@ -508,10 +504,10 @@
 
 .imp-topbar-user {
   display: flex;
-  max-width: min(100%, 16rem);
+  max-width: min(100%, 18rem);
   align-items: center;
   gap: var(--imp-space-2);
-  padding: 0.35rem 0.55rem;
+  padding: 0.45rem 0.6rem;
   border: 1px solid var(--imp-border);
   border-radius: var(--imp-radius-md);
   background: color-mix(in srgb, var(--imp-surface) 84%, #ffffff);
@@ -520,9 +516,9 @@
 
 .imp-topbar-user__avatar {
   display: grid;
-  width: 1.9rem;
-  min-width: 1.9rem;
-  height: 1.9rem;
+  width: 2.15rem;
+  min-width: 2.15rem;
+  height: 2.15rem;
   place-items: center;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--imp-primary), var(--imp-accent));
@@ -543,7 +539,7 @@
   overflow: hidden;
   color: var(--imp-text);
   font-family: var(--imp-font-heading);
-  font-size: 0.8rem;
+  font-size: var(--imp-text-sm);
   font-weight: var(--imp-weight-bold);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -560,7 +556,7 @@
 .imp-topbar-user__email {
   overflow: hidden;
   color: var(--imp-text-soft);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -926,7 +922,7 @@
   inset: 0 auto auto 0;
   width: 100%;
   height: 0.3rem;
-  background: linear-gradient(90deg, var(--imp-primary), var(--imp-accent));
+  background: var(--imp-accent);
 }
 
 .imp-request-card__meta {
