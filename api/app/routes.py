@@ -1,98 +1,133 @@
+import os
 import requests
 from . import app, auth, database
-from flask import json, render_template, redirect, url_for, jsonify, request
+from flask import json, render_template, redirect, url_for, jsonify, g, session
 from app.forms import FormFlows
 from app.models import flows, Chamada, Etapas, Execucao
+from sqlalchemy import and_, or_, func
+from datetime import timedelta
+import base64
+
+def carregar_info_usuario(context):
+    """Busca e armazena info do usuário no flask.g"""
+    if hasattr(g, 'info_user'):
+        return
+    user = context['user']
+    user_id = user.get("oid") or user.get("id")
+    access_token = context['access_token']
+
+    info1 = requests.get(
+        f"https://graph.microsoft.com/v1.0/users/{user_id}?$select=id,displayName,mail,jobTitle",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    info2 = requests.get(
+        f"https://graph.microsoft.com/v1.0/users/{user_id}/memberOf",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    groups = info2.json().get("value", [])
+
+    g.info_user = {
+        "displayName": info1.json().get("displayName", ""),
+        "jobTitle":    info1.json().get("jobTitle", ""),
+        "mail":        info1.json().get("mail", ""),
+        "groups":      [grp.get("displayName", "") for grp in groups]
+    }
+
+    credentials = base64.b64encode(
+    f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
+
+    g.coligadas = requests.get(
+        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
+    )
+    g.movimentos = requests.get(
+        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G",
+                headers={"Authorization": f"Basic {credentials}"}
+)
+
+@app.context_processor
+def inject_info_user():
+    return {
+        "info_user": getattr(g, 'info_user', None),
+        "coligadas": getattr(g, 'coligadas', None),
+        "movimentos": getattr(g, 'movimentos', None)
+    }
+
 
 @app.route("/")
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])
 def index(*, context):
     user = context['user']
-    nome = user.get("name")
-    email=user.get("email")
+    carregar_info_usuario(context)
+    user_oid = user.get("oid") or user.get("id")
+    user_job = g.info_user.get("jobTitle", "")
+    groups   = g.info_user.get("groups", [])
+    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    tarefas_raw = (
+    database.session.query(Chamada)
+    .join(Execucao, Execucao.id_chamada == Chamada.id)
+    .join(Etapas, Etapas.id == Execucao.id_etapa)
+    .join(flows, flows.id == Etapas.id_flow)
+    .filter(Execucao.finalizada_em.is_(None))
+    .filter(and_(Execucao.assumida_em.is_(None), Execucao.executor.is_(None)))
+    .filter(
+        or_(
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            Execucao.executor.like(f"%{user_oid}%"),
+            *grupos_conditions
+        )
+    )
+    .add_columns(
+        Etapas.sla,
+        Chamada.status,
+        Etapas.nome.label("etapa_nome"),
+        flows.alias.label("fluxo_nome"),
+        Execucao.iniciada_em
+    ).all()
+)
+    minhas_tarefas = []
+    for row in tarefas_raw:
+        minhas_tarefas.append({
+            "chamada":    row.Chamada,
+            "sla":        row.sla,
+            "status":     row.status,
+            "etapa_nome": row.etapa_nome,
+            "fluxo_nome": row.fluxo_nome,
+            "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
+        })
+    solicitacoes = (
+        database.session.query(Chamada)
+        .join(Execucao, Execucao.id_chamada == Chamada.id)
+        .join(Etapas, Etapas.id == Execucao.id_etapa)
+        .join(flows, flows.id == Etapas.id_flow)
+        .filter(Chamada.solicitante == f"{user_oid}")
+        .filter(and_(Etapas.nome == "Solicitação", Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"])))
+        .add_columns(
+            Chamada.id,
+            flows.alias.label("fluxo_nome"),
+            Execucao.iniciada_em,
+            Chamada.status
+        )
+        .all()
+    )
     return render_template(
         'home.html',
         user=user,
-        nome=nome,
-        email=email,
         title="Flask Web App Sample",
+        minhas_tarefas = minhas_tarefas,
+        solicitacoes = solicitacoes
     )
-
-
-def get_authenticated_user_id(user):
-    candidate = (
-        user.get("id")
-        or user.get("user_id")
-        or user.get("employee_id")
-        or user.get("matricula")
-    )
-
-    if candidate is None:
-        return None
-
-    try:
-        return int(candidate)
-    except (TypeError, ValueError):
-        return None
 
 
 @app.route("/solicitacoes")
 @auth.login_required
 def solicitacoes(context):
-    status_labels = {
-        "A": ("Em andamento", "warning"),
-        "F": ("Finalizada", "success"),
-        "C": ("Cancelada", "danger")
-    }
     user = context.get("user", {})
-    user_id = get_authenticated_user_id(user)
-
-    chamadas = []
-
-    if user_id is not None:
-        chamadas = (
-            Chamada.query
-            .filter_by(solicitante=user_id)
-            .order_by(Chamada.id.desc())
-            .all()
-        )
-
-    solicitacoes_rows = []
-
-    for chamada in chamadas:
-        fluxo = flows.query.get(chamada.id_fluxo)
-        ultima_execucao = (
-            Execucao.query
-            .filter_by(id_chamada=chamada.id)
-            .order_by(Execucao.iniciada_em.desc(), Execucao.id.desc())
-            .first()
-        )
-        etapa_atual = (
-            Etapas.query.get(ultima_execucao.id_etapa)
-            if ultima_execucao
-            else None
-        )
-        status_label, status_variant = status_labels.get(
-            chamada.status,
-            ("Pendente", "info")
-        )
-
-        solicitacoes_rows.append({
-            "id": chamada.id,
-            "protocolo": f"SOL-{chamada.id:06d}",
-            "tipo": fluxo.alias if fluxo else "Fluxo não encontrado",
-            "area": fluxo.area_responsavel if fluxo else "-",
-            "abertura": ultima_execucao.iniciada_em if ultima_execucao else None,
-            "etapa": etapa_atual.nome if etapa_atual else "Aguardando início",
-            "status_label": status_label,
-            "status_variant": status_variant
-        })
 
     return render_template(
         "solicitacoes.html",
-        user=user,
-        solicitacoes=solicitacoes_rows,
-        abertas_count=sum(1 for chamada in chamadas if chamada.status == "A")
+        user=user
     )
 
 
@@ -105,9 +140,11 @@ def novasolicitacao(context):
         user=context['user'],
         fluxos=fluxos
     )
+
 @app.route("/flow/<id_fluxo>")
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])  # ✅ adicionar scopes=
 def ini_flow(id_fluxo, context):
+    carregar_info_usuario(context)
     fluxo = flows.query.get(id_fluxo)
     name = fluxo.nome
     return render_template(f'fluxos/{name}.html', 
@@ -120,11 +157,11 @@ def ini_flow(id_fluxo, context):
 @auth.login_required
 def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
-    if request.method == "POST":
-        form_data = dict(request.form)
+    if requests.method == "POST":
+        form_data = dict(requests.form)
         files = {}
-        for key in request.files:
-            files[key] = request.files.getlist(key)
+        for key in requests.files:
+            files[key] = requests.files.getlist(key)
         user = context['user']
         nome = user.get("name")
 
@@ -136,8 +173,8 @@ def submit_flow(id_fluxo, id_etapa, context):
         }
 
         files = []
-        for key in request.files:
-            for file in request.files.getlist(key):
+        for key in requests.files:
+            for file in requests.files.getlist(key):
                 if file.filename:
                     files.append((key, (file.filename, file.stream, file.content_type)))
 
@@ -156,5 +193,22 @@ def submit_flow(id_fluxo, id_etapa, context):
         'novasolicitacao.html',
         user=context,
         fluxos=flows.query.all(),
-        message="Solicitação enviada com sucesso!" if request.method == "POST" else None
+        message="Solicitação enviada com sucesso!" if requests.method == "POST" else None
     )
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+###    SELECT 	FT.DESCRICAO,
+#		FCFO.CODTCF,
+#		FCFO.NOMEFANTASIA
+# /*RUA,
+#NUMERO,
+#BAIRRO,
+#CEP,
+#CIDADE || '/' || CODETD AS CIDEST,
+#CGCCFO */
+#FROM FCFO
+#LEFT JOIN FTCF FT ON FCFO.CODTCF = FT.CODTCF
