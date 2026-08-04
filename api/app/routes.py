@@ -1,5 +1,6 @@
 import os
 import requests
+from functools import wraps
 from . import app, auth, database
 from flask import json, render_template, redirect, url_for, jsonify, g, session
 from app.forms import FormFlows
@@ -9,9 +10,15 @@ from datetime import timedelta
 import base64
 
 def carregar_info_usuario(context):
-    """Busca e armazena info do usuário no flask.g"""
+    """Busca uma vez no Graph e reutiliza os dados do usuário na sessão."""
     if hasattr(g, 'info_user'):
         return
+
+    cached_info_user = session.get("info_user")
+    if cached_info_user:
+        g.info_user = cached_info_user
+        return
+
     user = context['user']
     user_id = user.get("oid") or user.get("id")
     access_token = context['access_token']
@@ -26,13 +33,33 @@ def carregar_info_usuario(context):
     )
     groups = info2.json().get("value", [])
 
-    g.info_user = {
+    info_user = {
         "displayName": info1.json().get("displayName", ""),
         "jobTitle":    info1.json().get("jobTitle", ""),
         "mail":        info1.json().get("mail", ""),
         "groups":      [grp.get("displayName", "") for grp in groups]
     }
 
+    session["info_user"] = info_user
+    g.info_user = info_user
+
+
+def with_info_user(view_func):
+    """Garante g.info_user para rotas autenticadas sem chamada manual na rota."""
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        context = kwargs.get("context")
+        if context is not None:
+            carregar_info_usuario(context)
+        elif not hasattr(g, 'info_user'):
+            cached_info_user = session.get("info_user")
+            if cached_info_user:
+                g.info_user = cached_info_user
+        return view_func(*args, **kwargs)
+
+    return wrapper
+
+def carregar_info_form():
     credentials = base64.b64encode(
     f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
 
@@ -48,17 +75,15 @@ def carregar_info_usuario(context):
 @app.context_processor
 def inject_info_user():
     return {
-        "info_user": getattr(g, 'info_user', None),
-        "coligadas": getattr(g, 'coligadas', None),
-        "movimentos": getattr(g, 'movimentos', None)
+        "info_user": getattr(g, 'info_user', None)
     }
 
 
 @app.route("/")
 @auth.login_required(scopes=["User.Read"])
+@with_info_user
 def index(*, context):
     user = context['user']
-    carregar_info_usuario(context)
     user_oid = user.get("oid") or user.get("id")
     user_job = g.info_user.get("jobTitle", "")
     groups   = g.info_user.get("groups", [])
@@ -121,10 +146,10 @@ def index(*, context):
 
 
 @app.route("/solicitacoes")
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
 def solicitacoes(context):
-    user = context.get("user", {})
-
+    user = context["user"]
     return render_template(
         "solicitacoes.html",
         user=user
@@ -132,7 +157,8 @@ def solicitacoes(context):
 
 
 @app.route("/novasolicitacao")
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
 def novasolicitacao(context):
     fluxos = flows.query.all()
     return render_template(
@@ -143,9 +169,10 @@ def novasolicitacao(context):
 
 @app.route("/flow/<id_fluxo>")
 @auth.login_required(scopes=["User.Read"])  # ✅ adicionar scopes=
+@with_info_user
 def ini_flow(id_fluxo, context):
-    carregar_info_usuario(context)
     fluxo = flows.query.get(id_fluxo)
+    carregar_info_form()
     name = fluxo.nome
     return render_template(f'fluxos/{name}.html', 
         user=context['user'],
@@ -154,7 +181,8 @@ def ini_flow(id_fluxo, context):
 
 
 @app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
 def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
     if requests.method == "POST":
