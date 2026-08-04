@@ -1,88 +1,87 @@
 {% extends "index.html" %}
 
-	{% block titulo %}
-		Nova Solicitação
-	{% endblock %}
+{% block titulo %}
+    Nova Solicitação
+{% endblock %}
 
-	{% block topBar %}
-			<h1 class="imp-heading">Nova Solicitação</h1>
-				<p class="imp-subtitle imp-topbar__subtitle">
-					Inicie um novo fluxo.
-				</p>
-	{% endblock %}
+{% block topBar %}
+    <h1 class="imp-heading">Nova Solicitação</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Inicie um novo fluxo.
+    </p>
+{% endblock %}
 
+{% block main %}
+    <section class="imp-stack imp-gap-6">
+        <div>
+            <span class="imp-kicker">Fluxos disponíveis</span>
+            <h2 class="imp-title">Selecione um tipo de solicitação</h2>
+            <p class="imp-subtitle">
+                Os cards abaixo são gerados dinamicamente. Para adicionar novos
+                fluxos, basta incluir outro item na lista JavaScript da página.
+            </p>
+        </div>
 
-	{% block main %}
-		<section class="imp-stack imp-gap-6">
-			<div>
-				<span class="imp-kicker">Fluxos disponíveis</span>
-				<h2 class="imp-title">Selecione um tipo de solicitação</h2>
-				<p class="imp-subtitle">
-					Os cards abaixo são gerados dinamicamente. Para adicionar novos
-					fluxos, basta incluir outro item na lista JavaScript da página.
-				</p>
-			</div>
+        <article class="imp-card imp-card--accent">
+            <header class="imp-card__header">
+                <div>
+                    <h3 class="imp-card__title">Catálogo de solicitações</h3>
+                    <p class="imp-card__subtitle">
+                        Cada opção resume o objetivo do fluxo e leva o usuário para a
+                        etapa correspondente.
+                    </p>
+                </div>
 
-			<article class="imp-card imp-card--accent">
-				<header class="imp-card__header">
-					<div>
-						<h3 class="imp-card__title">Catálogo de solicitações</h3>
-						<p class="imp-card__subtitle">
-							Cada opção resume o objetivo do fluxo e leva o usuário para a
-							etapa correspondente.
-						</p>
-					</div>
+                <span class="imp-badge imp-badge--primary" id="flowCountBadge">
+                    {{ fluxos|length }} fluxos
+                </span>
+            </header>
 
-					<span class="imp-badge imp-badge--primary" id="flowCountBadge">
-						{{ fluxos|length }} fluxos
-					</span>
-				</header>
+            <div class="imp-card__body imp-stack imp-gap-6">
+                <div class="imp-grid imp-grid--4" id="flowHighlights"></div>
+                {% if fluxos|length == 0 %}
+                    <div class="imp-request-empty imp-hidden" id="flowEmptyState">
+                        <p class="imp-title imp-mb-4">Nenhum fluxo disponível</p>
+                        <p class="imp-subtitle imp-m-0">
+                            Cadastre pelo menos um fluxo na lista da página para exibir
+                            os cards de solicitação.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="imp-grid imp-request-grid" id="flowCards">
+                        {% for fluxo in fluxos %}
+                            <article class="imp-card imp-request-card">
+                                <header class="imp-card__header">
+                                    <div>
+                                        <div class="imp-request-card__meta">
+                                            <span>{{ fluxo.area_responsavel }}</span>
+                                        </div>
+                                        <h3 class="imp-card__title">{{ fluxo.alias }}</h3>
+                                    </div>
+                                </header>
 
-				<div class="imp-card__body imp-stack imp-gap-6">
-					<div class="imp-grid imp-grid--4" id="flowHighlights"></div>
-					{% if fluxos|length == 0 %}
-						<div class="imp-request-empty imp-hidden" id="flowEmptyState">
-							<p class="imp-title imp-mb-4">Nenhum fluxo disponível</p>
-							<p class="imp-subtitle imp-m-0">
-								Cadastre pelo menos um fluxo na lista da página para exibir
-								os cards de solicitação.
-							</p>
-						</div>
-					{% else %}
-					<div class="imp-grid imp-request-grid" id="flowCards">
-					{% for fluxo in fluxos %}
-						<article class="imp-card imp-request-card">
-							<header class="imp-card__header">
-								<div>
-									<div class="imp-request-card__meta">
-										<span>{{ fluxo.area_responsavel }}</span>
-									</div>
-									<h3 class="imp-card__title">{{ fluxo.alias }}</h3>
-								</div>
-							</header>
+                                <div class="imp-card__body">
+                                    <p class="imp-request-card__description">
+                                        {{ fluxo.descricao }}
+                                    </p>
+                                </div>
 
-							<div class="imp-card__body">
-								<p class="imp-request-card__description">
-									{{ fluxo.descricao }}
-								</p>
-							</div>
+                                <footer class="imp-card__footer">
+                                    <a class="imp-btn" href="{{ url_for('ini_flow', id_fluxo=fluxo.id) }}">
+                                        Iniciar solicitação
+                                    </a>
+                                </footer>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
 
-							<footer class="imp-card__footer">
-								<a class="imp-btn" href="{{ url_for('ini_flow', id_fluxo=fluxo.id) }}">
-									Iniciar solicitação
-								</a>
-							</footer>
-						</article>
-					{% endfor %}
-					</div>
-					{% endif %}
-				</div>
-
-				<footer class="imp-card__footer">
-					<a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
-						Voltar ao início
-					</a>
-				</footer>
-			</article>
-		</section>
-	{% endblock %}
+            <footer class="imp-card__footer">
+                <a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+                    Voltar ao início
+                </a>
+            </footer>
+        </article>
+    </section>
+{% endblock %}

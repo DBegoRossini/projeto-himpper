@@ -6,18 +6,79 @@
       .replace(/\s+/g, " ")
       .trim();
 
-  const getInitials = value => {
-    const normalized = normalizeWhitespace(value);
+  const closeMenu = card => {
+    const toggle = card.querySelector("[data-topbar-user-toggle]");
+    const menu = card.querySelector("[data-topbar-user-menu]");
 
-    if (!normalized) return "US";
+    card.classList.remove("is-open");
 
-    const parts = normalized.split(" ").filter(Boolean);
-
-    if (parts.length === 1) {
-      return parts[0].slice(0, 2).toUpperCase();
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", "false");
     }
 
-    return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+    if (menu) {
+      menu.hidden = true;
+    }
+  };
+
+  const openMenu = card => {
+    const toggle = card.querySelector("[data-topbar-user-toggle]");
+    const menu = card.querySelector("[data-topbar-user-menu]");
+
+    card.classList.add("is-open");
+
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    if (menu) {
+      menu.hidden = false;
+    }
+  };
+
+  const bindMenu = card => {
+    const toggle = card.querySelector("[data-topbar-user-toggle]");
+    const menu = card.querySelector("[data-topbar-user-menu]");
+    const logoutButton = card.querySelector("[data-topbar-user-logout]");
+
+    if (!toggle || !menu) {
+      return;
+    }
+
+    toggle.addEventListener("click", () => {
+      const isOpen = card.classList.contains("is-open");
+
+      document.querySelectorAll("[data-topbar-user].is-open").forEach(openCard => {
+        if (openCard !== card) {
+          closeMenu(openCard);
+        }
+      });
+
+      if (isOpen) {
+        closeMenu(card);
+      } else {
+        openMenu(card);
+      }
+    });
+
+    document.addEventListener("click", event => {
+      if (!card.contains(event.target)) {
+        closeMenu(card);
+      }
+    });
+
+    card.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeMenu(card);
+        toggle.focus();
+      }
+    });
+
+    if (logoutButton) {
+      logoutButton.addEventListener("click", () => {
+        closeMenu(card);
+      });
+    }
   };
 
   const initTopbarUser = () => {
@@ -25,21 +86,43 @@
       const name = normalizeWhitespace(card.dataset.userName);
       const email = normalizeWhitespace(card.dataset.userEmail);
       const role = normalizeWhitespace(card.dataset.userRole);
-      const avatar = card.querySelector("[data-topbar-user-avatar]");
       const emailElement = card.querySelector("[data-topbar-user-email]");
       const roleElement = card.querySelector("[data-topbar-user-role]");
+      const detailNameElement = card.querySelector("[data-topbar-user-detail-name]");
+      const detailEmailElement = card.querySelector("[data-topbar-user-detail-email]");
+      const detailRoleElement = card.querySelector("[data-topbar-user-detail-role]");
+      const detailEmailWrap = card.querySelector('[data-topbar-user-detail="email"]');
+      const detailRoleWrap = card.querySelector('[data-topbar-user-detail="role"]');
 
-      if (avatar) {
-        avatar.textContent = getInitials(name || email);
+      if (detailNameElement) {
+        detailNameElement.textContent = name;
       }
 
       if (emailElement && !email) {
         emailElement.remove();
       }
 
+      if (detailEmailElement) {
+        detailEmailElement.textContent = email;
+      }
+
+      if (detailEmailWrap && !email) {
+        detailEmailWrap.remove();
+      }
+
       if (roleElement && !role) {
         roleElement.remove();
       }
+
+      if (detailRoleElement) {
+        detailRoleElement.textContent = role;
+      }
+
+      if (detailRoleWrap && !role) {
+        detailRoleWrap.remove();
+      }
+
+      bindMenu(card);
     });
   };
 

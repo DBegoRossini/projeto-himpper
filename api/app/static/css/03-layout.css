@@ -232,35 +232,62 @@
 }
 
 .imp-topbar-user {
+  position: relative;
   display: flex;
   max-width: min(100%, 16rem);
+  flex-direction: column;
+}
+
+.imp-topbar-user__trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
   align-items: center;
+  justify-content: space-between;
   gap: var(--imp-space-2);
-  padding: 0.35rem 0.55rem;
+  padding: 0.45rem 0.65rem;
   border: 1px solid var(--imp-border);
   border-radius: var(--imp-radius-md);
   background: color-mix(in srgb, var(--imp-surface) 84%, #ffffff);
   box-shadow: var(--imp-shadow-xs);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--imp-transition-fast),
+    box-shadow var(--imp-transition-fast),
+    background-color var(--imp-transition-fast),
+    transform var(--imp-transition-fast);
 }
 
-.imp-topbar-user__avatar {
-  display: grid;
-  width: 1.9rem;
-  min-width: 1.9rem;
-  height: 1.9rem;
-  place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--imp-primary), var(--imp-accent));
-  color: #ffffff;
-  font-family: var(--imp-font-heading);
-  font-size: var(--imp-text-xs);
-  font-weight: var(--imp-weight-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.imp-topbar-user__trigger:hover {
+  border-color: var(--imp-border-strong);
+  box-shadow: var(--imp-shadow-sm);
+  transform: translateY(-1px);
+}
+
+.imp-topbar-user__trigger:focus-visible {
+  outline: 3px solid rgba(var(--imp-primary-rgb), 0.14);
+  outline-offset: 2px;
+}
+
+.imp-topbar-user.is-open .imp-topbar-user__trigger {
+  border-color: rgba(var(--imp-primary-rgb), 0.28);
+  box-shadow: 0 0 0 0.18rem rgba(var(--imp-primary-rgb), 0.08);
 }
 
 .imp-topbar-user__content {
   min-width: 0;
+}
+
+.imp-topbar-user__chevron {
+  color: var(--imp-text-muted);
+  font-size: 0.72rem;
+  transition: transform var(--imp-transition-fast);
+}
+
+.imp-topbar-user.is-open .imp-topbar-user__chevron {
+  transform: rotate(180deg);
 }
 
 .imp-topbar-user__name {
@@ -281,6 +308,14 @@
   margin-top: 0.05rem;
 }
 
+.imp-topbar-user__eyebrow {
+  margin: 0;
+}
+
+.imp-topbar-user__eyebrow::before {
+  width: 1rem;
+}
+
 .imp-topbar-user__role,
 .imp-topbar-user__email {
   overflow: hidden;
@@ -299,6 +334,83 @@
 .imp-topbar-user__role:last-child::after {
   content: none;
   margin-left: 0;
+}
+
+.imp-topbar-user__menu {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  z-index: 45;
+  width: min(18rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border-top-width: 0.28rem;
+}
+
+.imp-topbar-user__menu-head {
+  align-items: center;
+}
+
+.imp-topbar-user__menu-name {
+  display: block;
+  margin-top: 0;
+  color: var(--imp-text);
+  font-family: var(--imp-font-heading);
+  font-size: var(--imp-text-lg);
+  font-weight: var(--imp-weight-bold);
+}
+
+.imp-topbar-user__menu-subtitle {
+  margin-top: var(--imp-space-1);
+}
+
+.imp-topbar-user__menu-body {
+  padding-top: var(--imp-space-5);
+  padding-bottom: var(--imp-space-5);
+}
+
+.imp-topbar-user__details {
+  display: grid;
+  gap: var(--imp-space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.imp-topbar-user__detail {
+  display: grid;
+  gap: var(--imp-space-1);
+  margin: 0;
+}
+
+.imp-topbar-user__detail dt {
+  margin: 0;
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-xs);
+  font-weight: var(--imp-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.imp-topbar-user__detail dd {
+  margin: 0;
+  color: var(--imp-text);
+  font-size: var(--imp-text-sm);
+  overflow-wrap: anywhere;
+}
+
+.imp-topbar-user__menu-actions {
+  justify-content: stretch;
+}
+
+.imp-topbar-user__action {
+  min-height: 1.9rem !important;
+  padding: 0.32rem 0.72rem !important;
+  justify-content: center;
+  line-height: 1;
+}
+
+.imp-topbar-user__action:focus-visible {
+  outline: 3px solid rgba(var(--imp-danger-rgb), 0.16);
+  outline-offset: 2px;
 }
 
 .imp-page-content {
@@ -381,6 +493,12 @@
   .imp-topbar-user {
     min-width: 0;
     max-width: 100%;
+  }
+
+  .imp-topbar-user__menu {
+    right: auto;
+    left: 0;
+    width: min(100%, 20rem);
   }
 
   .imp-topbar-user__meta {

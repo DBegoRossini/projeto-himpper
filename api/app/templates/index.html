@@ -88,6 +88,7 @@
 
     <div class="imp-page">
             {% set user_name = user.get('name') or user.get('preferred_username') or user.get('email') or 'Usuário autenticado' %}
+        {% set user_email = user.get('preferred_username') or user.get('email') or user.get('upn') or '' %}
             {% set user_role = user.get('job_title') or user.get('cargo') or user.get('department') or '' %}
       <header class="imp-topbar">
         <div class="imp-topbar__left">
@@ -101,14 +102,49 @@
                         class="imp-topbar-user"
                         data-topbar-user
                         data-user-name="{{ user_name }}"
+                        data-user-email="{{ user_email }}"
                         data-user-role="{{ user_role }}"
                     >
-                        <div class="imp-topbar-user__content">
-                            <strong class="imp-topbar-user__name" data-topbar-user-name>{{ user_name }}</strong>
-                            <div class="imp-topbar-user__meta">
+                        <button
+                            type="button"
+                            class="imp-topbar-user__trigger"
+                            data-topbar-user-toggle
+                            aria-haspopup="menu"
+                            aria-expanded="false"
+                        >
+                            <div class="imp-topbar-user__content">
+                                <strong class="imp-topbar-user__name" data-topbar-user-name>{{ user_name }}</strong>
+                                <div class="imp-topbar-user__meta">
+                                </div>
+                            </div>
+                            <span class="imp-topbar-user__chevron" aria-hidden="true">▾</span>
+                        </button>
+
+                        <div class="imp-topbar-user__menu" data-topbar-user-menu hidden>
+                            <div class="imp-topbar-user__menu-head">
+                                <p class="imp-topbar-user__eyebrow">Usuário conectado</p>
+                                <strong class="imp-topbar-user__menu-name">{{ user_name }}</strong>
+                            </div>
+
+                            <dl class="imp-topbar-user__details">
                                 {% if user_role %}
-                                    <span class="imp-topbar-user__role" data-topbar-user-role>{{ user_role }}</span>
+                                    <div class="imp-topbar-user__detail" data-topbar-user-detail="role">
+                                        <dt>Cargo</dt>
+                                        <dd data-topbar-user-detail-role>{{ user_role }}</dd>
+                                    </div>
                                 {% endif %}
+                                {% if user_email %}
+                                    <div class="imp-topbar-user__detail" data-topbar-user-detail="email">
+                                        <dt>E-mail</dt>
+                                        <dd data-topbar-user-detail-email>{{ user_email }}</dd>
+                                    </div>
+                                {% endif %}
+                            </dl>
+
+                            <div class="imp-topbar-user__menu-actions">
+                                <button type="button" class="imp-btn imp-btn--sm imp-topbar-user__action" data-topbar-user-logout>
+                                    Logoff
+                                </button>
                             </div>
                         </div>
                     </section>
