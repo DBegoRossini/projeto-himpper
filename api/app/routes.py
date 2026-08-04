@@ -4,6 +4,8 @@ from . import app, auth, database
 from flask import json, render_template, redirect, url_for, jsonify, g
 from app.forms import FormFlows
 from app.models import flows, Chamada, Etapas, Execucao
+from sqlalchemy import and_, or_, func
+from datetime import timedelta
 
 def carregar_info_usuario(context):
     """Busca e armazena info do usuário no flask.g"""
@@ -40,10 +42,64 @@ def inject_info_user():
 def index(*, context):
     user = context['user']
     carregar_info_usuario(context)
+    user_oid = user.get("oid") or user.get("id")
+    user_job = g.info_user.get("jobTitle", "")
+    groups   = g.info_user.get("groups", [])
+    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    tarefas_raw = (
+    database.session.query(Chamada)
+    .join(Execucao, Execucao.id_chamada == Chamada.id)
+    .join(Etapas, Etapas.id == Execucao.id_etapa)
+    .join(flows, flows.id == Etapas.id_flow)
+    .filter(Execucao.finalizada_em.is_(None))
+    .filter(and_(Execucao.assumida_em.is_(None), Execucao.executor.is_(None)))
+    .filter(
+        or_(
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            Execucao.executor.like(f"%{user_oid}%"),
+            *grupos_conditions
+        )
+    )
+    .add_columns(
+        Etapas.sla,
+        Chamada.status,
+        Etapas.nome.label("etapa_nome"),
+        flows.alias.label("fluxo_nome"),
+        Execucao.iniciada_em
+    ).all()
+)
+    minhas_tarefas = []
+    for row in tarefas_raw:
+        minhas_tarefas.append({
+            "chamada":    row.Chamada,
+            "sla":        row.sla,
+            "status":     row.status,
+            "etapa_nome": row.etapa_nome,
+            "fluxo_nome": row.fluxo_nome,
+            "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
+        })
+    solicitacoes = (
+        database.session.query(Chamada)
+        .join(Execucao, Execucao.id_chamada == Chamada.id)
+        .join(Etapas, Etapas.id == Execucao.id_etapa)
+        .join(flows, flows.id == Etapas.id_flow)
+        .filter(Chamada.solicitante == f"{user_oid}")
+        .filter(and_(Etapas.nome == "Solicitação", Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"])))
+        .add_columns(
+            Chamada.id,
+            flows.alias.label("fluxo_nome"),
+            Execucao.iniciada_em,
+            Chamada.status
+        )
+        .all()
+    )
     return render_template(
         'home.html',
         user=user,
-        title="Flask Web App Sample"
+        title="Flask Web App Sample",
+        minhas_tarefas = minhas_tarefas,
+        solicitacoes = solicitacoes
     )
 
 

@@ -66,7 +66,7 @@
                 </div>
 
                 <span class="imp-badge imp-badge--warning" id="myTasksCount">
-                  0 pendentes
+                  {{ minhas_tarefas|length }} pendentes
                 </span>
               </header>
 
@@ -81,7 +81,16 @@
                         <th>Status</th>
                       </tr>
                     </thead>
-                    <tbody id="myTasksRows"></tbody>
+                    <tbody id="myTasksRows">
+                      {% for tarefa in minhas_tarefas %}
+                      <tr>
+                        <td>{{ tarefa.etapa_nome }}</td>
+                        <td>{{ tarefa.fluxo_nome }}</td>
+                        <td>{{ tarefa.prazo_limite.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ tarefa.status }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
                   </table>
                 </div>
                 <p class="imp-subtitle imp-hidden" id="myTasksEmptyState">
@@ -106,7 +115,7 @@
                 </div>
 
                 <span class="imp-badge imp-badge--success" id="myRequestsCount">
-                  0 em andamento
+                  {{ solicitacoes|length }} em andamento
                 </span>
               </header>
 
@@ -121,7 +130,16 @@
                         <th>Status</th>
                       </tr>
                     </thead>
-                    <tbody id="myRequestsRows"></tbody>
+                    <tbody id="myRequestsRows">
+                      {% for solicitacao in solicitacoes %}
+                      <tr>
+                        <td>{{ solicitacao.id }}</td>
+                        <td>{{ solicitacao.fluxo_nome }}</td>
+                        <td>{{ solicitacao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ solicitacao.status }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
                   </table>
                 </div>
                 <p class="imp-subtitle imp-hidden" id="myRequestsEmptyState">
@@ -130,7 +148,7 @@
               </div>
 
               <footer class="imp-card__footer">
-                <a class="imp-btn" href="./novasolicitacao.html">
+                <a class="imp-btn" href="{{ url_for('novasolicitacao') }}">
                   Abrir nova solicitação
                 </a>
               </footer>
