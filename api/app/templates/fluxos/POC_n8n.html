@@ -152,7 +152,9 @@
         <label class="form-label form-required" for="field-10">Coligada Empreendimento Contratante <span class="req-mark">*</span></label>
         <div class="select-input_10">
           <select id="field-10" name="field-10" value="">
-          
+            {% for coligada in g.coligadas.json() %}
+              <option value="{{coligada['VALUE']}}">{{coligada['LABEL']}}</option>
+            {% endfor %}
           </select>
         </div>
         <p class="error-field-10 error-hidden">Este campo é obrigatório</p>

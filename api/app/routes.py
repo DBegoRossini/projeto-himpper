@@ -1,11 +1,12 @@
 import os
 import requests
 from . import app, auth, database
-from flask import json, render_template, redirect, url_for, jsonify, g
+from flask import json, render_template, redirect, url_for, jsonify, g, session
 from app.forms import FormFlows
 from app.models import flows, Chamada, Etapas, Execucao
 from sqlalchemy import and_, or_, func
 from datetime import timedelta
+import base64
 
 def carregar_info_usuario(context):
     """Busca e armazena info do usuário no flask.g"""
@@ -32,9 +33,25 @@ def carregar_info_usuario(context):
         "groups":      [grp.get("displayName", "") for grp in groups]
     }
 
+    credentials = base64.b64encode(
+    f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
+
+    g.coligadas = requests.get(
+        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
+    )
+    g.movimentos = requests.get(
+        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G",
+                headers={"Authorization": f"Basic {credentials}"}
+)
+
 @app.context_processor
 def inject_info_user():
-    return {"info_user": getattr(g, 'info_user', None)}
+    return {
+        "info_user": getattr(g, 'info_user', None),
+        "coligadas": getattr(g, 'coligadas', None),
+        "movimentos": getattr(g, 'movimentos', None)
+    }
 
 
 @app.route("/")
@@ -123,9 +140,11 @@ def novasolicitacao(context):
         user=context['user'],
         fluxos=fluxos
     )
+
 @app.route("/flow/<id_fluxo>")
-@auth.login_required
+@auth.login_required(scopes=["User.Read"])  # ✅ adicionar scopes=
 def ini_flow(id_fluxo, context):
+    carregar_info_usuario(context)
     fluxo = flows.query.get(id_fluxo)
     name = fluxo.nome
     return render_template(f'fluxos/{name}.html', 
@@ -176,3 +195,20 @@ def submit_flow(id_fluxo, id_etapa, context):
         fluxos=flows.query.all(),
         message="Solicitação enviada com sucesso!" if requests.method == "POST" else None
     )
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+###    SELECT 	FT.DESCRICAO,
+#		FCFO.CODTCF,
+#		FCFO.NOMEFANTASIA
+# /*RUA,
+#NUMERO,
+#BAIRRO,
+#CEP,
+#CIDADE || '/' || CODETD AS CIDEST,
+#CGCCFO */
+#FROM FCFO
+#LEFT JOIN FTCF FT ON FCFO.CODTCF = FT.CODTCF
