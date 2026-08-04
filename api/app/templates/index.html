@@ -86,9 +86,10 @@
     aria-label="Fechar menu"
     ></button>
 
-    <div class="imp-page">
+        <div class="imp-page">
             {% set user_name = user.get('name') or user.get('preferred_username') or user.get('email') or 'Usuário autenticado' %}
-            {% set user_role = user.get('job_title') or user.get('cargo') or user.get('department') or '' %}
+            {% set user_roles = user.get('roles') or [] %}
+            {% set user_role = user.get('jobTitle') or user.get('job_title') or user.get('department') or user.get('role') or (user_roles|first if user_roles else none) %}
       <header class="imp-topbar">
         <div class="imp-topbar__left">
                     <div class="imp-topbar__headline">
@@ -104,11 +105,9 @@
                         data-user-role="{{ user_role }}"
                     >
                         <div class="imp-topbar-user__content">
-                            <strong class="imp-topbar-user__name" data-topbar-user-name>{{ user_name }}</strong>
+                            <strong class="imp-topbar-user__name" data-topbar-user-name>{{ info_user.displayName }}</strong>
                             <div class="imp-topbar-user__meta">
-                                {% if user_role %}
-                                    <span class="imp-topbar-user__role" data-topbar-user-role>{{ user_role }}</span>
-                                {% endif %}
+                                <span class="imp-topbar-user__role" data-topbar-user-role>{{ info_user.jobTitle }}</span>
                             </div>
                         </div>
                     </section>
