@@ -82,11 +82,11 @@ def ini_flow(id_fluxo, context):
 @auth.login_required
 def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
-    if request.method == "POST":
-        form_data = dict(request.form)
+    if requests.method == "POST":
+        form_data = dict(requests.form)
         files = {}
-        for key in request.files:
-            files[key] = request.files.getlist(key)
+        for key in requests.files:
+            files[key] = requests.files.getlist(key)
         user = context['user']
         nome = user.get("name")
 
@@ -98,8 +98,8 @@ def submit_flow(id_fluxo, id_etapa, context):
         }
 
         files = []
-        for key in request.files:
-            for file in request.files.getlist(key):
+        for key in requests.files:
+            for file in requests.files.getlist(key):
                 if file.filename:
                     files.append((key, (file.filename, file.stream, file.content_type)))
 
@@ -118,5 +118,5 @@ def submit_flow(id_fluxo, id_etapa, context):
         'novasolicitacao.html',
         user=context,
         fluxos=flows.query.all(),
-        message="Solicitação enviada com sucesso!" if request.method == "POST" else None
+        message="Solicitação enviada com sucesso!" if requests.method == "POST" else None
     )
