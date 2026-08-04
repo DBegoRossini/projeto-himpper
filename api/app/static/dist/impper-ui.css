@@ -649,10 +649,6 @@
   padding-left: var(--imp-space-5);
 }
 
-.imp-topbar-user__detail {
-  
-}
-
 .imp-topbar-user__detail dt {
   margin: 0;
   color: var(--imp-text-muted);
@@ -677,12 +673,9 @@
 }
 
 .imp-topbar-user__action {
-  max-height: 0.0rem !important;
-  padding: 0.50rem 0.5rem !important;
-  justify-content: center;
-  border-radius: var(--imp-radius-md);
-  color: #ffffff;
-  background: var(--imp-orange) !important;
+  min-height: 1rem !important;
+  max-height: 0.5rem !important;
+  min-width: 4rem !important;
 
 }
 
