@@ -11,10 +11,9 @@
         "etapa": "Validar centro de custo",
         "status_label": "Em andamento",
         "status_variant": "warning",
-        "solicitante": "Mariana Costa",
+        "solicitante": "Ana Mendes",
         "prioridade": "Alta",
-        "resumo": "Solicitação aguardando conferência do centro de custo e anexos obrigatórios antes do envio para aprovação.",
-        "acao": "Assumir análise"
+        "resumo": "Solicitação aguardando conferência do centro de custo e anexos obrigatórios antes do envio para aprovação."
     },
     {
         "id": "pendencia-rh-2318",
@@ -26,10 +25,9 @@
         "etapa": "Conferir documentos",
         "status_label": "Pendente",
         "status_variant": "primary",
-        "solicitante": "Carlos Eduardo",
+        "solicitante": "Augusto Gabriel",
         "prioridade": "Média",
-        "resumo": "Documentação enviada pelo colaborador precisa ser validada antes da atualização no cadastro principal.",
-        "acao": "Revisar documentos"
+        "resumo": "Documentação enviada pelo colaborador precisa ser validada antes da atualização no cadastro principal."
     },
     {
         "id": "pendencia-fin-7784",
@@ -41,10 +39,9 @@
         "etapa": "Aprovar pagamento",
         "status_label": "Em andamento",
         "status_variant": "success",
-        "solicitante": "Fernanda Lopes",
+        "solicitante": "Luciana Oliveira",
         "prioridade": "Alta",
-        "resumo": "Pagamento já possui documentação fiscal anexada e aguarda apenas a atuação final do responsável pela alçada.",
-        "acao": "Abrir para decisão"
+        "resumo": "Pagamento já possui documentação fiscal anexada e aguarda apenas a atuação final do responsável pela alçada."
     },
     {
         "id": "pendencia-ti-5501",
@@ -56,10 +53,9 @@
         "etapa": "Autorizar perfil",
         "status_label": "Pendente",
         "status_variant": "warning",
-        "solicitante": "Lucas Almeida",
+        "solicitante": "Rafaela Gonçalves",
         "prioridade": "Baixa",
-        "resumo": "O usuário precisa de acesso complementar ao ambiente operacional para concluir as atividades do novo projeto.",
-        "acao": "Avaliar perfil"
+        "resumo": "O usuário precisa de acesso complementar ao ambiente operacional para concluir as atividades do novo projeto."
     }
 ] %}
 
@@ -184,9 +180,15 @@
                                     </td>
                                     <td data-label="Prazo">{{ pendencia.prazo }}</td>
                                     <td data-label="Ação">
-                                        <a class="imp-btn imp-btn--neutral imp-btn--sm" href="#{{ pendencia.id }}">
-                                            {{ pendencia.acao }}
-                                        </a>
+                                        {% if pendencia.status_label == "Pendente" %}
+                                            <a class="imp-btn imp-btn--neutral imp-btn--sm" href="#{{ pendencia.id }}">
+                                                Assumir
+                                            </a>
+                                        {% else %}
+                                            <a class="imp-btn imp-btn--outline imp-btn--sm" href="#{{ pendencia.id }}">
+                                                Abandonar
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -209,9 +211,7 @@
                                         <p class="imp-kicker imp-request-mobile-card__kicker">{{ pendencia.protocolo }}</p>
                                         <h3 class="imp-card__title">{{ pendencia.tipo }}</h3>
                                     </div>
-                                    <span class="imp-badge imp-badge--{{ pendencia.status_variant }}">
-                                        {{ pendencia.status_label }}
-                                    </span>
+                                    <span class="imp-badge imp-badge--{{ pendencia.status_variant }}">{{ pendencia.status_label }}</span>
                                 </div>
 
                                 <dl class="imp-request-mobile-card__meta">
@@ -233,9 +233,15 @@
                                     </div>
                                 </dl>
 
-                                <a class="imp-btn imp-btn--neutral imp-w-full" href="#{{ pendencia.id }}">
-                                    {{ pendencia.acao }}
-                                </a>
+                                {% if pendencia.status_label == "Pendente" %}
+                                    <a class="imp-btn imp-btn--neutral imp-w-full" href="#">
+                                        Assumir
+                                    </a>
+                                {% else %}
+                                    <a class="imp-btn imp-btn--outline imp-w-full" href="#">
+                                        Abandonar
+                                    </a>
+                                {% endif %}
                             </div>
                         </article>
                     {% endfor %}
@@ -258,67 +264,6 @@
                 </a>
             </footer>
         </article>
-
-        <section class="imp-grid imp-grid--2">
-            {% for pendencia in pendencias %}
-                <article class="imp-card imp-card--accent" id="{{ pendencia.id }}">
-                    <header class="imp-card__header">
-                        <div>
-                            <span class="imp-kicker">{{ pendencia.protocolo }}</span>
-                            <h3 class="imp-card__title">{{ pendencia.tipo }}</h3>
-                            <p class="imp-card__subtitle">
-                                {{ pendencia.area }} · Solicitado por {{ pendencia.solicitante }}
-                            </p>
-                        </div>
-
-                        <span class="imp-badge imp-badge--{{ pendencia.status_variant }}">
-                            {{ pendencia.status_label }}
-                        </span>
-                    </header>
-
-                    <div class="imp-card__body imp-stack imp-gap-4">
-                        <p class="imp-subtitle imp-m-0">
-                            {{ pendencia.resumo }}
-                        </p>
-
-                        <div class="imp-grid imp-grid--3">
-                            <article class="imp-stat">
-                                <div class="imp-stat__icon">⌚</div>
-                                <div>
-                                    <span class="imp-stat__label">Prazo</span>
-                                    <strong class="imp-stat__value">{{ pendencia.prazo }}</strong>
-                                </div>
-                            </article>
-
-                            <article class="imp-stat">
-                                <div class="imp-stat__icon">▤</div>
-                                <div>
-                                    <span class="imp-stat__label">Etapa atual</span>
-                                    <strong class="imp-stat__value">{{ pendencia.etapa }}</strong>
-                                </div>
-                            </article>
-
-                            <article class="imp-stat">
-                                <div class="imp-stat__icon">!</div>
-                                <div>
-                                    <span class="imp-stat__label">Prioridade</span>
-                                    <strong class="imp-stat__value">{{ pendencia.prioridade }}</strong>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-
-                    <footer class="imp-card__footer">
-                        <a class="imp-btn imp-btn--neutral" href="#requestSearch">
-                            Voltar para a lista
-                        </a>
-                        <a class="imp-btn" href="#{{ pendencia.id }}">
-                            {{ pendencia.acao }}
-                        </a>
-                    </footer>
-                </article>
-            {% endfor %}
-        </section>
     </section>
 
     <script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
