@@ -3,8 +3,7 @@ import requests
 from functools import wraps
 from . import app, auth, database
 from flask import json, render_template, redirect, url_for, jsonify, g, session
-from app.forms import FormFlows
-from app.models import flows, Chamada, Etapas, Execucao
+from app.models import flows, Chamada, Etapas, Execucao, Notificacoes
 from sqlalchemy import and_, or_, func
 from datetime import timedelta
 import base64
@@ -39,9 +38,11 @@ def carregar_info_usuario(context):
         "mail":        info1.json().get("mail", ""),
         "groups":      [grp.get("displayName", "") for grp in groups]
     }
+    notificacoes = Notificacoes.query.filter_by(usuario=user_id).order_by(Notificacoes.enviada_em.desc()).all()
 
     session["info_user"] = info_user
     g.info_user = info_user
+    g.notificacoes = notificacoes
 
 
 def with_info_user(view_func):

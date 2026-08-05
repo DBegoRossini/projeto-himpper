@@ -31,3 +31,9 @@ class Execucao(database.Model):
     assumida_em = database.Column(database.DateTime, nullable=True)
     finalizada_em = database.Column(database.DateTime, nullable=True)
     executor = database.Column(database.Integer, nullable=True)
+
+class Notificacoes(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    usuario = database.Column(database.String(500), nullable=False)
+    enviada_em = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
+    mensagem = database.Column(database.String(500), nullable=False)
