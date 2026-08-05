@@ -8,18 +8,37 @@ from sqlalchemy import and_, or_, func
 from datetime import timedelta
 import base64
 
+
+def carregar_notificacoes_usuario(user_id):
+    notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
+        .order_by(Notificacoes.data_criacao.desc()).all()
+
+    session["notificacoes"] = [
+        {
+            "id": n.id,
+            "mensagem": n.mensagem,
+            "enviada_em": n.data_criacao.isoformat() if n.data_criacao else None
+        }
+        for n in notificacoes
+    ]
+
+    g.notificacoes = session["notificacoes"]
+
 def carregar_info_usuario(context):
-    """Busca uma vez no Graph e reutiliza os dados do usuário na sessão."""
+    user = context['user']
+    user_id = user.get("oid") or user.get("id")
+
     if hasattr(g, 'info_user'):
+        if not hasattr(g, 'notificacoes'):
+            carregar_notificacoes_usuario(user_id)
         return
 
     cached_info_user = session.get("info_user")
     if cached_info_user:
         g.info_user = cached_info_user
+        carregar_notificacoes_usuario(user_id)
         return
 
-    user = context['user']
-    user_id = user.get("oid") or user.get("id")
     access_token = context['access_token']
 
     info1 = requests.get(
@@ -38,15 +57,13 @@ def carregar_info_usuario(context):
         "mail":        info1.json().get("mail", ""),
         "groups":      [grp.get("displayName", "") for grp in groups]
     }
-    notificacoes = Notificacoes.query.filter_by(usuario=user_id).order_by(Notificacoes.enviada_em.desc()).all()
 
     session["info_user"] = info_user
     g.info_user = info_user
-    g.notificacoes = notificacoes
+    carregar_notificacoes_usuario(user_id)
 
 
 def with_info_user(view_func):
-    """Garante g.info_user para rotas autenticadas sem chamada manual na rota."""
     @wraps(view_func)
     def wrapper(*args, **kwargs):
         context = kwargs.get("context")
@@ -56,8 +73,10 @@ def with_info_user(view_func):
             cached_info_user = session.get("info_user")
             if cached_info_user:
                 g.info_user = cached_info_user
+                g.notificacoes = session.get("notificacoes", [])
+            if not hasattr(g, 'notificacoes'):
+                g.notificacoes = session.get("notificacoes", [])
         return view_func(*args, **kwargs)
-
     return wrapper
 
 def carregar_info_form():
@@ -76,7 +95,8 @@ def carregar_info_form():
 @app.context_processor
 def inject_info_user():
     return {
-        "info_user": getattr(g, 'info_user', None)
+        "info_user": getattr(g, 'info_user', None),
+        "notificacoes": getattr(g, 'notificacoes', [])
     }
 
 
@@ -140,7 +160,6 @@ def index(*, context):
     return render_template(
         'home.html',
         user=user,
-        title="Flask Web App Sample",
         minhas_tarefas = minhas_tarefas,
         solicitacoes = solicitacoes
     )

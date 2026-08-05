@@ -35,5 +35,5 @@ class Execucao(database.Model):
 class Notificacoes(database.Model):
     id = database.Column(database.Integer, primary_key=True)
     usuario = database.Column(database.String(500), nullable=False)
-    enviada_em = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
+    data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     mensagem = database.Column(database.String(500), nullable=False)

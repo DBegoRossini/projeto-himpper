@@ -111,11 +111,24 @@
                         >
                             <div class="imp-topbar-user__content">
                                 <strong class="imp-topbar-user__name" data-topbar-user-name>🕭</strong>
-                                <div class="imp-topbar-user__meta"></div>
+                                <div class="imp-topbar-user__meta">
+                                </div>
                             </div>
                         </button>
 
                         <div class="imp-topbar-user__menu" data-topbar-user-menu hidden>
+                            {% if notificacoes %}
+                                <dl class="imp-topbar-user__details">
+                                    {% for notificacao in notificacoes %}
+                                        <div class="imp-topbar-user__detail" data-topbar-user-detail="notification">
+                                            <dt>Notificação</dt>
+                                            <dd>{{ notificacao['mensagem'] }}</dd> 
+                                        </div>
+                                    {% endfor %}
+                                </dl>
+                            {% else %}
+                                <p style="padding: 1rem;">Nenhuma notificação.</p>
+                            {% endif %}
                         </div>
                     </section>
                 </div>
