@@ -26,7 +26,7 @@
 
 .imp-request-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(14rem, 0.8fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(14rem, 1fr) minmax(12rem, 0.8fr);
   gap: var(--imp-space-4);
   align-items: end;
 }
@@ -53,6 +53,67 @@
 .imp-request-table tbody tr td:nth-child(2),
 .imp-request-table tbody tr td:nth-child(5) {
   white-space: normal;
+}
+
+.imp-request-table-wrap--inbox {
+  overflow-x: auto;
+}
+
+.imp-request-table--inbox {
+  min-width: 72rem;
+  table-layout: auto;
+}
+
+.imp-request-table--inbox th {
+  white-space: nowrap;
+}
+
+.imp-request-table--inbox td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.imp-request-table--inbox th:nth-child(1),
+.imp-request-table--inbox td:nth-child(1) {
+  width: 6rem;
+}
+
+.imp-request-table--inbox th:nth-child(5),
+.imp-request-table--inbox td:nth-child(5),
+.imp-request-table--inbox th:nth-child(8),
+.imp-request-table--inbox td:nth-child(8) {
+  width: 9.5rem;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+
+.imp-request-table--inbox th:nth-child(7),
+.imp-request-table--inbox td:nth-child(7) {
+  width: 8.5rem;
+}
+
+.imp-request-table--inbox th:nth-child(9),
+.imp-request-table--inbox td:nth-child(9) {
+  width: 8.5rem;
+  text-align: center;
+}
+
+.imp-request-table--inbox td:nth-child(2),
+.imp-request-table--inbox td:nth-child(3),
+.imp-request-table--inbox td:nth-child(4),
+.imp-request-table--inbox td:nth-child(6) {
+  min-width: 10rem;
+}
+
+.imp-request-table--inbox td:nth-child(7),
+.imp-request-table--inbox td:nth-child(9) {
+  white-space: nowrap;
+}
+
+.imp-request-table--inbox td:nth-child(9) .imp-btn {
+  width: 100%;
 }
 
 .imp-request-row__primary {
