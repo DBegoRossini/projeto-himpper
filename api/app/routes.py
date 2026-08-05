@@ -156,6 +156,17 @@ def solicitacoes(context):
     )
 
 
+@app.route("/caixa-de-entrada")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def caixaentrada(context):
+    user = context["user"]
+    return render_template(
+        "caixaentrada.html",
+        user=user
+    )
+
+
 @app.route("/novasolicitacao")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user

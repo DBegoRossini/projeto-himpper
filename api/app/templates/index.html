@@ -48,7 +48,7 @@
         </li>
 
         <li>
-            <a class="imp-nav__link" href="#">
+            <a class="imp-nav__link{% if current_endpoint == 'caixaentrada' %} is-active{% endif %}" href="{{ url_for('caixaentrada') }}">
             <span class="imp-nav__icon" aria-hidden="true">✉</span>
             <span class="imp-nav__label">Caixa de entrada</span>
             </a>
@@ -110,9 +110,33 @@
                             aria-expanded="false"
                         >
                             <div class="imp-topbar-user__content">
+                                <strong class="imp-topbar-user__name" data-topbar-user-name>🕭</strong>
+                                <div class="imp-topbar-user__meta"></div>
+                            </div>
+                        </button>
+
+                        <div class="imp-topbar-user__menu" data-topbar-user-menu hidden>
+                        </div>
+                    </section>
+                </div>
+                <div class="imp-topbar__right">
+                    <section
+                        class="imp-topbar-user"
+                        data-topbar-user
+                        data-user-name="{{ info_user.displayName }}"
+                        data-user-email="{{ info_user.mail }}"
+                        data-user-role="{{ info_user.jobTitle }}"
+                    >
+                        <button
+                            type="button"
+                            class="imp-topbar-user__trigger"
+                            data-topbar-user-toggle
+                            aria-haspopup="menu"
+                            aria-expanded="false"
+                        >
+                            <div class="imp-topbar-user__content">
                                 <strong class="imp-topbar-user__name" data-topbar-user-name>{{ info_user.displayName }}</strong>
-                                <div class="imp-topbar-user__meta">
-                                </div>
+                                <div class="imp-topbar-user__meta"></div>
                             </div>
                             <span class="imp-topbar-user__chevron" aria-hidden="true">▾</span>
                         </button>
