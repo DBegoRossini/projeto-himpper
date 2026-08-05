@@ -3,7 +3,7 @@
 {% set pendencias = [
     {
         "id": "pendencia-oc-1042",
-        "protocolo": "OC-1042",
+        "protocolo": "1042",
         "tipo": "Abertura de ordem de compra",
         "area": "Suprimentos",
         "recebida_em": "05/08/2026 08:15",
@@ -17,7 +17,7 @@
     },
     {
         "id": "pendencia-rh-2318",
-        "protocolo": "RH-2318",
+        "protocolo": "2318",
         "tipo": "Atualização cadastral",
         "area": "Recursos Humanos",
         "recebida_em": "04/08/2026 14:40",
@@ -31,7 +31,7 @@
     },
     {
         "id": "pendencia-fin-7784",
-        "protocolo": "FIN-7784",
+        "protocolo": "7784",
         "tipo": "Liberação financeira",
         "area": "Financeiro",
         "recebida_em": "03/08/2026 09:05",
@@ -45,7 +45,7 @@
     },
     {
         "id": "pendencia-ti-5501",
-        "protocolo": "TI-5501",
+        "protocolo": "5501",
         "tipo": "Solicitação de acesso",
         "area": "Tecnologia da Informação",
         "recebida_em": "02/08/2026 17:20",
@@ -73,7 +73,7 @@
 {% block main %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
 
-    <section class="imp-stack imp-gap-6 imp-request-page">
+    <section class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox">
         <div>
             <span class="imp-kicker">Fila pessoal</span>
             <h2 class="imp-title">Itens aguardando sua atuação</h2>
@@ -131,6 +131,17 @@
                         >
                     </label>
 
+                    <label class="imp-field imp-request-toolbar__search" for="requestRequesterFilter">
+                        <span class="imp-label">Solicitante</span>
+                        <input
+                            id="requestRequesterFilter"
+                            type="search"
+                            class="imp-input"
+                            placeholder="Filtre pelo nome do solicitante"
+                            data-request-requester-filter
+                        >
+                    </label>
+
                     <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
                         <span class="imp-label">Status</span>
                         <select id="requestStatusFilter" class="imp-select" data-request-status-filter>
@@ -141,13 +152,13 @@
                     </label>
                 </div>
 
-                <div class="imp-table-wrap imp-request-table-wrap">
-                    <table class="imp-table imp-request-table" data-request-table>
+                <div class="imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
+                    <table class="imp-table imp-request-table imp-request-table--inbox" data-request-table>
                         <thead>
                             <tr>
                                 <th>Protocolo</th>
+                                <th>Solicitante</th>
                                 <th>Tipo</th>
-                                <th>Área</th>
                                 <th>Recebida em</th>
                                 <th>Etapa atual</th>
                                 <th>Status</th>
@@ -162,6 +173,7 @@
                                     data-request-row
                                     data-request-id="{{ pendencia.id }}"
                                     data-status="{{ pendencia.status_label }}"
+                                    data-requester="{{ pendencia.solicitante }}"
                                     data-search="{{ (pendencia.protocolo ~ ' ' ~ pendencia.tipo ~ ' ' ~ pendencia.area ~ ' ' ~ pendencia.etapa ~ ' ' ~ pendencia.solicitante ~ ' ' ~ pendencia.status_label ~ ' ' ~ pendencia.prioridade)|lower }}"
                                 >
                                     <td data-label="Protocolo">
@@ -169,8 +181,8 @@
                                             {{ pendencia.protocolo }}
                                         </a>
                                     </td>
+                                    <td data-label="Solicitante">{{ pendencia.solicitante }}</td>
                                     <td data-label="Tipo">{{ pendencia.tipo }}</td>
-                                    <td data-label="Área">{{ pendencia.area }}</td>
                                     <td data-label="Recebida em">{{ pendencia.recebida_em }}</td>
                                     <td data-label="Etapa atual">{{ pendencia.etapa }}</td>
                                     <td data-label="Status">
@@ -203,6 +215,7 @@
                             data-request-row
                             data-request-id="{{ pendencia.id }}"
                             data-status="{{ pendencia.status_label }}"
+                            data-requester="{{ pendencia.solicitante }}"
                             data-search="{{ (pendencia.protocolo ~ ' ' ~ pendencia.tipo ~ ' ' ~ pendencia.area ~ ' ' ~ pendencia.etapa ~ ' ' ~ pendencia.solicitante ~ ' ' ~ pendencia.status_label ~ ' ' ~ pendencia.prioridade)|lower }}"
                         >
                             <div class="imp-card__body imp-stack imp-gap-4">
@@ -216,8 +229,8 @@
 
                                 <dl class="imp-request-mobile-card__meta">
                                     <div>
-                                        <dt>Área</dt>
-                                        <dd>{{ pendencia.area }}</dd>
+                                        <dt>Solicitante</dt>
+                                        <dd>{{ pendencia.solicitante }}</dd>
                                     </div>
                                     <div>
                                         <dt>Recebida em</dt>

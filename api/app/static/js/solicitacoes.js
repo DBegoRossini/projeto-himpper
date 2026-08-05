@@ -10,6 +10,9 @@
 
   const initSolicitacoesPage = () => {
     const searchField = document.querySelector("[data-request-search]");
+    const requesterFilter = document.querySelector(
+      "[data-request-requester-filter]"
+    );
     const statusFilter = document.querySelector(
       "[data-request-status-filter]"
     );
@@ -37,14 +40,18 @@
 
     const sync = () => {
       const searchTerm = normalize(searchField.value);
+      const requesterTerm = normalize(requesterFilter?.value);
       const selectedStatus = normalize(statusFilter.value);
 
       rows.forEach(row => {
         const haystack = normalize(row.dataset.search);
+        const requester = normalize(row.dataset.requester);
         const status = normalize(row.dataset.status);
         const matchesSearch = !searchTerm || haystack.includes(searchTerm);
+        const matchesRequester =
+          !requesterTerm || requester.includes(requesterTerm);
         const matchesStatus = !selectedStatus || status === selectedStatus;
-        const visible = matchesSearch && matchesStatus;
+        const visible = matchesSearch && matchesRequester && matchesStatus;
 
         row.hidden = !visible;
       });
@@ -75,6 +82,7 @@
     };
 
     searchField.addEventListener("input", sync);
+    requesterFilter?.addEventListener("input", sync);
     statusFilter.addEventListener("change", sync);
     sync();
   };
