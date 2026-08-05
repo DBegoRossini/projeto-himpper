@@ -15,6 +15,7 @@ class Chamada(database.Model):
     id_fluxo = database.Column(database.Integer, database.ForeignKey("flows.id"), nullable=False)
     status = database.Column(database.String(1), nullable=False, default="A")
     solicitante = database.Column(database.Integer, nullable=False)
+    data = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
 
 class Etapas(database.Model):
     id = database.Column(database.Integer, primary_key=True)

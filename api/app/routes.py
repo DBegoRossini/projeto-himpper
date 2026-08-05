@@ -181,9 +181,44 @@ def solicitacoes(context):
 @with_info_user
 def caixaentrada(context):
     user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    user_job = g.info_user.get("jobTitle", "")
+    groups   = g.info_user.get("groups", [])
+    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    pendencias_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(Execucao.finalizada_em.is_(None))\
+    .filter(
+            or_(
+                Etapas.responsaveis.like(f"%{user_oid}%"),
+                Etapas.responsaveis.like(f"%{user_job}%"),
+                Execucao.executor.like(f"%{user_oid}%"),
+                *grupos_conditions
+            )
+        )\
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("fluxo_nome"),
+        Chamada.data.label("data_solicitacao"),
+        Etapas.nome.label("etapa_nome"),
+        Chamada.status,
+        Etapas.sla,
+    ).all()
+    pendencias = []
+    for row in pendencias_raw:
+        pendencias.append({
+                "protocolo":   row.id,
+                "tipo":        row.fluxo_nome,
+                "recebida_em": row.data_solicitacao,
+                "etapa_nome": row.etapa_nome,
+                "status": row.status,
+                "prazo_limite": row.data_solicitacao + timedelta(hours=row.sla) if row.data_solicitacao else None
+            })
     return render_template(
         "caixaentrada.html",
-        user=user
+        user=user,
+        pendencias=pendencias
     )
 
 
@@ -199,7 +234,7 @@ def novasolicitacao(context):
     )
 
 @app.route("/flow/<id_fluxo>")
-@auth.login_required(scopes=["User.Read"])  # ✅ adicionar scopes=
+@auth.login_required(scopes=["User.Read"]) 
 @with_info_user
 def ini_flow(id_fluxo, context):
     fluxo = flows.query.get(id_fluxo)
