@@ -99,7 +99,7 @@ def carregar_info_form():
         print(f"Erro na requisição: {g.coligMov.status_code}")
 
     g.ccusto = requests.get(
-        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G?parameters=usuario={user}",
+        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G?parameters=USUARIO={user}",
                 headers={"Authorization": f"Basic {credentials}"}
 )
 
