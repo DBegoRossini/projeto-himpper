@@ -89,14 +89,14 @@ def carregar_info_form():
         f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}",
         headers={"Authorization": f"Basic {credentials}"}
     )
-    if g.coligMov.status_code == 200:
-        coligadas = {}
-        for colig in g.coligMov.json():
-            coligadas[colig.get("valorCOLIG")] = colig.get("labelCOLIG")
-        g.coligadasUnic = list(set(coligadas.values()))
-        print(g.coligadasUnic)
-    else:
-        print(f"Erro na requisição: {g.coligMov.status_code}")
+    coligadas = {}
+    for colig in g.coligMov.json():
+        label = colig.get("LABELCOLIG")
+        valor = colig.get("VALORCOLIG")
+        if label not in coligadas.values() and valor not in coligadas.keys():
+            coligadas[valor] = label
+    print(coligadas)
+    g.coligadasUnic = coligadas.items()
 
     g.ccusto = requests.get(
         f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G?parameters=USUARIO={user}",
