@@ -44,8 +44,8 @@
                                 Coligada <span class="imp-label__required">*</span>
                             </label>
                             <select id="codcoligada" name="codcoligada" class="imp-select" autocomplete="organization" required>
-                                {% for coligada in g.coligadas.json() %}
-                                    <option value="{{coligada['VALUE']}}">{{coligada['LABEL']}}</option>
+                                {% for valor, label in g.coligadasUnic %}
+                                    <option value="{{ valor }}">{{ label }}</option>
                                 {% endfor %}
                             </select>
                             <p class="imp-help">Escolha a empresa responsável pela compra.</p>

@@ -82,13 +82,24 @@ def with_info_user(view_func):
 def carregar_info_form():
     credentials = base64.b64encode(
     f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
-
-    g.coligadas = requests.get(
-        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+    user_email = g.info_user.get("mail")
+    user = user_email.split("@")[0]
+    print(user)
+    g.coligMov = requests.get(
+        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}",
         headers={"Authorization": f"Basic {credentials}"}
     )
-    g.movimentos = requests.get(
-        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G",
+    if g.coligMov.status_code == 200:
+        coligadas = {}
+        for colig in g.coligMov.json():
+            coligadas[colig.get("valorCOLIG")] = colig.get("labelCOLIG")
+        g.coligadasUnic = list(set(coligadas.values()))
+        print(g.coligadasUnic)
+    else:
+        print(f"Erro na requisição: {g.coligMov.status_code}")
+
+    g.ccusto = requests.get(
+        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G?parameters=usuario={user}",
                 headers={"Authorization": f"Basic {credentials}"}
 )
 
@@ -148,7 +159,7 @@ def index(*, context):
         .join(Etapas, Etapas.id == Execucao.id_etapa)
         .join(flows, flows.id == Etapas.id_flow)
         .filter(Chamada.solicitante == f"{user_oid}")
-        .filter(and_(Etapas.nome == "Solicitação", Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"])))
+        .filter(Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"]))
         .add_columns(
             Chamada.id,
             flows.alias.label("fluxo_nome"),
@@ -170,9 +181,22 @@ def index(*, context):
 @with_info_user
 def solicitacoes(context):
     user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(Chamada.solicitante == f"{user_oid}")\
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("tipo"),
+        Chamada.data.label("abertura_label"),
+        Etapas.nome.label("etapa"),
+        Chamada.status.label("status_label"),
+    ).all()
     return render_template(
         "solicitacoes.html",
-        user=user
+        user=user,
+        solicitacoes=solicitacoes
     )
 
 
@@ -181,6 +205,7 @@ def solicitacoes(context):
 @with_info_user
 def caixaentrada(context):
     user = context["user"]
+    access_token = context['access_token']
     user_oid = user.get("oid") or user.get("id")
     user_job = g.info_user.get("jobTitle", "")
     groups   = g.info_user.get("groups", [])
@@ -202,18 +227,25 @@ def caixaentrada(context):
         flows.alias.label("fluxo_nome"),
         Chamada.data.label("data_solicitacao"),
         Etapas.nome.label("etapa_nome"),
+        Execucao.iniciada_em.label("iniciada_em"),
         Chamada.status,
         Etapas.sla,
+        Chamada.solicitante
     ).all()
     pendencias = []
     for row in pendencias_raw:
+        solicitante = requests.get(
+            f"https://graph.microsoft.com/v1.0/users/{row.solicitante}?$select=displayName",
+                    headers={"Authorization": f"Bearer {access_token}"}
+        )
         pendencias.append({
                 "protocolo":   row.id,
+                "solicitante": solicitante.json().get("displayName", "Desconhecido"),
                 "tipo":        row.fluxo_nome,
                 "recebida_em": row.data_solicitacao,
-                "etapa_nome": row.etapa_nome,
-                "status": row.status,
-                "prazo_limite": row.data_solicitacao + timedelta(hours=row.sla) if row.data_solicitacao else None
+                "etapa": row.etapa_nome,
+                "status_label": row.status,
+                "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
     return render_template(
         "caixaentrada.html",

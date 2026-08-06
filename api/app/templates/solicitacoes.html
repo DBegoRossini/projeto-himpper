@@ -92,7 +92,6 @@
                                 <tr>
                                     <th>Protocolo</th>
                                     <th>Tipo</th>
-                                    <th>Área</th>
                                     <th>Abertura</th>
                                     <th>Etapa atual</th>
                                     <th>Status</th>
@@ -109,10 +108,9 @@
                                         data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
                                     >
                                         <td data-label="Protocolo">
-                                            <span class="imp-request-row__primary">{{ solicitacao.protocolo }}</span>
+                                            <span class="imp-request-row__primary">{{ solicitacao.id }}</span>
                                         </td>
                                         <td data-label="Tipo">{{ solicitacao.tipo }}</td>
-                                        <td data-label="Área">{{ solicitacao.area }}</td>
                                         <td data-label="Abertura">{{ abertura_label }}</td>
                                         <td data-label="Etapa atual">{{ solicitacao.etapa }}</td>
                                         <td data-label="Status">
