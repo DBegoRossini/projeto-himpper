@@ -74,6 +74,12 @@
             <span class="imp-nav__label">Relatórios</span>
             </a>
         </li>
+        <li>
+            <a class="imp-nav__link{% if current_endpoint == 'permissoes' %} is-active{% endif %}" href="{{ url_for('permissoes') }}">
+            <span class="imp-nav__icon" aria-hidden="true">🗝</span>
+            <span class="imp-nav__label">Permissões</span>
+            </a>
+        </li>
         </ul>
     </nav>
 

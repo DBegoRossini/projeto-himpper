@@ -1,0 +1,473 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Controle de permissões de acesso
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">Controle de permissões de acesso</h1>
+        <p class="imp-subtitle imp-topbar__subtitle">
+            Selecione um fluxo abaixo para alterar suas permissões de acesso.
+        </p>
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
+
+    <section class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox">
+        <div>
+            <span class="imp-kicker">Gestão de acessos</span>
+            <h2 class="imp-title">Fluxos para controle de permissões</h2>
+            <p class="imp-subtitle">
+                Consulte os fluxos disponíveis, filtre por texto, área ou versão e acesse rapidamente cada item para edição de permissões.
+            </p>
+        </div>
+
+        <div class="imp-request-summary" data-request-summary>
+            <article class="imp-stat imp-request-stat">
+                <div class="imp-stat__icon">#</div>
+                <div>
+                    <span class="imp-stat__label">Fluxos cadastrados</span>
+                    <strong class="imp-stat__value" data-summary-total>{{ fluxos|length }}</strong>
+                </div>
+            </article>
+
+            <article class="imp-stat imp-request-stat">
+                <div class="imp-stat__icon">O</div>
+                <div>
+                    <span class="imp-stat__label">Fluxos ativos</span>
+                    <strong class="imp-stat__value" data-summary-open>0</strong>
+                </div>
+            </article>
+
+        </div>
+
+        <article class="imp-card imp-card--accent-orange imp-request-panel">
+            <header class="imp-card__header imp-request-panel__header">
+                <div>
+                    <h3 class="imp-card__title">Fluxos</h3>
+                    <p class="imp-card__subtitle">
+                        Selecione um fluxo para abrir o resumo e seguir com a atualização de permissões.
+                    </p>
+                </div>
+            </header>
+
+            <div class="imp-card__body imp-stack imp-gap-5">
+                <div class="imp-request-toolbar">
+                    <label class="imp-field imp-request-toolbar__search" for="requestSearch">
+                        <span class="imp-label">Buscar fluxo</span>
+                        <input
+                            id="requestSearch"
+                            type="search"
+                            class="imp-input"
+                            placeholder="Pesquise por ID, alias, area ou versão"
+                            data-request-search
+                        >
+                    </label>
+
+                    <label class="imp-field imp-request-toolbar__search" for="requestRequesterFilter">
+                            <span class="imp-label">Área</span>
+                        <input
+                            id="requestRequesterFilter"
+                            type="search"
+                            class="imp-input"
+                            placeholder="Filtre pelo nome da área responsável"
+                            data-request-requester-filter
+                        >
+                    </label>
+
+                    <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
+                        <span class="imp-label">Versão</span>
+                        <select id="requestStatusFilter" class="imp-select" data-request-status-filter>
+                            <option value="">Todos</option>
+                            {% for versao in versoes_unicas %}
+                                <option value="{{ versao }}">{{ versao }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+
+                <div class="imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
+                    <table class="imp-table imp-request-table imp-request-table--inbox" data-request-table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Alias</th>
+                                <th>Área</th>
+                                <th>Versão</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fluxo in fluxos %}
+                                <tr
+                                    class="imp-request-row"
+                                    data-request-row
+                                    data-request-id="{{ fluxo.id }}"
+                                    data-flow-nome="{{ fluxo.nome }}"
+                                    data-flow-alias="{{ fluxo.alias }}"
+                                    data-flow-area="{{ fluxo.area_responsavel }}"
+                                    data-status="{{ fluxo.versao }}"
+                                    data-versao="{{ fluxo.versao }}"
+                                    data-flow-acesso="{{ fluxo.acesso }}"
+                                    data-requester="{{ fluxo.area_responsavel }}"
+                                    data-search="{{ (fluxo.id ~ ' ' ~ fluxo.alias ~ ' ' ~ fluxo.area_responsavel ~ ' ' ~ fluxo.versao)|lower }}"
+                                >
+                                    <td data-label="ID">
+                                        <a class="imp-request-row__primary" href="#{{ fluxo.id }}">
+                                            {{ fluxo.id }}
+                                        </a>
+                                    </td>
+                                    <td data-label="Alias">{{ fluxo.alias }}</td>
+                                    <td data-label="Área">{{ fluxo.area_responsavel }}</td>
+                                    <td data-label="Versão">
+                                        <span class="imp-badge imp-badge--versao-{{ fluxo.versao }}">
+                                            {{ fluxo.versao }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Ação">
+                                        <button type="button" onclick="abrirPopup(this)" class="imp-btn imp-btn--neutral imp-w-full">
+                                            Editar permissões
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="imp-request-mobile-list" data-request-mobile-list>
+                    {% for fluxo in fluxos %}
+                        <article
+                            class="imp-card imp-request-mobile-card"
+                            data-request-row
+                            data-request-id="{{ fluxo.id }}"
+                            data-flow-nome="{{ fluxo.nome }}"
+                            data-flow-alias="{{ fluxo.alias }}"
+                            data-flow-area="{{ fluxo.area_responsavel }}"
+                            data-status="{{ fluxo.versao }}"
+                            data-versao="{{ fluxo.versao }}"
+                            data-flow-acesso="{{ fluxo.acesso }}"
+                            data-requester="{{ fluxo.area_responsavel }}"
+                            data-search="{{ (fluxo.id ~ ' ' ~ fluxo.alias ~ ' ' ~ fluxo.area_responsavel ~ ' ' ~ fluxo.versao)|lower }}"
+                        >
+                            <div class="imp-card__body imp-stack imp-gap-4">
+                                <div class="imp-request-mobile-card__top">
+                                    <div>
+                                        <p class="imp-kicker imp-request-mobile-card__kicker">{{ fluxo.id }}</p>
+                                        <h3 class="imp-card__title">{{ fluxo.alias }}</h3>
+                                    </div>
+                                    <span class="imp-badge imp-badge--{{ fluxo.versao }}">{{ fluxo.versao }}</span>
+                                </div>
+
+                                <dl class="imp-request-mobile-card__meta">
+                                    <div>
+                                        <dt>ID</dt>
+                                        <dd>{{ fluxo.id }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Alias</dt>
+                                        <dd>{{ fluxo.alias }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Área</dt>
+                                        <dd>{{ fluxo.area_responsavel }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Versão</dt>
+                                        <dd>{{ fluxo.versao }}</dd>
+                                    </div>
+                                </dl>
+
+                                <button type="button" onclick="abrirPopup(this)" class="imp-btn imp-btn--neutral imp-w-full">
+                                    Editar permissões
+                                </button>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="imp-request-empty imp-hidden" data-request-empty>
+                    <p class="imp-title imp-mb-4">Nenhum resultado para os filtros aplicados</p>
+                    <p class="imp-subtitle imp-m-0">
+                        Ajuste a busca ou limpe o filtro de versão para visualizar outros fluxos.
+                    </p>
+                </div>
+            </div>
+
+            <footer class="imp-card__footer">
+                <a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+                    Voltar ao início
+                </a>
+            </footer>
+        </article>
+    </section>
+
+    <div id="meuPopup" class="pop-up" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(15, 23, 42, 0.45); padding:24px; overflow:auto;">
+        <div style="background:white; margin:4% auto; padding:24px; width:min(760px, 100%); border-radius:16px; box-shadow:0 18px 40px rgba(15, 23, 42, 0.18);">
+            <div class="imp-stack imp-gap-4">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+                    <div>
+                        <h3 class="imp-card__title" style="margin:0;">Editar permissões do fluxo</h3>
+                        <p class="imp-card__subtitle" style="margin:4px 0 0;">
+                            Fluxo selecionado: <strong id="popup-flow-label">-</strong>
+                        </p>
+                    </div>
+                    <button type="button" onclick="fecharPopup()" class="imp-btn imp-btn--outline imp-btn--sm">X</button>
+                </div>
+
+                <div style="display:flex; gap:8px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+                    <button
+                        type="button"
+                        class="imp-btn imp-btn--neutral imp-btn--sm"
+                        data-popup-tab-trigger
+                        data-tab="acesso"
+                        aria-controls="popup-tab-acesso"
+                        aria-selected="true"
+                    >
+                        Acesso ao fluxo
+                    </button>
+                    <button
+                        type="button"
+                        class="imp-btn imp-btn--outline imp-btn--sm"
+                        data-popup-tab-trigger
+                        data-tab="etapas"
+                        aria-controls="popup-tab-etapas"
+                        aria-selected="false"
+                    >
+                        Etapas cadastradas
+                    </button>
+                </div>
+
+                <form method="POST" class="imp-stack imp-gap-4">
+                    <input type="hidden" name="fluxo_id" id="popup-fluxo-id-hidden" value="">
+                    <input type="hidden" name="permissoes_antigas" id="popup-permissoes-antigas" value="">
+                    <input type="hidden" name="novas_permissoes" id="popup-novas-permissoes" value="">
+
+                    <section id="popup-tab-acesso" data-popup-tab-panel data-tab="acesso">
+                        <div class="imp-stack imp-gap-3">
+                            <label class="imp-field" for="popup-fluxo-id">
+                                <span class="imp-label">ID do fluxo</span>
+                                <input id="popup-fluxo-id" type="text" class="imp-input" value="" disabled>
+                            </label>
+
+                            <label class="imp-field" for="popup-fluxo-nome">
+                                <span class="imp-label">Nome do fluxo</span>
+                                <input id="popup-fluxo-nome" type="text" class="imp-input" value="" disabled>
+                            </label>
+
+                            <label class="imp-field" for="popup-area-responsavel">
+                                <span class="imp-label">Área responsável</span>
+                                <input id="popup-area-responsavel" type="text" class="imp-input" value="" disabled>
+                            </label>
+
+                            <label class="imp-field" for="popup-fluxo-versao">
+                                <span class="imp-label">Versão</span>
+                                <input id="popup-fluxo-versao" type="text" class="imp-input" value="" disabled>
+                            </label>
+
+                            <table class="imp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Permissão</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="popup-permissoes-list">
+                                    <tr>
+                                        <td>Acesso configurado</td>
+                                        <td>-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <label class="imp-field" for="popup-novas-permissoes-combobox">
+                                <span class="imp-label">Novas permissões</span>
+                                <input
+                                    id="popup-novas-permissoes-combobox"
+                                    type="text"
+                                    class="imp-input"
+                                    list="popup-permissoes-opcoes"
+                                    placeholder="Digite ou selecione e separe os valores por vírgula"
+                                    oninput="sincronizarNovasPermissoes(this.value)"
+                                >
+                                <datalist id="popup-permissoes-opcoes">
+                                    {% for permissao in opcoes_permissoes | default([], true) %}
+                                        <option value="{{ permissao }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section id="popup-tab-etapas" data-popup-tab-panel data-tab="etapas" class="imp-hidden">
+                        <div id="popup-etapas-list" class="imp-stack imp-gap-3"></div>
+                    </section>
+
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button type="button" onclick="fecharPopup()" class="imp-btn imp-btn--outline">Cancelar</button>
+                        <button type="submit" class="imp-btn imp-btn--neutral">Salvar alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
+    <script id="etapasPorFluxoData" type="application/json">{{ etapas_por_fluxo | default({}, true) | tojson }}</script>
+    <script>
+        const etapasPorFluxo = JSON.parse(document.getElementById('etapasPorFluxoData').textContent || '{}');
+
+        function obterPermissoesDaTabela() {
+            return Array.from(document.querySelectorAll('[data-permissao-item]'))
+                .map((item) => (item.textContent || '').trim())
+                .filter((item) => item !== '-')
+                .filter(Boolean);
+        }
+
+        function sincronizarPermissoesAntigas() {
+            const permissoes = obterPermissoesDaTabela();
+            document.getElementById('popup-permissoes-antigas').value = permissoes.join(';');
+        }
+
+        function renderPermissoesPopup(acesso) {
+            const tbody = document.getElementById('popup-permissoes-list');
+            const itens = String(acesso || '')
+                .split(/[;,]/)
+                .map((item) => item.trim())
+                .filter(Boolean);
+
+            if (!itens.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>-</td>
+                        <td></td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = itens.map((item) => `
+                    <tr>
+                        <td data-permissao-item>${item}</td>
+                        <td><button type="button" onclick="removerPermissao(this)">🗑️</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            sincronizarPermissoesAntigas();
+            document.getElementById('popup-novas-permissoes').value = itens.join(', ');
+            document.getElementById('popup-novas-permissoes-combobox').value = itens.join(', ');
+        }
+
+        function renderEtapasPopup(flowId) {
+            const container = document.getElementById('popup-etapas-list');
+            const etapas = etapasPorFluxo[String(flowId)] || [];
+
+            if (!etapas.length) {
+                container.innerHTML = `
+                    <article class="imp-card" style="border:1px solid #e2e8f0;">
+                        <div class="imp-card__body">
+                            <strong>Nenhuma etapa cadastrada</strong>
+                            <p class="imp-subtitle" style="margin:6px 0 0;">Esse fluxo ainda não possui etapas vinculadas.</p>
+                        </div>
+                    </article>
+                `;
+                return;
+            }
+
+            container.innerHTML = etapas.map((etapa, indice) => `
+                <article class="imp-card" style="border:1px solid #e2e8f0;">
+                    <div class="imp-card__body">
+                        <strong>Etapa ${indice + 1} - ${etapa.nome}</strong>
+                        <p class="imp-subtitle" style="margin:6px 0 0;">Responsáveis: ${etapa.responsaveis}</p>
+                        <p class="imp-subtitle" style="margin:6px 0 0;">SLA: ${etapa.sla} hora(s)</p>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function abrirPopup(botao) {
+            const row = botao.closest('[data-request-row]');
+            if (!row) {
+                return;
+            }
+
+            const flowId = row.dataset.requestId || '';
+            const alias = row.dataset.flowAlias || '';
+            const area = row.dataset.flowArea || '';
+            const versao = row.dataset.versao || '';
+            const acesso = row.dataset.flowAcesso || '';
+
+            document.getElementById('popup-flow-label').textContent = `${flowId} - ${alias}`;
+            document.getElementById('popup-fluxo-id-hidden').value = flowId;
+            document.getElementById('popup-fluxo-id').value = flowId;
+            document.getElementById('popup-fluxo-nome').value = alias;
+            document.getElementById('popup-area-responsavel').value = area;
+            document.getElementById('popup-fluxo-versao').value = versao;
+
+            renderPermissoesPopup(acesso);
+            renderEtapasPopup(flowId);
+            trocarAbaPopup('acesso');
+
+            document.getElementById('meuPopup').style.display = 'block';
+        }
+
+        function fecharPopup() {
+            document.getElementById('meuPopup').style.display = 'none';
+        }
+
+        function sincronizarNovasPermissoes(valor) {
+            const valores = valor
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean);
+
+            document.getElementById('popup-novas-permissoes').value = valores.join(', ');
+        }
+
+        function removerPermissao(botao) {
+            const linha = botao.closest('tr');
+            if (linha) {
+                linha.remove();
+            }
+
+            const tbody = document.getElementById('popup-permissoes-list');
+            sincronizarPermissoesAntigas();
+
+            const restantes = obterPermissoesDaTabela();
+
+            if (!restantes.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td>-</td>
+                        <td></td>
+                    </tr>
+                `;
+            }
+
+            const valor = restantes.join(', ');
+            document.getElementById('popup-novas-permissoes').value = valor;
+            document.getElementById('popup-novas-permissoes-combobox').value = valor;
+        }
+
+        function trocarAbaPopup(aba) {
+            const botoes = document.querySelectorAll('[data-popup-tab-trigger]');
+            const paineis = document.querySelectorAll('[data-popup-tab-panel]');
+
+            botoes.forEach((botao) => {
+                const ativa = botao.dataset.tab === aba;
+                botao.classList.toggle('imp-btn--neutral', ativa);
+                botao.classList.toggle('imp-btn--outline', !ativa);
+                botao.setAttribute('aria-selected', ativa ? 'true' : 'false');
+            });
+
+            paineis.forEach((painel) => {
+                const ativo = painel.dataset.tab === aba;
+                painel.classList.toggle('imp-hidden', !ativo);
+            });
+        }
+
+        document.querySelectorAll('[data-popup-tab-trigger]').forEach((botao) => {
+            botao.addEventListener('click', () => trocarAbaPopup(botao.dataset.tab));
+        });
+    </script>
+{% endblock %}

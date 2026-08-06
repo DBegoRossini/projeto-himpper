@@ -2,7 +2,7 @@ import os
 import requests
 from functools import wraps
 from . import app, auth, database
-from flask import json, render_template, redirect, url_for, jsonify, g, session
+from flask import json, render_template, redirect, url_for, jsonify, g, session, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes
 from sqlalchemy import and_, or_, func
 from datetime import timedelta
@@ -320,6 +320,47 @@ def submit_flow(id_fluxo, id_etapa, context):
         user=context,
         fluxos=flows.query.all(),
         message="Solicitação enviada com sucesso!" if requests.method == "POST" else None
+    )
+
+@app.route("/permissoes", methods=["POST", "GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def permissoes(context):
+    Flows = flows.query.all()
+
+    if flask_request.method == "POST":
+        fluxo_id = (flask_request.form.get("fluxo_id") or "").strip()
+        nova_permissao = (flask_request.form.get("novas_permissoes") or "").strip()
+
+        if fluxo_id and nova_permissao:
+            try:
+                fluxo_db = flows.query.filter_by(id=int(fluxo_id)).first()
+                if fluxo_db is not None and nova_permissao.isdigit():
+                    fluxo_db.acesso = int(nova_permissao)
+                    database.session.commit()
+                    Flows = flows.query.all()
+            except ValueError:
+                pass
+
+    etapas = Etapas.query.order_by(Etapas.id_flow, Etapas.id).all()
+    etapas_por_fluxo = {}
+    versoes_unicas = sorted({f.versao for f in Flows if f.versao})
+
+    for etapa in etapas:
+        chave_fluxo = str(etapa.id_flow)
+        etapas_por_fluxo.setdefault(chave_fluxo, []).append({
+            "id": etapa.id,
+            "nome": etapa.nome,
+            "responsaveis": etapa.responsaveis or "Não informado",
+            "sla": etapa.sla,
+        })
+
+    return render_template(
+        'permissoes.html',
+        user=context['user'],
+        fluxos=Flows,
+        etapas_por_fluxo=etapas_por_fluxo,
+        versoes_unicas=versoes_unicas,
     )
 
 @app.route("/logout")
