@@ -110,6 +110,7 @@
                                     data-status="{{ fluxo.versao }}"
                                     data-versao="{{ fluxo.versao }}"
                                     data-flow-acesso="{{ fluxo.acesso }}"
+                                    data-flow-acesso-ids="{{ fluxo.acesso_ids }}"
                                     data-requester="{{ fluxo.area_responsavel }}"
                                     data-search="{{ (fluxo.id ~ ' ' ~ fluxo.alias ~ ' ' ~ fluxo.area_responsavel ~ ' ' ~ fluxo.versao)|lower }}"
                                 >
@@ -148,6 +149,7 @@
                             data-status="{{ fluxo.versao }}"
                             data-versao="{{ fluxo.versao }}"
                             data-flow-acesso="{{ fluxo.acesso }}"
+                            data-flow-acesso-ids="{{ fluxo.acesso_ids }}"
                             data-requester="{{ fluxo.area_responsavel }}"
                             data-search="{{ (fluxo.id ~ ' ' ~ fluxo.alias ~ ' ' ~ fluxo.area_responsavel ~ ' ' ~ fluxo.versao)|lower }}"
                         >
@@ -227,16 +229,6 @@
                     >
                         Acesso ao fluxo
                     </button>
-                    <button
-                        type="button"
-                        class="imp-btn imp-btn--outline imp-btn--sm"
-                        data-popup-tab-trigger
-                        data-tab="etapas"
-                        aria-controls="popup-tab-etapas"
-                        aria-selected="false"
-                    >
-                        Etapas cadastradas
-                    </button>
                 </div>
 
                 <form method="POST" class="imp-stack imp-gap-4">
@@ -283,25 +275,20 @@
 
                             <label class="imp-field" for="popup-novas-permissoes-combobox">
                                 <span class="imp-label">Novas permissões</span>
-                                <input
+                                <select
                                     id="popup-novas-permissoes-combobox"
-                                    type="text"
-                                    class="imp-input"
-                                    list="popup-permissoes-opcoes"
-                                    placeholder="Digite ou selecione e separe os valores por vírgula"
-                                    oninput="sincronizarNovasPermissoes(this.value)"
+                                    class="imp-select"
+                                    multiple
+                                    size="8"
+                                    onchange="sincronizarNovasPermissoes()"
                                 >
-                                <datalist id="popup-permissoes-opcoes">
                                     {% for permissao in opcoes_permissoes | default([], true) %}
-                                        <option value="{{ permissao }}"></option>
+                                        <option value="{{ permissao.id }}">{{ permissao.displayName }} ({{ permissao.id }})</option>
                                     {% endfor %}
-                                </datalist>
+                                </select>
+                                <small class="imp-help">Use Ctrl (ou Cmd) para selecionar múltiplos itens.</small>
                             </label>
                         </div>
-                    </section>
-
-                    <section id="popup-tab-etapas" data-popup-tab-panel data-tab="etapas" class="imp-hidden">
-                        <div id="popup-etapas-list" class="imp-stack imp-gap-3"></div>
                     </section>
 
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
@@ -314,13 +301,10 @@
     </div>
 
     <script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
-    <script id="etapasPorFluxoData" type="application/json">{{ etapas_por_fluxo | default({}, true) | tojson }}</script>
     <script>
-        const etapasPorFluxo = JSON.parse(document.getElementById('etapasPorFluxoData').textContent || '{}');
-
         function obterPermissoesDaTabela() {
             return Array.from(document.querySelectorAll('[data-permissao-item]'))
-                .map((item) => (item.textContent || '').trim())
+                .map((item) => (item.dataset.permissaoId || '').trim())
                 .filter((item) => item !== '-')
                 .filter(Boolean);
         }
@@ -337,6 +321,11 @@
                 .map((item) => item.trim())
                 .filter(Boolean);
 
+            const select = document.getElementById('popup-novas-permissoes-combobox');
+            Array.from(select.options).forEach((opt) => {
+                opt.selected = itens.includes((opt.value || '').trim());
+            });
+
             if (!itens.length) {
                 tbody.innerHTML = `
                     <tr>
@@ -345,44 +334,20 @@
                     </tr>
                 `;
             } else {
-                tbody.innerHTML = itens.map((item) => `
+                tbody.innerHTML = itens.map((item) => {
+                    const option = Array.from(select.options).find((opt) => (opt.value || '').trim() === item);
+                    const label = option ? option.textContent : item;
+                    return `
                     <tr>
-                        <td data-permissao-item>${item}</td>
+                        <td data-permissao-item data-permissao-id="${item}">${label}</td>
                         <td><button type="button" onclick="removerPermissao(this)">🗑️</button></td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
             }
 
             sincronizarPermissoesAntigas();
-            document.getElementById('popup-novas-permissoes').value = itens.join(', ');
-            document.getElementById('popup-novas-permissoes-combobox').value = itens.join(', ');
-        }
-
-        function renderEtapasPopup(flowId) {
-            const container = document.getElementById('popup-etapas-list');
-            const etapas = etapasPorFluxo[String(flowId)] || [];
-
-            if (!etapas.length) {
-                container.innerHTML = `
-                    <article class="imp-card" style="border:1px solid #e2e8f0;">
-                        <div class="imp-card__body">
-                            <strong>Nenhuma etapa cadastrada</strong>
-                            <p class="imp-subtitle" style="margin:6px 0 0;">Esse fluxo ainda não possui etapas vinculadas.</p>
-                        </div>
-                    </article>
-                `;
-                return;
-            }
-
-            container.innerHTML = etapas.map((etapa, indice) => `
-                <article class="imp-card" style="border:1px solid #e2e8f0;">
-                    <div class="imp-card__body">
-                        <strong>Etapa ${indice + 1} - ${etapa.nome}</strong>
-                        <p class="imp-subtitle" style="margin:6px 0 0;">Responsáveis: ${etapa.responsaveis}</p>
-                        <p class="imp-subtitle" style="margin:6px 0 0;">SLA: ${etapa.sla} hora(s)</p>
-                    </div>
-                </article>
-            `).join('');
+            sincronizarNovasPermissoes();
         }
 
         function abrirPopup(botao) {
@@ -395,7 +360,7 @@
             const alias = row.dataset.flowAlias || '';
             const area = row.dataset.flowArea || '';
             const versao = row.dataset.versao || '';
-            const acesso = row.dataset.flowAcesso || '';
+            const acessoIds = row.dataset.flowAcessoIds || '';
 
             document.getElementById('popup-flow-label').textContent = `${flowId} - ${alias}`;
             document.getElementById('popup-fluxo-id-hidden').value = flowId;
@@ -404,8 +369,7 @@
             document.getElementById('popup-area-responsavel').value = area;
             document.getElementById('popup-fluxo-versao').value = versao;
 
-            renderPermissoesPopup(acesso);
-            renderEtapasPopup(flowId);
+            renderPermissoesPopup(acessoIds);
             trocarAbaPopup('acesso');
 
             document.getElementById('meuPopup').style.display = 'block';
@@ -415,25 +379,37 @@
             document.getElementById('meuPopup').style.display = 'none';
         }
 
-        function sincronizarNovasPermissoes(valor) {
-            const valores = valor
-                .split(',')
-                .map((item) => item.trim())
+        function sincronizarNovasPermissoes() {
+            const select = document.getElementById('popup-novas-permissoes-combobox');
+            const valores = Array.from(select.selectedOptions)
+                .map((opt) => (opt.value || '').trim())
                 .filter(Boolean);
 
-            document.getElementById('popup-novas-permissoes').value = valores.join(', ');
+            document.getElementById('popup-novas-permissoes').value = valores.join(',');
         }
 
         function removerPermissao(botao) {
             const linha = botao.closest('tr');
+            const permissaoCell = linha ? linha.querySelector('[data-permissao-id]') : null;
+            const permissaoId = permissaoCell ? (permissaoCell.dataset.permissaoId || '').trim() : '';
             if (linha) {
                 linha.remove();
+            }
+
+            if (permissaoId) {
+                const select = document.getElementById('popup-novas-permissoes-combobox');
+                const option = Array.from(select.options).find((opt) => (opt.value || '').trim() === permissaoId);
+                if (option) {
+                    option.selected = false;
+                }
             }
 
             const tbody = document.getElementById('popup-permissoes-list');
             sincronizarPermissoesAntigas();
 
-            const restantes = obterPermissoesDaTabela();
+            const restantes = Array.from(
+                document.querySelectorAll('[data-permissao-id]')
+            ).map((item) => (item.dataset.permissaoId || '').trim()).filter(Boolean);
 
             if (!restantes.length) {
                 tbody.innerHTML = `
@@ -444,30 +420,11 @@
                 `;
             }
 
-            const valor = restantes.join(', ');
-            document.getElementById('popup-novas-permissoes').value = valor;
-            document.getElementById('popup-novas-permissoes-combobox').value = valor;
+            document.getElementById('popup-novas-permissoes').value = restantes.join(',');
         }
 
         function trocarAbaPopup(aba) {
-            const botoes = document.querySelectorAll('[data-popup-tab-trigger]');
-            const paineis = document.querySelectorAll('[data-popup-tab-panel]');
-
-            botoes.forEach((botao) => {
-                const ativa = botao.dataset.tab === aba;
-                botao.classList.toggle('imp-btn--neutral', ativa);
-                botao.classList.toggle('imp-btn--outline', !ativa);
-                botao.setAttribute('aria-selected', ativa ? 'true' : 'false');
-            });
-
-            paineis.forEach((painel) => {
-                const ativo = painel.dataset.tab === aba;
-                painel.classList.toggle('imp-hidden', !ativo);
-            });
+            return aba;
         }
-
-        document.querySelectorAll('[data-popup-tab-trigger]').forEach((botao) => {
-            botao.addEventListener('click', () => trocarAbaPopup(botao.dataset.tab));
-        });
     </script>
 {% endblock %}

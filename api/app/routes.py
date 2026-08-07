@@ -1,3 +1,4 @@
+from ast import For
 import os
 import requests
 from functools import wraps
@@ -283,7 +284,7 @@ def ini_flow(id_fluxo, context):
 @with_info_user
 def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
-    if requests.method == "POST":
+    if flask_request.method == "POST":
         form_data = dict(requests.form)
         files = {}
         for key in requests.files:
@@ -319,47 +320,126 @@ def submit_flow(id_fluxo, id_etapa, context):
         'novasolicitacao.html',
         user=context,
         fluxos=flows.query.all(),
-        message="Solicitação enviada com sucesso!" if requests.method == "POST" else None
+        message="Solicitação enviada com sucesso!" if flask_request.method == "POST" else None
     )
 
 @app.route("/permissoes", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def permissoes(context):
+    access_token = context['access_token']
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    def listar_todos(url):
+        itens = []
+        proxima_url = url
+        while proxima_url:
+            try:
+                resposta = requests.get(proxima_url, headers=headers, timeout=10)
+                if not resposta.ok:
+                    break
+                body = resposta.json()
+                itens.extend(body.get("value", []))
+                proxima_url = body.get("@odata.nextLink")
+            except requests.exceptions.RequestException:
+                break
+        return itens
+
+    grupos = listar_todos("https://graph.microsoft.com/v1.0/groups?$select=id,displayName")
+    usuarios = listar_todos("https://graph.microsoft.com/v1.0/users?$select=id,displayName")
+
+    permis = []
+    for grupo in grupos:
+        if grupo.get("id"):
+            permis.append({
+                "id": str(grupo.get("id")).strip(),
+                "displayName": (grupo.get("displayName") or "").strip()
+            })
+    for us in usuarios:
+        if us.get("id"):
+            permis.append({
+                "id": str(us.get("id")).strip(),
+                "displayName": (us.get("displayName") or us.get("userPrincipalName") or "").strip()
+            })
+
+    # Remove duplicados por ID e ordena alfabeticamente por displayName.
+    permis_unicos = {}
+    for item in permis:
+        permis_unicos[item["id"].lower()] = item
+    opcoes_permissoes = sorted(
+        permis_unicos.values(),
+        key=lambda x: (x.get("displayName") or "").lower()
+    )
+
+    def normalizar_ids_acesso(valor):
+        # Aceita ',' e ';' como separadores e remove entradas vazias ou '-'.
+        texto = str(valor or "").replace(";", ",")
+        ids = []
+        for parte in texto.split(","):
+            token = parte.strip()
+            if not token or token == "-":
+                continue
+            ids.append(token)
+        return ids
+
+    permis_por_id = {
+        str(p.get("id", "")).strip().lower(): p.get("displayName")
+        for p in opcoes_permissoes
+        if p.get("id")
+    }
+    
     Flows = flows.query.all()
+    Fluxos = []
+    for fluxo in Flows:
+        ids_fluxo = normalizar_ids_acesso(fluxo.acesso)
+        nomes_fluxo = [
+            permis_por_id.get(item.lower(), item)
+            for item in ids_fluxo
+        ]
+        Fluxos.append({
+            "id": fluxo.id,
+            "nome": fluxo.nome,
+            "versao": fluxo.versao,
+            "acesso_ids": ",".join(ids_fluxo),
+            "acesso": ", ".join(nomes_fluxo) if nomes_fluxo else "Não informado",
+            "alias": fluxo.alias,
+            "area_responsavel": fluxo.area_responsavel
+        })
 
     if flask_request.method == "POST":
         fluxo_id = (flask_request.form.get("fluxo_id") or "").strip()
-        nova_permissao = (flask_request.form.get("novas_permissoes") or "").strip()
+        nova_permissao_raw = (flask_request.form.get("novas_permissoes") or "").strip()
 
-        if fluxo_id and nova_permissao:
+        if nova_permissao_raw in ("", "-"):
+            nova_permissao = ""
+        else:
+            ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
+            nova_permissao = ",".join(ids_normalizados)
+
+        print("Fluxo ID:", fluxo_id)
+        print("Nova Permissão:", nova_permissao)
+        if fluxo_id:
             try:
                 fluxo_db = flows.query.filter_by(id=int(fluxo_id)).first()
-                if fluxo_db is not None and nova_permissao.isdigit():
-                    fluxo_db.acesso = int(nova_permissao)
+                print(fluxo_db)
+                if fluxo_db is not None:
+                    fluxo_db.acesso = nova_permissao
+                    database.session.add(fluxo_db)
                     database.session.commit()
                     Flows = flows.query.all()
             except ValueError:
-                pass
+                print("ID do fluxo inválido:", fluxo_id)
+            except Exception as e:
+                database.session.rollback()
+                print("Erro ao salvar permissões:", repr(e))
 
-    etapas = Etapas.query.order_by(Etapas.id_flow, Etapas.id).all()
-    etapas_por_fluxo = {}
     versoes_unicas = sorted({f.versao for f in Flows if f.versao})
-
-    for etapa in etapas:
-        chave_fluxo = str(etapa.id_flow)
-        etapas_por_fluxo.setdefault(chave_fluxo, []).append({
-            "id": etapa.id,
-            "nome": etapa.nome,
-            "responsaveis": etapa.responsaveis or "Não informado",
-            "sla": etapa.sla,
-        })
 
     return render_template(
         'permissoes.html',
         user=context['user'],
-        fluxos=Flows,
-        etapas_por_fluxo=etapas_por_fluxo,
+        fluxos=Fluxos,
+        opcoes_permissoes=opcoes_permissoes,
         versoes_unicas=versoes_unicas,
     )
 
