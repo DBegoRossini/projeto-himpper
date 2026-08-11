@@ -285,14 +285,15 @@ def ini_flow(id_fluxo, context):
 def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
     if flask_request.method == "POST":
-        form_data = dict(requests.form)
+        form_data = dict(flask_request.form)
         files = {}
-        for key in requests.files:
-            files[key] = requests.files.getlist(key)
+        for key in flask_request.files:
+            files[key] = flask_request.files.getlist(key)
         user = context['user']
         nome = user.get("name")
-
-        url = f"https://impper.app.n8n.cloud/webhook-test/{id_etapa}"
+        print(id_etapa)
+        url = f"https://n8n.grupoimpper.com.br/webhook-test/{id_etapa}"
+        headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         data = {
         "id_fluxo": id_fluxo,
         "solicitante": nome,
@@ -300,14 +301,15 @@ def submit_flow(id_fluxo, id_etapa, context):
         }
 
         files = []
-        for key in requests.files:
-            for file in requests.files.getlist(key):
+        for key in flask_request.files:
+            for file in flask_request.files.getlist(key):
                 if file.filename:
                     files.append((key, (file.filename, file.stream, file.content_type)))
 
         try:
             resp = requests.post(
             url,
+            headers=headers,
             data=data, 
             files=files if files else None, 
             timeout=10
