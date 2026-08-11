@@ -5,7 +5,7 @@ from functools import wraps
 from . import app, auth, database
 from flask import json, render_template, redirect, url_for, jsonify, g, session, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes
-from sqlalchemy import and_, or_, func
+from sqlalchemy import cast, String, or_, and_
 from datetime import timedelta
 import base64
 
@@ -132,7 +132,7 @@ def index(*, context):
         or_(
             Etapas.responsaveis.like(f"%{user_oid}%"),
             Etapas.responsaveis.like(f"%{user_job}%"),
-            Execucao.executor.like(f"%{user_oid}%"),
+            cast(Execucao.executor, String).like(f"%{user_oid}%"), 
             *grupos_conditions
         )
     )
@@ -216,13 +216,13 @@ def caixaentrada(context):
     .join(Etapas, Etapas.id == Execucao.id_etapa)\
     .filter(Execucao.finalizada_em.is_(None))\
     .filter(
-            or_(
-                Etapas.responsaveis.like(f"%{user_oid}%"),
-                Etapas.responsaveis.like(f"%{user_job}%"),
-                Execucao.executor.like(f"%{user_oid}%"),
-                *grupos_conditions
-            )
-        )\
+        or_(
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            cast(Execucao.executor, String).like(f"%{user_oid}%"),  # ← cast aqui
+            *grupos_conditions
+        )
+    )\
     .add_columns(
         Chamada.id,
         flows.alias.label("fluxo_nome"),

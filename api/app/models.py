@@ -7,14 +7,14 @@ class flows(database.Model):
     alias = database.Column(database.String(100), nullable=False)
     descricao = database.Column(database.String(500), nullable=False)
     area_responsavel = database.Column(database.String(100), nullable=False)
-    acesso = database.Column(database.Integer, nullable=False)
+    acesso = database.Column(database.String(300), nullable=False)
     versao = database.Column(database.String(3), nullable=False)
 
 class Chamada(database.Model):
     id = database.Column(database.Integer, primary_key=True)
     id_fluxo = database.Column(database.Integer, database.ForeignKey("flows.id"), nullable=False)
     status = database.Column(database.String(1), nullable=False, default="A")
-    solicitante = database.Column(database.Integer, nullable=False)
+    solicitante = database.Column(database.String(500), nullable=False)
     data = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
 
 class Etapas(database.Model):
@@ -31,7 +31,7 @@ class Execucao(database.Model):
     iniciada_em = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     assumida_em = database.Column(database.DateTime, nullable=True)
     finalizada_em = database.Column(database.DateTime, nullable=True)
-    executor = database.Column(database.Integer, nullable=True)
+    executor = database.Column(database.String(500), nullable=True)
 
 class Notificacoes(database.Model):
     id = database.Column(database.Integer, primary_key=True)

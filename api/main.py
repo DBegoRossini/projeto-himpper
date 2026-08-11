@@ -1,4 +1,6 @@
 from app import app, database
+from dotenv import load_dotenv
+load_dotenv(encoding='utf-8')
 
 if __name__ == "__main__":
     with app.app_context():

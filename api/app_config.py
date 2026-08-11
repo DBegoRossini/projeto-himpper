@@ -8,3 +8,6 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 SESSION_TYPE = "filesystem"
+SENHA_BANCO = os.getenv("senha_banco")
+US_BANCO = os.getenv("us_banco")
+SSH_PASSPHRASE = os.getenv("SSH_PASSPHRASE")
