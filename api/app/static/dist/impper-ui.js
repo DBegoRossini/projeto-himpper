@@ -303,6 +303,22 @@
         : String(field.value.length);
   };
 
+  const handleClickableRow = event => {
+    const row = event.target.closest(".js-clickable-row");
+
+    if (!row || !row.dataset.href) return;
+
+    if (
+      event.target.closest(
+        "a, button, input, select, textarea, label, [role='button']"
+      )
+    ) {
+      return;
+    }
+
+    window.location.href = row.dataset.href;
+  };
+
   const bindEvents = () => {
     document.addEventListener("click", event => {
       const element = event.target.closest(
@@ -347,6 +363,8 @@
         dismissElement(element);
       }
     });
+
+    document.addEventListener("click", handleClickableRow);
 
     document.addEventListener("input", event => {
       const field = event.target;
@@ -579,38 +597,3 @@
     ImpperUI.init();
   }
 })();
-
-const flowCatalog = [
-    {
-        title: "Abrir Ordem de Compra",
-        description:
-            "Inicie pedidos de compra com dados do fornecedor, centro de custo e aprovação financeira.",
-        category: "Suprimentos",
-        eta: "2 a 5 min",
-        href: "#"
-    },
-    {
-        title: "Solicitação de Contrato",
-        description:
-            "Formalize uma nova contratação com escopo, vigência, anexos e responsáveis pela validação.",
-        category: "Jurídico",
-        eta: "4 a 8 min",
-        href: "#"
-    },
-    {
-        title: "Requisição de Pagamento",
-        description:
-            "Encaminhe pagamentos eventuais com comprovantes, classificação contábil e trilha de aprovação.",
-        category: "Financeiro",
-        eta: "3 a 6 min",
-        href: "#"
-    },
-    {
-        title: "Solicitação de Aditivo",
-        description:
-            "Registre alterações de escopo ou prazo em contratos vigentes com justificativa e documentos de suporte.",
-        category: "Contratos",
-        eta: "5 a 7 min",
-        href: "#"
-    }
-];

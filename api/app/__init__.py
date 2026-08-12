@@ -13,8 +13,8 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '
 
 SSH_HOST = '179.198.114.158'
 SSH_PORT = 22
-SSH_USER = 'debora.rossini'
-SSH_KEY   = '/users/debora.rossini/.ssh/id_ed25519' 
+SSH_USER = 'ana.mendes'
+SSH_KEY   = '/users/ana.mendes/.ssh/id_ed25519' 
 SSH_PASSPHRASE = app_config.SSH_PASSPHRASE   
 pkey = Ed25519Key.from_private_key_file(SSH_KEY, password=SSH_PASSPHRASE)
 
