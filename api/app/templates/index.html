@@ -11,10 +11,11 @@
     <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap"
     rel="stylesheet"/>
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-ui.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-ui.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-bootstrap.css') }}"/>
+    <script defer src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script defer src="{{ url_for('static', filename='dist/impper-ui.js') }}"></script>
-    <script defer src="{{ url_for('static', filename='js/topbar-user.js') }}"></script>
 </head>
 <body class="impper-app">
     
@@ -101,88 +102,81 @@
           </div>
         </div>
                 <div class="imp-topbar__right">
-                    <section
-                        class="imp-topbar-user"
-                        data-topbar-user
-                        data-user-name="{{ info_user.displayName }}"
-                        data-user-email="{{ info_user.mail }}"
-                        data-user-role="{{ info_user.jobTitle }}"
-                    >
+                    <section class="imp-topbar-user dropdown">
                         <button
                             type="button"
-                            class="imp-topbar-user__trigger"
-                            data-topbar-user-toggle
-                            aria-haspopup="menu"
+                            class="imp-topbar-user__trigger dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
                             aria-expanded="false"
                         >
                             <div class="imp-topbar-user__content">
-                                <strong class="imp-topbar-user__name" data-topbar-user-name>🕭</strong>
-                                <div class="imp-topbar-user__meta">
-                                </div>
+                                <strong class="imp-topbar-user__name">🕭</strong>
+                                <div class="imp-topbar-user__meta"></div>
                             </div>
                         </button>
 
-                        <div class="imp-topbar-user__menu" data-topbar-user-menu hidden>
+                        <div class="dropdown-menu dropdown-menu-end imp-topbar-user__menu p-0">
                             {% if notificacoes %}
-                                <dl class="imp-topbar-user__details">
-                                    {% for notificacao in notificacoes %}
-                                        <div class="imp-topbar-user__detail" data-topbar-user-detail="notification">
-                                            <dt>Notificação</dt>
-                                            <dd>{{ notificacao['mensagem'] }}</dd> 
-                                        </div>
-                                    {% endfor %}
-                                </dl>
+                                <div class="imp-card__body imp-topbar-user__menu-body">
+                                    <dl class="imp-topbar-user__details">
+                                        {% for notificacao in notificacoes %}
+                                            <div class="imp-topbar-user__detail">
+                                                <dt>Notificação</dt>
+                                                <dd>{{ notificacao['mensagem'] }}</dd>
+                                            </div>
+                                        {% endfor %}
+                                    </dl>
+                                </div>
                             {% else %}
-                                <p style="padding: 1rem;">Nenhuma notificação.</p>
+                                <div class="imp-card__body imp-topbar-user__menu-body">
+                                    <p class="imp-subtitle imp-m-0">Nenhuma notificação.</p>
+                                </div>
                             {% endif %}
                         </div>
                     </section>
                 </div>
                 <div class="imp-topbar__right">
-                    <section
-                        class="imp-topbar-user"
-                        data-topbar-user
-                        data-user-name="{{ info_user.displayName }}"
-                        data-user-email="{{ info_user.mail }}"
-                        data-user-role="{{ info_user.jobTitle }}"
-                    >
+                    <section class="imp-topbar-user dropdown">
                         <button
                             type="button"
-                            class="imp-topbar-user__trigger"
-                            data-topbar-user-toggle
-                            aria-haspopup="menu"
+                            class="imp-topbar-user__trigger dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
                             aria-expanded="false"
                         >
                             <div class="imp-topbar-user__content">
-                                <strong class="imp-topbar-user__name" data-topbar-user-name>{{ info_user.displayName }}</strong>
+                                <strong class="imp-topbar-user__name">{{ info_user.displayName }}</strong>
                                 <div class="imp-topbar-user__meta"></div>
                             </div>
                             <span class="imp-topbar-user__chevron" aria-hidden="true">▾</span>
                         </button>
 
-                        <div class="imp-topbar-user__menu" data-topbar-user-menu hidden>
-                            <div class="imp-topbar-user__menu-head">
-                                <p class="imp-topbar-user__eyebrow">Usuário conectado</p>
-                                <strong class="imp-topbar-user__menu-name">{{ info_user.displayName }}</strong>
-                            </div>
+                        <div class="dropdown-menu dropdown-menu-end imp-topbar-user__menu p-0">
+                            <div class="imp-card__body imp-topbar-user__menu-body">
+                                <div class="imp-topbar-user__menu-head">
+                                    <p class="imp-topbar-user__eyebrow">Usuário conectado</p>
+                                    <strong class="imp-topbar-user__menu-name">{{ info_user.displayName }}</strong>
+                                </div>
 
-                            <dl class="imp-topbar-user__details">
-                                {% if info_user.jobTitle %}
-                                    <div class="imp-topbar-user__detail" data-topbar-user-detail="role">
-                                        <dt>Cargo</dt>
-                                        <dd data-topbar-user-detail-role>{{ info_user.jobTitle }}</dd>
-                                    </div>
-                                {% endif %}
-                                {% if info_user.mail %}
-                                    <div class="imp-topbar-user__detail" data-topbar-user-detail="email">
-                                        <dt>E-mail</dt>
-                                        <dd data-topbar-user-detail-email>{{ info_user.mail }}</dd>
-                                    </div>
-                                {% endif %}
-                            </dl>
+                                <dl class="imp-topbar-user__details">
+                                    {% if info_user.jobTitle %}
+                                        <div class="imp-topbar-user__detail">
+                                            <dt>Cargo</dt>
+                                            <dd>{{ info_user.jobTitle }}</dd>
+                                        </div>
+                                    {% endif %}
+                                    {% if info_user.mail %}
+                                        <div class="imp-topbar-user__detail">
+                                            <dt>E-mail</dt>
+                                            <dd>{{ info_user.mail }}</dd>
+                                        </div>
+                                    {% endif %}
+                                </dl>
 
-                            <div class="imp-topbar-user__menu-actions">
-                                <a class="imp-btn imp-btn--neutral imp-topbar-user__action" data-topbar-user-logout href="{{ url_for('logout') }}">Sair</a>
+                                <div class="imp-topbar-user__menu-actions d-grid">
+                                    <a class="btn btn-neutral imp-topbar-user__action" href="{{ url_for('logout') }}">Sair</a>
+                                </div>
                             </div>
                         </div>
                     </section>

@@ -112,7 +112,7 @@
   white-space: nowrap;
 }
 
-.imp-request-table--inbox td:nth-child(9) .imp-btn {
+.imp-request-table--inbox td:nth-child(9) .btn {
   width: 100%;
 }
 

@@ -49,8 +49,8 @@
             </article>
         </div>
 
-        <article class="imp-card imp-card--accent-orange imp-request-panel">
-            <header class="imp-card__header imp-request-panel__header">
+        <article class="card imp-card imp-card--accent-orange imp-request-panel">
+            <header class="card-header imp-card__header imp-request-panel__header">
                 <div>
                     <h3 class="imp-card__title">Acompanhamento</h3>
                     <p class="imp-card__subtitle">
@@ -60,14 +60,14 @@
 
             </header>
 
-            <div class="imp-card__body imp-stack imp-gap-5">
+            <div class="card-body imp-card__body imp-stack imp-gap-5">
                 <div class="imp-request-toolbar">
                     <label class="imp-field imp-request-toolbar__search" for="requestSearch">
                         <span class="imp-label">Buscar solicitação</span>
                         <input
                             id="requestSearch"
                             type="search"
-                            class="imp-input"
+                            class="form-control"
                             placeholder="Pesquise por protocolo, tipo, área ou etapa"
                             data-request-search
                         >
@@ -75,7 +75,7 @@
 
                     <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
                         <span class="imp-label">Status</span>
-                        <select id="requestStatusFilter" class="imp-select" data-request-status-filter>
+                        <select id="requestStatusFilter" class="form-select" data-request-status-filter>
                             <option value="">Todos</option>
                             <option value="Em andamento">Em andamento</option>
                             <option value="Finalizada">Finalizada</option>
@@ -86,8 +86,8 @@
                 </div>
 
                 {% if solicitacoes %}
-                    <div class="imp-table-wrap imp-request-table-wrap">
-                        <table class="imp-table imp-request-table" data-request-table>
+                    <div class="table-responsive imp-table-wrap imp-request-table-wrap">
+                        <table class="table imp-table imp-request-table align-middle mb-0" data-request-table>
                             <thead>
                                 <tr>
                                     <th>Protocolo</th>
@@ -114,7 +114,7 @@
                                         <td data-label="Abertura">{{ abertura_label }}</td>
                                         <td data-label="Etapa atual">{{ solicitacao.etapa }}</td>
                                         <td data-label="Status">
-                                            <span class="imp-badge imp-badge--{{ solicitacao.status_variant }}">
+                                            <span class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}">
                                                 {{ solicitacao.status_label }}
                                             </span>
                                         </td>
@@ -128,19 +128,19 @@
                         {% for solicitacao in solicitacoes %}
                             {% set abertura_label = solicitacao.abertura.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura else '-' %}
                             <article
-                                class="imp-card imp-request-mobile-card"
+                                class="card imp-card imp-request-mobile-card"
                                 data-request-row
                                 data-request-id="{{ solicitacao.id }}"
                                 data-status="{{ solicitacao.status_label }}"
                                 data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
                             >
-                                <div class="imp-card__body imp-stack imp-gap-4">
+                                <div class="card-body imp-card__body imp-stack imp-gap-4">
                                     <div class="imp-request-mobile-card__top">
                                         <div>
                                             <p class="imp-kicker imp-request-mobile-card__kicker">{{ solicitacao.protocolo }}</p>
                                             <h3 class="imp-card__title">{{ solicitacao.tipo }}</h3>
                                         </div>
-                                        <span class="imp-badge imp-badge--{{ solicitacao.status_variant }}">
+                                        <span class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}">
                                             {{ solicitacao.status_label }}
                                         </span>
                                     </div>
@@ -180,11 +180,11 @@
                 {% endif %}
             </div>
 
-            <footer class="imp-card__footer">
-                <a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+            <footer class="card-footer imp-card__footer">
+                <a class="btn btn-neutral" href="{{ url_for('index') }}">
                     Voltar ao início
                 </a>
-                <a class="imp-btn" href="{{ url_for('novasolicitacao') }}">
+                <a class="btn btn-primary" href="{{ url_for('novasolicitacao') }}">
                     Abrir nova solicitação
                 </a>
             </footer>

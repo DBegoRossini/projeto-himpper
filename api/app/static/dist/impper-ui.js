@@ -64,7 +64,7 @@
 
     if (!region) {
       region = document.createElement("div");
-      region.className = "imp-toast-region";
+      region.className = "toast-container position-fixed top-0 end-0 p-3 imp-toast-region";
       region.setAttribute("aria-live", "polite");
       region.setAttribute("aria-atomic", "false");
       document.body.appendChild(region);
@@ -458,39 +458,45 @@
       };
 
       const toast = document.createElement("div");
-      toast.className = `imp-toast imp-toast--${type}`;
+      toast.className = `toast imp-toast toast--${type}`;
       toast.setAttribute(
         "role",
         type === "danger" ? "alert" : "status"
       );
+      toast.setAttribute("aria-live", type === "danger" ? "assertive" : "polite");
+      toast.setAttribute("aria-atomic", "true");
 
       toast.innerHTML = `
-        <div class="imp-toast__icon" aria-hidden="true">
-          ${escapeHtml(iconMap[type] || iconMap.info)}
+        <div class="d-flex align-items-start">
+          <div class="toast-body imp-toast__message">
+            ${
+              title
+                ? `<p class="imp-toast__title mb-1"><span class="imp-toast__icon me-2" aria-hidden="true">${escapeHtml(iconMap[type] || iconMap.info)}</span>${escapeHtml(title)}</p>`
+                : `<span class="imp-toast__icon me-2" aria-hidden="true">${escapeHtml(iconMap[type] || iconMap.info)}</span>`
+            }
+            <p class="mb-0">${escapeHtml(message)}</p>
+          </div>
+          <button
+            type="button"
+            class="btn-close ms-2 me-2 mt-2"
+            data-bs-dismiss="toast"
+            aria-label="Fechar notificação"
+          ></button>
         </div>
-        <div>
-          ${
-            title
-              ? `<p class="imp-toast__title">${escapeHtml(title)}</p>`
-              : ""
-          }
-          <p class="imp-toast__message">${escapeHtml(message)}</p>
-        </div>
-        <button
-          type="button"
-          class="imp-btn imp-btn--ghost imp-btn--icon imp-btn--sm"
-          data-impper-dismiss
-          aria-label="Fechar notificação"
-        >
-          ×
-        </button>
       `;
 
       ensureToastRegion().appendChild(toast);
 
-      if (duration > 0) {
-        window.setTimeout(() => toast.remove(), duration);
-      }
+      const toastInstance = bootstrap.Toast.getOrCreateInstance(toast, {
+        autohide: duration > 0,
+        delay: duration > 0 ? duration : 5000
+      });
+
+      toast.addEventListener("hidden.bs.toast", () => {
+        toast.remove();
+      }, { once: true });
+
+      toastInstance.show();
 
       return toast;
     },

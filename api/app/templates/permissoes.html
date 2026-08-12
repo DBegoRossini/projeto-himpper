@@ -42,8 +42,8 @@
 
         </div>
 
-        <article class="imp-card imp-card--accent-orange imp-request-panel">
-            <header class="imp-card__header imp-request-panel__header">
+        <article class="card imp-card imp-card--accent-orange imp-request-panel">
+            <header class="card-header imp-card__header imp-request-panel__header">
                 <div>
                     <h3 class="imp-card__title">Fluxos</h3>
                     <p class="imp-card__subtitle">
@@ -52,14 +52,14 @@
                 </div>
             </header>
 
-            <div class="imp-card__body imp-stack imp-gap-5">
+            <div class="card-body imp-card__body imp-stack imp-gap-5">
                 <div class="imp-request-toolbar">
                     <label class="imp-field imp-request-toolbar__search" for="requestSearch">
                         <span class="imp-label">Buscar fluxo</span>
                         <input
                             id="requestSearch"
                             type="search"
-                            class="imp-input"
+                            class="form-control"
                             placeholder="Pesquise por ID, alias, area ou versão"
                             data-request-search
                         >
@@ -70,7 +70,7 @@
                         <input
                             id="requestRequesterFilter"
                             type="search"
-                            class="imp-input"
+                            class="form-control"
                             placeholder="Filtre pelo nome da área responsável"
                             data-request-requester-filter
                         >
@@ -78,7 +78,7 @@
 
                     <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
                         <span class="imp-label">Versão</span>
-                        <select id="requestStatusFilter" class="imp-select" data-request-status-filter>
+                        <select id="requestStatusFilter" class="form-select" data-request-status-filter>
                             <option value="">Todos</option>
                             {% for versao in versoes_unicas %}
                                 <option value="{{ versao }}">{{ versao }}</option>
@@ -87,8 +87,8 @@
                     </label>
                 </div>
 
-                <div class="imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
-                    <table class="imp-table imp-request-table imp-request-table--inbox" data-request-table>
+                <div class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
+                    <table class="table imp-table imp-request-table imp-request-table--inbox align-middle mb-0" data-request-table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -122,12 +122,12 @@
                                     <td data-label="Alias">{{ fluxo.alias }}</td>
                                     <td data-label="Área">{{ fluxo.area_responsavel }}</td>
                                     <td data-label="Versão">
-                                        <span class="imp-badge imp-badge--versao-{{ fluxo.versao }}">
+                                        <span class="badge rounded-pill imp-badge imp-badge--versao-{{ fluxo.versao }}">
                                             {{ fluxo.versao }}
                                         </span>
                                     </td>
                                     <td data-label="Ação">
-                                        <button type="button" onclick="abrirPopup(this)" class="imp-btn imp-btn--neutral imp-w-full">
+                                        <button type="button" onclick="abrirPopup(this)" class="btn btn-neutral w-100">
                                             Editar permissões
                                         </button>
                                     </td>
@@ -140,7 +140,7 @@
                 <div class="imp-request-mobile-list" data-request-mobile-list>
                     {% for fluxo in fluxos %}
                         <article
-                            class="imp-card imp-request-mobile-card"
+                            class="card imp-card imp-request-mobile-card"
                             data-request-row
                             data-request-id="{{ fluxo.id }}"
                             data-flow-nome="{{ fluxo.nome }}"
@@ -153,13 +153,13 @@
                             data-requester="{{ fluxo.area_responsavel }}"
                             data-search="{{ (fluxo.id ~ ' ' ~ fluxo.alias ~ ' ' ~ fluxo.area_responsavel ~ ' ' ~ fluxo.versao)|lower }}"
                         >
-                            <div class="imp-card__body imp-stack imp-gap-4">
+                            <div class="card-body imp-card__body imp-stack imp-gap-4">
                                 <div class="imp-request-mobile-card__top">
                                     <div>
                                         <p class="imp-kicker imp-request-mobile-card__kicker">{{ fluxo.id }}</p>
                                         <h3 class="imp-card__title">{{ fluxo.alias }}</h3>
                                     </div>
-                                    <span class="imp-badge imp-badge--{{ fluxo.versao }}">{{ fluxo.versao }}</span>
+                                    <span class="badge rounded-pill imp-badge imp-badge--{{ fluxo.versao }}">{{ fluxo.versao }}</span>
                                 </div>
 
                                 <dl class="imp-request-mobile-card__meta">
@@ -181,7 +181,7 @@
                                     </div>
                                 </dl>
 
-                                <button type="button" onclick="abrirPopup(this)" class="imp-btn imp-btn--neutral imp-w-full">
+                                <button type="button" onclick="abrirPopup(this)" class="btn btn-neutral w-100">
                                     Editar permissões
                                 </button>
                             </div>
@@ -197,41 +197,42 @@
                 </div>
             </div>
 
-            <footer class="imp-card__footer">
-                <a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+            <footer class="card-footer imp-card__footer">
+                <a class="btn btn-neutral" href="{{ url_for('index') }}">
                     Voltar ao início
                 </a>
             </footer>
         </article>
     </section>
 
-    <div id="meuPopup" class="pop-up" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(15, 23, 42, 0.45); padding:24px; overflow:auto;">
-        <div style="background:white; margin:4% auto; padding:24px; width:min(760px, 100%); border-radius:16px; box-shadow:0 18px 40px rgba(15, 23, 42, 0.18);">
-            <div class="imp-stack imp-gap-4">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+    <div id="meuPopup" class="modal fade" tabindex="-1" aria-labelledby="popup-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
                     <div>
-                        <h3 class="imp-card__title" style="margin:0;">Editar permissões do fluxo</h3>
-                        <p class="imp-card__subtitle" style="margin:4px 0 0;">
+                        <h3 class="imp-card__title imp-m-0" id="popup-title">Editar permissões do fluxo</h3>
+                        <p class="imp-card__subtitle imp-m-0 imp-mt-2">
                             Fluxo selecionado: <strong id="popup-flow-label">-</strong>
                         </p>
                     </div>
-                    <button type="button" onclick="fecharPopup()" class="imp-btn imp-btn--outline imp-btn--sm">X</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
 
-                <div style="display:flex; gap:8px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-                    <button
-                        type="button"
-                        class="imp-btn imp-btn--neutral imp-btn--sm"
-                        data-popup-tab-trigger
-                        data-tab="acesso"
-                        aria-controls="popup-tab-acesso"
-                        aria-selected="true"
-                    >
-                        Acesso ao fluxo
-                    </button>
-                </div>
+                <div class="modal-body">
+                    <div class="d-flex gap-2 border-bottom pb-2 mb-4">
+                        <button
+                            type="button"
+                            class="btn btn-neutral btn-sm"
+                            data-popup-tab-trigger
+                            data-tab="acesso"
+                            aria-controls="popup-tab-acesso"
+                            aria-selected="true"
+                        >
+                            Acesso ao fluxo
+                        </button>
+                    </div>
 
-                <form method="POST" class="imp-stack imp-gap-4">
+                    <form method="POST" class="imp-stack imp-gap-4">
                     <input type="hidden" name="fluxo_id" id="popup-fluxo-id-hidden" value="">
                     <input type="hidden" name="permissoes_antigas" id="popup-permissoes-antigas" value="">
                     <input type="hidden" name="novas_permissoes" id="popup-novas-permissoes" value="">
@@ -240,25 +241,26 @@
                         <div class="imp-stack imp-gap-3">
                             <label class="imp-field" for="popup-fluxo-id">
                                 <span class="imp-label">ID do fluxo</span>
-                                <input id="popup-fluxo-id" type="text" class="imp-input" value="" disabled>
+                                <input id="popup-fluxo-id" type="text" class="form-control" value="" disabled>
                             </label>
 
                             <label class="imp-field" for="popup-fluxo-nome">
                                 <span class="imp-label">Nome do fluxo</span>
-                                <input id="popup-fluxo-nome" type="text" class="imp-input" value="" disabled>
+                                <input id="popup-fluxo-nome" type="text" class="form-control" value="" disabled>
                             </label>
 
                             <label class="imp-field" for="popup-area-responsavel">
                                 <span class="imp-label">Área responsável</span>
-                                <input id="popup-area-responsavel" type="text" class="imp-input" value="" disabled>
+                                <input id="popup-area-responsavel" type="text" class="form-control" value="" disabled>
                             </label>
 
                             <label class="imp-field" for="popup-fluxo-versao">
                                 <span class="imp-label">Versão</span>
-                                <input id="popup-fluxo-versao" type="text" class="imp-input" value="" disabled>
+                                <input id="popup-fluxo-versao" type="text" class="form-control" value="" disabled>
                             </label>
 
-                            <table class="imp-table">
+                            <div class="table-responsive imp-table-wrap">
+                            <table class="table imp-table align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Permissão</th>
@@ -272,12 +274,13 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
 
                             <label class="imp-field" for="popup-novas-permissoes-combobox">
                                 <span class="imp-label">Novas permissões</span>
                                 <select
                                     id="popup-novas-permissoes-combobox"
-                                    class="imp-select"
+                                    class="form-select"
                                     multiple
                                     size="8"
                                     onchange="sincronizarNovasPermissoes()"
@@ -291,11 +294,12 @@
                         </div>
                     </section>
 
-                    <div style="display:flex; gap:10px; justify-content:flex-end;">
-                        <button type="button" onclick="fecharPopup()" class="imp-btn imp-btn--outline">Cancelar</button>
-                        <button type="submit" class="imp-btn imp-btn--neutral">Salvar alterações</button>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" onclick="fecharPopup()" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-neutral">Salvar alterações</button>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -372,11 +376,11 @@
             renderPermissoesPopup(acessoIds);
             trocarAbaPopup('acesso');
 
-            document.getElementById('meuPopup').style.display = 'block';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('meuPopup')).show();
         }
 
         function fecharPopup() {
-            document.getElementById('meuPopup').style.display = 'none';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('meuPopup')).hide();
         }
 
         function sincronizarNovasPermissoes() {

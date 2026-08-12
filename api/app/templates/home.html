@@ -56,8 +56,8 @@
           </div>
 
           <div class="imp-grid imp-grid--2">
-            <article class="imp-card imp-card--accent imp-dashboard-card">
-              <header class="imp-card__header">
+            <article class="card imp-card imp-card--accent imp-dashboard-card">
+              <header class="card-header imp-card__header">
                 <div>
                   <h3 class="imp-card__title">Minhas tarefas</h3>
                   <p class="imp-card__subtitle">
@@ -65,14 +65,14 @@
                   </p>
                 </div>
 
-                <span class="imp-badge imp-badge--warning" id="myTasksCount">
+                <span class="badge rounded-pill imp-badge imp-badge--warning" id="myTasksCount">
                   {{ minhas_tarefas|length }} pendentes
                 </span>
               </header>
 
-              <div class="imp-card__body">
-                <div class="imp-table-wrap imp-table-wrap--scrollable">
-                  <table class="imp-table">
+              <div class="card-body imp-card__body">
+                <div class="table-responsive imp-table-wrap imp-table-wrap--scrollable">
+                  <table class="table imp-table align-middle mb-0">
                     <thead>
                       <tr>
                         <th>Tarefa</th>
@@ -98,15 +98,15 @@
                 </p>
               </div>
 
-              <footer class="imp-card__footer">
-                <a class="imp-btn imp-btn--neutral" href="#">
+              <footer class="card-footer imp-card__footer">
+                <a class="btn btn-neutral" href="#">
                   Ver todas as tarefas
                 </a>
               </footer>
             </article>
 
-            <article class="imp-card imp-card--accent imp-dashboard-card">
-              <header class="imp-card__header">
+            <article class="card imp-card imp-card--accent imp-dashboard-card">
+              <header class="card-header imp-card__header">
                 <div>
                   <h3 class="imp-card__title">Minhas solicitações</h3>
                   <p class="imp-card__subtitle">
@@ -114,14 +114,14 @@
                   </p>
                 </div>
 
-                <span class="imp-badge imp-badge--success" id="myRequestsCount">
+                <span class="badge rounded-pill imp-badge imp-badge--success" id="myRequestsCount">
                   {{ solicitacoes|length }} em andamento
                 </span>
               </header>
 
-              <div class="imp-card__body">
-                <div class="imp-table-wrap imp-table-wrap--scrollable">
-                  <table class="imp-table">
+              <div class="card-body imp-card__body">
+                <div class="table-responsive imp-table-wrap imp-table-wrap--scrollable">
+                  <table class="table imp-table align-middle mb-0">
                     <thead>
                       <tr>
                         <th>Protocolo</th>
@@ -147,8 +147,8 @@
                 </p>
               </div>
 
-              <footer class="imp-card__footer">
-                <a class="imp-btn" href="{{ url_for('novasolicitacao') }}">
+              <footer class="card-footer imp-card__footer">
+                <a class="btn btn-primary" href="{{ url_for('novasolicitacao') }}">
                   Abrir nova solicitação
                 </a>
               </footer>

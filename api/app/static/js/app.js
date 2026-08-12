@@ -94,8 +94,8 @@ if (flowCards && flowCountBadge && flowHighlights && flowEmptyState) {
         flowCards.innerHTML = flows
             .map(
                 flow => `
-                    <article class="imp-card imp-request-card">
-                        <header class="imp-card__header">
+                    <article class="card imp-card imp-request-card">
+                        <header class="card-header imp-card__header">
                             <div>
                                 <div class="imp-request-card__meta">
                                     <span>${flow.category}</span>
@@ -105,14 +105,14 @@ if (flowCards && flowCountBadge && flowHighlights && flowEmptyState) {
                             </div>
                         </header>
 
-                        <div class="imp-card__body">
+                        <div class="card-body imp-card__body">
                             <p class="imp-request-card__description">
                                 ${flow.description}
                             </p>
                         </div>
 
-                        <footer class="imp-card__footer">
-                            <a class="imp-btn" href="${flow.href}">
+                        <footer class="card-footer imp-card__footer">
+                            <a class="btn btn-primary" href="${flow.href}">
                                 Acessar fluxo
                             </a>
                         </footer>
