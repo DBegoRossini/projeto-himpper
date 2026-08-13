@@ -11,3 +11,5 @@ SESSION_TYPE = "filesystem"
 SENHA_BANCO = os.getenv("senha_banco")
 US_BANCO = os.getenv("us_banco")
 SSH_PASSPHRASE = os.getenv("SSH_PASSPHRASE")
+SS_PATH = os.getenv("ss_path")
+SS_USER = os.getenv("ss_user")

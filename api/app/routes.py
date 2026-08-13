@@ -1,10 +1,11 @@
-from ast import For
 import os
+from io import BytesIO
+import magic
 import requests
 from functools import wraps
 from . import app, auth, database
-from flask import json, render_template, redirect, url_for, jsonify, g, session, request as flask_request
-from app.models import flows, Chamada, Etapas, Execucao, Notificacoes
+from flask import  abort, render_template, redirect, send_file, url_for,  g, session, request as flask_request
+from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios
 from sqlalchemy import cast, String, or_, and_
 from datetime import timedelta
 import base64
@@ -324,15 +325,65 @@ def submit_flow(id_fluxo, id_etapa, context):
         fluxos=flows.query.all(),
         message="Solicitação enviada com sucesso!" if flask_request.method == "POST" else None
     )
+
+
 @app.route("/execucao/<int:id_chamada>")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def exec_tarefas(id_chamada, context):
+    chamada = Chamada.query.get(id_chamada)
+    fluxo = flows.query.get(chamada.id_fluxo) if chamada else None
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
+    etapa = Etapas.query.get(execucao.id_etapa) if execucao else None
+    formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
     return render_template(
         "execTarefas.html",
         user=context["user"],
-        id_chamada=id_chamada
+        id_chamada=id_chamada,
+        chamada=chamada,
+        fluxo=fluxo,
+        execucao=execucao,
+        etapa=etapa,
+        formularios=formulario
     )
+
+def detect_mime(file_bytes: bytes) -> str:
+    # PDF
+    if file_bytes.startswith(b'%PDF'):
+        return 'application/pdf'
+    # PNG
+    if file_bytes.startswith(b'\x89PNG'):
+        return 'image/png'
+    # JPEG
+    if file_bytes[:3] == b'\xff\xd8\xff':
+        return 'image/jpeg'
+    # DOCX / ZIP (DOCX é um ZIP internamente)
+    if file_bytes[:2] == b'PK':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    # fallback
+    return 'application/octet-stream'
+
+@app.route("/arquivo/<int:id_arquivo>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def download_arquivo(id_arquivo, context):
+    data = Formularios.query.filter_by(id=id_arquivo).first().valor
+    file_bytes = base64.b64decode(data) if data else None
+
+    if not file_bytes:
+        abort(404)
+
+    mime = detect_mime(file_bytes)
+    file_io = BytesIO(file_bytes)
+
+    return send_file(
+        file_io,
+        as_attachment=False,
+        download_name='documento',
+        mimetype=mime
+    )
+
+
 @app.route("/permissoes", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
