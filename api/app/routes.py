@@ -324,7 +324,15 @@ def submit_flow(id_fluxo, id_etapa, context):
         fluxos=flows.query.all(),
         message="Solicitação enviada com sucesso!" if flask_request.method == "POST" else None
     )
-
+@app.route("/execucao/<int:id_chamada>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def exec_tarefas(id_chamada, context):
+    return render_template(
+        "execTarefas.html",
+        user=context["user"],
+        id_chamada=id_chamada
+    )
 @app.route("/permissoes", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user

@@ -37,7 +37,11 @@
 
                         <div class="imp-field imp-field--full" data-field-wrap="field-0">
                             <label class="imp-label" for="field-0">Tipo de Solicitação <span class="imp-label__required">*</span></label>
+<<<<<<< HEAD
                             <select id="tp_solicitacao" name="tp_solicitacao" class="imp-select" required>
+=======
+                            <select id="field-0" name="field-0" class="form-select" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                                 <option value="" disabled selected>Selecione uma opção...</option>
                                 <option value="Emissão de contratos para engenharia">Emissão de contratos para engenharia</option>
                                 <option value="Emissão de contratos para projetos">Emissão de contratos para projetos</option>
@@ -63,6 +67,7 @@
                             </div>
                         </div>
 
+<<<<<<< HEAD
                         <div class="imp-field imp-field--full" id="form-adit" data-shown-when="tipo-contrato:Aditivo" data-impper-show-when="tp_contrato:Aditivo" hidden>
                             <label class="imp-label" for="mot_adit">Motivo do Aditamento <span class="imp-label__required">*</span></label>
                             <textarea class="imp-textarea" id="mot_adit" name="mot_adit" required></textarea>
@@ -76,6 +81,21 @@
                         <div class="imp-field" id="tp-wrapper" data-shown-when="tipo-contrato:Aditivo,Distrato" data-impper-show-when="tp_contrato:Aditivo|Distrato" hidden>
                             <label class="imp-label" for="n_contrato">N° do Contrato Original <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="number" id="n_contrato" name="n_contrato" value="" required>
+=======
+                        <div class="imp-field imp-field--full" id="form-adit" data-shown-when="tipo-contrato:Aditivo" data-impper-show-when="field-1:Aditivo" hidden>
+                            <label class="imp-label" for="field-2">Motivo do Aditamento <span class="imp-label__required">*</span></label>
+                            <textarea class="form-control" id="field-2" name="field-2" required></textarea>
+                        </div>
+
+                        <div class="imp-field" id="form-distrato" data-shown-when="tipo-contrato:Distrato" data-impper-show-when="field-1:Distrato" hidden>
+                            <label class="imp-label" for="field-3">Valores Pagos Até o Momento <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="text" id="field-3" name="field-3" oninput="mascaraRS(this)" placeholder="R$ 0,00" value="" required>
+                        </div>
+
+                        <div class="imp-field" id="tp-wrapper" data-shown-when="tipo-contrato:Aditivo,Distrato" data-impper-show-when="field-1:Aditivo|Distrato" hidden>
+                            <label class="imp-label" for="field-4">N° do Contrato Original <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="number" id="field-4" name="field-4" value="" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
                     </div>
                 </section>
@@ -120,17 +140,26 @@
                     </div>
 
                     <div class="imp-form-grid">
+<<<<<<< HEAD
                         <div class="imp-field" data-field-wrap="codcoligada">
                             <label class="imp-label" for="codcoligada">Coligada Empreendimento Contratante <span class="imp-label__required">*</span></label>
                             <select id="codcoligada" name="codcoligada" class="imp-select" autocomplete="organization" required>
                                 <option value="">Selecione uma coligada</option>
                                 {% for key, label in g.coligadasUnic %}
                                     <option value="{{ key }}">{{ label }}</option>
+=======
+                        <div class="imp-field" data-field-wrap="field-10">
+                            <label class="imp-label" for="field-10">Coligada Empreendimento Contratante <span class="imp-label__required">*</span></label>
+                            <select id="field-10" name="field-10" class="form-select" required>
+                                {% for coligada in g.coligadas.json() %}
+                                  <option value="{{coligada['VALUE']}}">{{coligada['LABEL']}}</option>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                                 {% endfor %}
                             </select>
                         </div>
 
                         <div class="imp-field imp-field--full" data-field-wrap="field-11">
+<<<<<<< HEAD
                             <label class="imp-label" for="res_escopo">Resumo do Escopo do Contrato <span class="imp-label__required">*</span></label>
                             <textarea class="imp-textarea" id="res_escopo" name="res_escopo" required></textarea>
                         </div>
@@ -138,6 +167,15 @@
                         <div class="imp-field" data-field-wrap="valor_contrato">
                             <label class="imp-label" for="valor_contrato">Valor do Contrato <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="text" id="valor_contrato" name="valor_contrato" placeholder="R$ 0,00" data-impper-mask="currency" value="" required>
+=======
+                            <label class="imp-label" for="field-11">Resumo do Escopo do Contrato <span class="imp-label__required">*</span></label>
+                            <textarea class="form-control" id="field-11" name="field-11" required></textarea>
+                        </div>
+
+                        <div class="imp-field" data-field-wrap="field-12">
+                            <label class="imp-label" for="field-12">Valor do Contrato <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="text" id="field-12" name="field-12" placeholder="R$ 0,00" oninput="mascaraRS(this)" value="" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
 
                         <div class="imp-field" data-field-wrap="caucao">
@@ -153,9 +191,15 @@
                                 </label>
                             </div>
                         </div>
+<<<<<<< HEAD
                         <div class="imp-field" data-field-wrap="pz_entrega" data-impper-show-when="tp_solicitacao:Emissão de contratos para projetos|Emissão de contratos diversos">
                             <label class="imp-label" for="pz_entrega">Prazo para entrega <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="text" id="pz_entrega" name="Prazo para entrega" value="" required>
+=======
+                        <div class="imp-field" data-field-wrap="field-22"  data-impper-show-when="field-0:Emissão de contratos para projetos|Emissão de contratos diversos">
+                            <label class="imp-label" for="field-22">Prazo para entrega <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="text" id="field-22" name="field-22" value="" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
                     </div>
                 </section>
@@ -168,9 +212,15 @@
                     </div>
 
                     <div class="imp-form-grid">
+<<<<<<< HEAD
                         <div class="imp-field imp-field--full" data-field-wrap="pz_entrega_objeto">
                             <label class="imp-label" for="pz_entrega_objeto">Prazo Para Entrega do Objeto/Serviço <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="date" id="pz_entrega_objeto" name="Prazo Para Entrega do Objeto/Serviço" value="" required>
+=======
+                        <div class="imp-field imp-field--full" data-field-wrap="field-14">
+                            <label class="imp-label" for="field-14">Prazo Para Entrega do Objeto/Serviço <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="date" id="field-14" name="field-14" value="" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
 
                         <div class="imp-field imp-field--full" data-field-wrap="field-15">
@@ -210,6 +260,7 @@
                         </div>
 
                         <div class="imp-field" data-field-wrap="field-19">
+<<<<<<< HEAD
                             <label class="imp-label" for="percentual_mdo">Percentual de MDO <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="text" id="percentual_mdo" name="Percentual de MDO" oninput="mascaraPercent(this)" placeholder="%" value="" required>
                         </div>
@@ -217,6 +268,15 @@
                         <div class="imp-field" data-field-wrap="field-20">
                             <label class="imp-label" for="percentual_mat">Percentual de MAT <span class="imp-label__required">*</span></label>
                             <input class="imp-input" type="text" id="percentual_mat" name="Percentual de MAT" oninput="mascaraPercent(this)" placeholder="%" value="" required>
+=======
+                            <label class="imp-label" for="field-19">Percentual de MDO <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="text" id="field-19" name="field-19" oninput="mascaraPercent(this)" placeholder="%" value="" required>
+                        </div>
+
+                        <div class="imp-field" data-field-wrap="field-20">
+                            <label class="imp-label" for="field-20">Percentual de MAT <span class="imp-label__required">*</span></label>
+                            <input class="form-control" type="text" id="field-20" name="field-20" oninput="mascaraPercent(this)" placeholder="%" value="" required>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
                     </div>
                 </section>
@@ -252,8 +312,13 @@
 
                     <div class="imp-form-grid">
                         <div class="imp-field imp-field--full" data-field-wrap="field-21">
+<<<<<<< HEAD
                             <label class="imp-label" for="Observacoes">Observações <span class="imp-label__required">*</span></label>
                             <textarea class="imp-textarea" id="Observacoes" name="Observacoes" required></textarea>
+=======
+                            <label class="imp-label" for="field-21">Observações <span class="imp-label__required">*</span></label>
+                            <textarea class="form-control" id="field-21" name="field-21" required></textarea>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                         </div>
                     </div>
                 </section>
@@ -261,10 +326,14 @@
                 <div class="imp-form-actions">
                     <div class="imp-form-note">Campos com <span class="imp-label__required">*</span> são obrigatórios.</div>
                     <div class="imp-cluster">
+<<<<<<< HEAD
                         <button type="button" id="submitButton" class="imp-btn imp-btn--accent" onclick="enviarFormulario(document, 1, 'EC-00')">
                             <span class="imp-spinner imp-spinner--sm imp-spinner--light" id="submitSpinner" hidden></span>
                             <span id="submitLabel">Enviar solicitação</span>
                         </button>
+=======
+                        <button id="submit-btn" class="btn btn-warning" type="submit">Enviar solicitação</button>
+>>>>>>> 3387ee96f742756da2e18e0bcb85f422fd7dea60
                     </div>
                 </div>
             </form>

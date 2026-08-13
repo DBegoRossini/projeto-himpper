@@ -43,7 +43,7 @@
                             <label class="imp-label" for="codcoligada">
                                 Coligada <span class="imp-label__required">*</span>
                             </label>
-                            <select id="codcoligada" name="codcoligada" class="imp-select" autocomplete="organization" required>
+                            <select id="codcoligada" name="codcoligada" class="form-select" autocomplete="organization" required>
                                 <option value="">Selecione uma coligada</option>
                                 {% for key, label in g.coligadasUnic %}
                                     <option value="{{ key }}">{{ label }}</option>
@@ -56,7 +56,7 @@
                             <label class="imp-label" for="centro_custo">
                                 Centro de custo <span class="imp-label__required">*</span>
                             </label>
-                            <select id="centro_custo" name="centro_custo" class="imp-select" required disabled>
+                            <select id="centro_custo" name="centro_custo" class="form-select" required disabled>
                                 <option value="">Selecione primeiro a coligada</option>
                             </select>
                             <p id="centroCustoHint" class="imp-help">Selecione a coligada para habilitar os centros de custo.</p>
@@ -95,7 +95,7 @@
                             <label class="imp-label" for="motivo_aquisicao">
                                 Motivo da aquisição <span class="imp-label__required">*</span>
                             </label>
-                            <textarea id="motivo_aquisicao" name="motivo_aquisicao" class="imp-textarea" maxlength="1500" placeholder="Explique o que está sendo adquirido, para qual finalidade e por que a aquisição é necessária." data-impper-counter required></textarea>
+                            <textarea id="motivo_aquisicao" name="motivo_aquisicao" class="form-control" maxlength="1500" placeholder="Explique o que está sendo adquirido, para qual finalidade e por que a aquisição é necessária." data-impper-counter required></textarea>
                             <div class="imp-form-meta">
                                 <p class="imp-help">Descreva a necessidade da compra de forma objetiva.</p>
                                 <span class="imp-form-counter" data-impper-counter-output>0/1500</span>
@@ -119,14 +119,14 @@
                             <label class="imp-label" for="razao_social_fornecedor">
                                 Razão social do fornecedor <span class="imp-label__required">*</span>
                             </label>
-                            <input id="razao_social_fornecedor" name="razao_social_fornecedor" type="text" class="imp-input" maxlength="180" autocomplete="organization" placeholder="Razão social conforme o documento" required>
+                            <input id="razao_social_fornecedor" name="razao_social_fornecedor" type="text" class="form-control" maxlength="180" autocomplete="organization" placeholder="Razão social conforme o documento" required>
                         </div>
 
                         <div class="imp-field" data-field-wrap="cnpj_fornecedor">
                             <label class="imp-label" for="cnpj_fornecedor">
                                 CNPJ do fornecedor <span class="imp-label__required">*</span>
                             </label>
-                            <input id="cnpj_fornecedor" name="cnpj_fornecedor" type="text" class="imp-input" inputmode="numeric" maxlength="18" autocomplete="off" placeholder="00.000.000/0000-00" data-impper-mask="cnpj" required>
+                            <input id="cnpj_fornecedor" name="cnpj_fornecedor" type="text" class="form-control" inputmode="numeric" maxlength="18" autocomplete="off" placeholder="00.000.000/0000-00" data-impper-mask="cnpj" required>
                         </div>
 
                         <div class="imp-field imp-field--full" data-field-wrap="documento_fiscal">
@@ -185,7 +185,7 @@
                             <label class="imp-label" for="descricao_prazo">
                                 Descrição do prazo ou vencimento <span class="imp-label__required">*</span>
                             </label>
-                            <textarea id="descricao_prazo" name="descricao_prazo" class="imp-textarea" maxlength="800" placeholder="Ex.: à vista, com vencimento em 31/07/2026; 30 dias após a emissão; 30/60 dias." data-impper-counter required></textarea>
+                            <textarea id="descricao_prazo" name="descricao_prazo" class="form-control" maxlength="800" placeholder="Ex.: à vista, com vencimento em 31/07/2026; 30 dias após a emissão; 30/60 dias." data-impper-counter required></textarea>
                             <div class="imp-form-meta">
                                 <p class="imp-help">Este campo é obrigatório mesmo quando o pagamento for à vista.</p>
                                 <span class="imp-form-counter" data-impper-counter-output>0/800</span>
@@ -237,7 +237,7 @@
                                 <label class="imp-label" for="dados_bancarios">
                                     Dados bancários <span class="imp-label__required">*</span>
                                 </label>
-                                <textarea id="dados_bancarios" name="dados_bancarios" class="imp-textarea" rows="6" maxlength="1000" minlength="10" placeholder="Ex.: Banco do Brasil (001)&#10;Agência: 1234-5&#10;Conta corrente: 12345-6&#10;Favorecido: Fornecedor Exemplo Ltda.&#10;CNPJ: 00.000.000/0001-00" required></textarea>
+                                <textarea id="dados_bancarios" name="dados_bancarios" class="form-control" rows="6" maxlength="1000" minlength="10" placeholder="Ex.: Banco do Brasil (001)&#10;Agência: 1234-5&#10;Conta corrente: 12345-6&#10;Favorecido: Fornecedor Exemplo Ltda.&#10;CNPJ: 00.000.000/0001-00" required></textarea>
                                 <p class="imp-help">Informe banco, agência, conta, tipo de conta, favorecido e CPF ou CNPJ.</p>
                             </div>
                         </div>
@@ -296,8 +296,8 @@
                         Revise os dados antes de enviar. Campos marcados com * são obrigatórios.
                     </div>
                     <div class="imp-cluster">
-                        <a class="imp-btn imp-btn--neutral" href="{{ url_for('novasolicitacao' ) }}">Voltar</a>
-                        <button type="button" id="submitButton" class="imp-btn imp-btn--accent" onclick="enviarFormulario(document, 2, 'OC-00')">
+                        <a class="btn btn-neutral" href="{{ url_for('novasolicitacao' ) }}">Voltar</a>
+                        <button type="button" id="submitButton" class="btn btn-warning" onclick="enviarFormulario(document, 2, 'OC-00')">
                             <span class="imp-spinner imp-spinner--sm imp-spinner--light" id="submitSpinner" hidden></span>
                             <span id="submitLabel">Enviar solicitação</span>
                         </button>

@@ -22,8 +22,8 @@
             </p>
         </div>
 
-        <article class="imp-card imp-card--accent">
-            <header class="imp-card__header">
+        <article class="card imp-card imp-card--accent">
+            <header class="card-header imp-card__header">
                 <div>
                     <h3 class="imp-card__title">Catálogo de solicitações</h3>
                     <p class="imp-card__subtitle">
@@ -32,12 +32,12 @@
                     </p>
                 </div>
 
-                <span class="imp-badge imp-badge--primary" id="flowCountBadge">
+                <span class="badge rounded-pill imp-badge imp-badge--primary" id="flowCountBadge">
                     {{ fluxos|length }} fluxos
                 </span>
             </header>
 
-            <div class="imp-card__body imp-stack imp-gap-6">
+            <div class="card-body imp-card__body imp-stack imp-gap-6">
                 <div class="imp-grid imp-grid--4" id="flowHighlights"></div>
                 {% if fluxos|length == 0 %}
                     <div class="imp-request-empty imp-hidden" id="flowEmptyState">
@@ -50,8 +50,8 @@
                 {% else %}
                     <div class="imp-grid imp-request-grid" id="flowCards">
                         {% for fluxo in fluxos %}
-                            <article class="imp-card imp-request-card">
-                                <header class="imp-card__header">
+                            <article class="card imp-card imp-request-card">
+                                <header class="card-header imp-card__header">
                                     <div>
                                         <div class="imp-request-card__meta">
                                             <span>{{ fluxo.area_responsavel }}</span>
@@ -60,14 +60,14 @@
                                     </div>
                                 </header>
 
-                                <div class="imp-card__body">
+                                <div class="card-body imp-card__body">
                                     <p class="imp-request-card__description">
                                         {{ fluxo.descricao }}
                                     </p>
                                 </div>
 
-                                <footer class="imp-card__footer">
-                                    <a class="imp-btn" href="{{ url_for('ini_flow', id_fluxo=fluxo.id) }}">
+                                <footer class="card-footer imp-card__footer">
+                                    <a class="btn btn-primary" href="{{ url_for('ini_flow', id_fluxo=fluxo.id) }}">
                                         Iniciar solicitação
                                     </a>
                                 </footer>
@@ -77,8 +77,8 @@
                 {% endif %}
             </div>
 
-            <footer class="imp-card__footer">
-                <a class="imp-btn imp-btn--neutral" href="{{ url_for('index') }}">
+            <footer class="card-footer imp-card__footer">
+                <a class="btn btn-neutral" href="{{ url_for('index') }}">
                     Voltar ao início
                 </a>
             </footer>
