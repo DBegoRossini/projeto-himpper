@@ -38,3 +38,10 @@ class Notificacoes(database.Model):
     usuario = database.Column(database.String(500), nullable=False)
     data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     mensagem = database.Column(database.String(500), nullable=False)
+
+class Formularios(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    id_chamada = database.Column(database.Integer, database.ForeignKey("chamada.id"), nullable=False)
+    campo = database.Column(database.String(100), nullable=False)
+    tp_campo = database.Column(database.String(50), nullable=False)
+    valor = database.Column(database.String(900), nullable=True)
