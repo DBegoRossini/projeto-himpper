@@ -132,7 +132,7 @@
                     </thead>
                     <tbody id="myRequestsRows">
                       {% for solicitacao in solicitacoes %}
-                      <tr class="js-clickable-row" data-href="{{ url_for('solicitacoes') }}">
+                      <tr class="js-clickable-row" data-href="{{ url_for('exec_tarefas', id_chamada=solicitacao.id) }}">
                         <td>{{ solicitacao.id }}</td>
                         <td>{{ solicitacao.fluxo_nome }}</td>
                         <td>{{ solicitacao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}</td>
