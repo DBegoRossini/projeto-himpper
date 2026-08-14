@@ -155,20 +155,21 @@ def index(*, context):
             "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
         })
     solicitacoes = (
-        database.session.query(Chamada)
-        .join(Execucao, Execucao.id_chamada == Chamada.id)
-        .join(Etapas, Etapas.id == Execucao.id_etapa)
-        .join(flows, flows.id == Etapas.id_flow)
-        .filter(Chamada.solicitante == f"{user_oid}")
-        .filter(Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"]))
-        .add_columns(
-            Chamada.id,
-            flows.alias.label("fluxo_nome"),
-            Execucao.iniciada_em,
-            Chamada.status
-        )
-        .all()
+    database.session.query(Chamada)
+    .join(Execucao, Execucao.id_chamada == Chamada.id)
+    .join(Etapas, Etapas.id == Execucao.id_etapa)
+    .join(flows, flows.id == Etapas.id_flow)
+    .filter(Chamada.solicitante == f"{user_oid}")
+    .filter(Chamada.status.notin_(["Cancelado", "Finalizado", "Reprovado", "Pausado"]))
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("fluxo_nome"),
+        Execucao.iniciada_em,
+        Chamada.status
     )
+    .distinct(Chamada.id)
+    .all()
+)
     return render_template(
         'home.html',
         user=user,
@@ -366,8 +367,8 @@ def detect_mime(file_bytes: bytes) -> str:
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def download_arquivo(id_arquivo, context):
-    data = Formularios.query.filter_by(id=id_arquivo).first().valor
-    file_bytes = base64.b64decode(data) if data else None
+    data = Formularios.query.filter_by(id=id_arquivo).first()
+    file_bytes = base64.b64decode(data.valor) if data else None
 
     if not file_bytes:
         abort(404)
@@ -378,7 +379,7 @@ def download_arquivo(id_arquivo, context):
     return send_file(
         file_io,
         as_attachment=False,
-        download_name='documento',
+        download_name=f'{data.campo} - {data.id_chamada}.{mime.split("/")[-1]}',
         mimetype=mime
     )
 
