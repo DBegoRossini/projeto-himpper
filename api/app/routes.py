@@ -1,6 +1,5 @@
 import os
 from io import BytesIO
-import magic
 import requests
 from functools import wraps
 from . import app, auth, database

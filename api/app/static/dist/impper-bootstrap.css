@@ -307,7 +307,6 @@
 }
 
 .impper-app .modal {
-  --bs-modal-zindex: 1000;
   --bs-modal-bg: var(--imp-surface);
   --bs-modal-color: var(--imp-text);
   --bs-modal-border-color: var(--imp-border);
