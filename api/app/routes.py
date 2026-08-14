@@ -9,6 +9,8 @@ from sqlalchemy import cast, String, or_, and_
 from datetime import timedelta
 import base64
 
+INFO_USER_CACHE_VERSION = 2
+
 
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
@@ -35,7 +37,7 @@ def carregar_info_usuario(context):
         return
 
     cached_info_user = session.get("info_user")
-    if cached_info_user:
+    if cached_info_user and cached_info_user.get("cache_version") == INFO_USER_CACHE_VERSION:
         g.info_user = cached_info_user
         carregar_notificacoes_usuario(user_id)
         return
@@ -47,16 +49,18 @@ def carregar_info_usuario(context):
         headers={"Authorization": f"Bearer {access_token}"}
     )
     info2 = requests.get(
-        f"https://graph.microsoft.com/v1.0/users/{user_id}/memberOf",
+        f"https://graph.microsoft.com/v1.0/users/{user_id}/memberOf?$select=id",
         headers={"Authorization": f"Bearer {access_token}"}
     )
     groups = info2.json().get("value", [])
+    print(info2)
 
     info_user = {
         "displayName": info1.json().get("displayName", ""),
         "jobTitle":    info1.json().get("jobTitle", ""),
         "mail":        info1.json().get("mail", ""),
-        "groups":      [grp.get("displayName", "") for grp in groups]
+        "groups":      [grp["id"] for grp in groups if grp.get("id")],
+        "cache_version": INFO_USER_CACHE_VERSION
     }
 
     session["info_user"] = info_user
@@ -144,6 +148,7 @@ def index(*, context):
         Execucao.iniciada_em
     ).all()
 )
+    print(tarefas_raw)
     minhas_tarefas = []
     for row in tarefas_raw:
         minhas_tarefas.append({
