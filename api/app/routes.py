@@ -260,6 +260,19 @@ def caixaentrada(context):
                 "status_label": row.status,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
+
+        for row in pendencias_raw:
+            print(
+                "DATA SOLICITACAO:",
+                row.data_solicitacao,
+                type(row.data_solicitacao)
+            )
+        
+            print(
+                "INICIADA EM:",
+                row.iniciada_em,
+                type(row.iniciada_em)
+            )
     return render_template(
         "caixaentrada.html",
         user=user,
