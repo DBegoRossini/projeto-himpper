@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block main %}
+    {% set user_oid = user.get('oid') or user.get('id') %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
 
     <section class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox">
@@ -35,8 +36,8 @@
             <article class="imp-stat imp-request-stat">
                 <div class="imp-stat__icon">◷</div>
                 <div>
-                    <span class="imp-stat__label">Em andamento</span>
-                    <strong class="imp-stat__value" data-summary-open>0</strong>
+                    <span class="imp-stat__label">Assumidas por mim</span>
+                    <strong class="imp-stat__value" data-summary-mine>0</strong>
                 </div>
             </article>
 
@@ -61,41 +62,44 @@
 
             <div class="card-body imp-card__body imp-stack imp-gap-5">
                 <div class="imp-request-toolbar">
-                    <label class="imp-field imp-request-toolbar__search" for="requestSearch">
-                        <span class="imp-label">Buscar pendência</span>
-                        <input
-                            id="requestSearch"
-                            type="search"
-                            class="form-control"
-                            placeholder="Pesquise por protocolo, tipo, área, solicitante ou etapa"
-                            data-request-search
-                        >
+                    <label
+                        class="imp-field imp-request-toolbar__search" for="requestSearch">
+                        <span class="imp-label">
+                            Buscar pendência
+                        </span>
+                        <input id="requestSearch" type="search" class="form-control" placeholder="Pesquise por protocolo, tipo, solicitante ou etapa" data-request-search>
                     </label>
 
                     <label class="imp-field imp-request-toolbar__search" for="requestRequesterFilter">
-                        <span class="imp-label">Solicitante</span>
-                        <input
-                            id="requestRequesterFilter"
-                            type="search"
-                            class="form-control"
-                            placeholder="Filtre pelo nome do solicitante"
-                            data-request-requester-filter
-                        >
+                        <span class="imp-label">
+                            Solicitante
+                        </span>
+                        <input id="requestRequesterFilter" type="search" class="form-control" placeholder="Filtre pelo nome do solicitante" data-request-requester-filter>
                     </label>
 
-                    <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
-                        <span class="imp-label">Status</span>
-                        <select id="requestStatusFilter" class="form-select" data-request-status-filter>
-                            <option value="">Todos</option>
-                            <option value="Em andamento">Em andamento</option>
-                            <option value="Pendente">Pendente</option>
+                    <label
+                        class="imp-field imp-request-toolbar__filter" for="requestOwnerFilter">
+                        <span class="imp-label">
+                            Fila
+                        </span>
+
+                        <select id="requestOwnerFilter" class="form-select" data-request-owner-filter>
+                            <option value="">
+                                Todas
+                            </option>
+                            <option value="mine">
+                                Assumidas por mim
+                            </option>
+                            <option value="unassigned">
+                                Não assumidas
+                            </option>
                         </select>
                     </label>
                 </div>
 
                 <div class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
-                    <table class="table imp-table imp-request-table imp-request-table--inbox mb-0" data-request-table align-middle>
-                        <thead class="align-middle">
+                    <table class="table imp-table imp-request-table imp-request-table--inbox align-middle mb-0" data-request-table>
+                        <thead class="align-middle text-center">
                             <tr>
                                 <th>Protocolo</th>
                                 <th>Solicitante</th>
@@ -113,9 +117,17 @@
                                     class="imp-request-row"
                                     data-request-row
                                     data-request-id="{{ pendencia.id }}"
-                                    data-status="{{ pendencia.status_label }}"
                                     data-requester="{{ pendencia.solicitante }}"
-                                    data-search="{{ (pendencia.protocolo ~ ' ' ~ pendencia.tipo ~ ' ' ~ pendencia.area ~ ' ' ~ pendencia.etapa ~ ' ' ~ pendencia.solicitante ~ ' ' ~ pendencia.status_label ~ ' ' ~ pendencia.prioridade)|lower }}"
+                                    data-owner="{% if not pendencia.executor %}unassigned{% elif pendencia.executor == user_oid %}mine{% else %}other{% endif %}"
+                                    data-deadline="{{ pendencia.prazo.isoformat() if pendencia.prazo else '' }}"
+                                    data-original-order="{{ loop.index0 }}"
+                                    data-search="{{ (
+                                        pendencia.protocolo ~ ' ' ~
+                                        pendencia.tipo ~ ' ' ~
+                                        pendencia.etapa ~ ' ' ~
+                                        pendencia.solicitante ~ ' ' ~
+                                        ('não assumido' if not pendencia.executor else 'assumido ' ~ pendencia.executor)
+                                    )|lower }}"
                                 >
                                     <td data-label="Protocolo">
                                         <a class="imp-request-row__primary" href="#{{ pendencia.id }}">
@@ -124,7 +136,7 @@
                                     </td>
                                     <td data-label="Solicitante">{{ pendencia.solicitante }}</td>
                                     <td data-label="Tipo">{{ pendencia.tipo }}</td>
-                                    <td data-label="Recebida em">{{ pendencia.recebida_em }}</td>
+                                    <td data-label="Recebida em">{{ pendencia.recebida_em.strftime('%d/%m/%Y %H:%M') if pendencia.recebida_em else '-' }}</td>
                                     <td data-label="Etapa atual">{{ pendencia.etapa }}</td>
                                     <td data-label="Status">
                                          {% if not pendencia.executor %}
@@ -144,7 +156,7 @@
                                                 Assumir
                                             </a>
                                         {% elif pendencia.executor == user.oid %}
-                                            <a class="btn btn-outline-primary btn-sm" href="">
+                                            <a class="btn btn-outline-primary btn-sm" href=""> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
                                                 Abandonar
                                             </a>
                                         {% endif %}
