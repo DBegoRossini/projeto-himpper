@@ -305,3 +305,120 @@
     justify-content: flex-end;
   }
 }
+/* Selects pesquisáveis — Ordem de Compra */
+.imp-searchable-select {
+  display: grid;
+  gap: var(--imp-space-2);
+}
+
+.imp-searchable-select .form-control[type="search"] {
+  min-height: 2.45rem;
+  background: var(--imp-surface-soft);
+}
+
+.imp-nature-list {
+  display: grid;
+  gap: var(--imp-space-3);
+}
+
+.imp-nature-row {
+  display: flex;
+  align-items: end;
+  gap: var(--imp-space-3);
+  padding: var(--imp-space-3);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-lg);
+  background: var(--imp-surface-soft);
+}
+
+.imp-nature-remove {
+  flex: 0 0 auto;
+  margin-bottom: 0.05rem;
+}
+
+@media (max-width: 56rem) {
+  .imp-nature-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .imp-nature-remove {
+    align-self: flex-end;
+  }
+}
+
+.imp-search-select {
+  width: 100%;
+}
+
+.imp-search-select__menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  left: 0;
+  z-index: 60;
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: 0.35rem;
+}
+
+.imp-search-select__menu.show {
+  display: block;
+}
+
+.imp-search-select__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--imp-radius-sm);
+  white-space: normal;
+}
+
+.imp-search-select__code {
+  color: var(--imp-text);
+  font-size: var(--imp-text-sm);
+  font-weight: var(--imp-weight-semibold);
+}
+
+.imp-search-select__description {
+  color: var(--imp-text-soft);
+  font-size: var(--imp-text-xs);
+}
+
+.imp-search-select__empty {
+  padding: 0.8rem;
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-sm);
+}
+
+.imp-nature-list {
+  display: grid;
+  gap: var(--imp-space-3);
+}
+
+.imp-nature-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--imp-space-3);
+  padding: var(--imp-space-3);
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-lg);
+  background: var(--imp-surface-soft);
+}
+
+.imp-nature-remove {
+  flex: 0 0 auto;
+  margin-top: 0.18rem;
+}
+
+@media (max-width: 56rem) {
+  .imp-nature-row {
+    flex-direction: column;
+  }
+
+  .imp-nature-remove {
+    align-self: flex-end;
+  }
+}

@@ -235,6 +235,8 @@ def caixaentrada(context):
         Chamada.data.label("data_solicitacao"),
         Etapas.nome.label("etapa_nome"),
         Execucao.iniciada_em.label("iniciada_em"),
+        Execucao.executor,
+        Etapas.responsaveis,
         Chamada.status,
         Etapas.sla,
         Chamada.solicitante
