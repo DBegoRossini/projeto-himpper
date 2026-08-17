@@ -212,7 +212,7 @@
   });
 })();
 
-async function enviarFormulario(document, id_fluxo, id_etapa) {
+async function enviarFormulario(document, id_fluxo, id_etapa, acao) {
   const form = document.querySelector('form');
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
       .filter(f => f.id);
@@ -231,6 +231,6 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
       method: 'POST',
       body: formData
     });
-  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}`;
+  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}/${acao}`;
   return formData;
 }

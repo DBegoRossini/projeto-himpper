@@ -94,8 +94,8 @@
                 </div>
 
                 <div class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
-                    <table class="table imp-table imp-request-table imp-request-table--inbox align-middle mb-0" data-request-table>
-                        <thead>
+                    <table class="table imp-table imp-request-table imp-request-table--inbox mb-0" data-request-table align-middle>
+                        <thead class="align-middle">
                             <tr>
                                 <th>Protocolo</th>
                                 <th>Solicitante</th>
@@ -127,18 +127,24 @@
                                     <td data-label="Recebida em">{{ pendencia.recebida_em }}</td>
                                     <td data-label="Etapa atual">{{ pendencia.etapa }}</td>
                                     <td data-label="Status">
-                                        <span class="badge rounded-pill imp-badge imp-badge--{{ pendencia.status_variant }}">
-                                            {{ pendencia.status_label }}
-                                        </span>
+                                         {% if not pendencia.executor %}
+                                            <span class="badge rounded-pill imp-badge imp-badge--warning">
+                                                Não assumido
+                                            </span>
+                                        {% else %}
+                                            <span class="badge rounded-pill imp-badge imp-badge--success">
+                                                Assumido por: {{ pendencia.executor }}
+                                            </span>
+                                        {% endif %}
                                     </td>
-                                    <td data-label="Prazo">{{ pendencia.prazo }}</td>
+                                    <td data-label="Prazo">{{ pendencia.prazo.strftime('%d/%m/%Y %H:%M') if pendencia.prazo else '-' }}</td>
                                     <td data-label="Ação">
-                                        {% if pendencia.status_label == "Pendente" %}
-                                            <a class="btn btn-neutral btn-sm" href="#{{ pendencia.id }}">
+                                        {% if pendencia.executor != user.oid %}
+                                            <a class="btn btn-neutral btn-sm" href=""> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
                                                 Assumir
                                             </a>
-                                        {% else %}
-                                            <a class="btn btn-outline-primary btn-sm" href="#{{ pendencia.id }}">
+                                        {% elif pendencia.executor == user.oid %}
+                                            <a class="btn btn-outline-primary btn-sm" href="">
                                                 Abandonar
                                             </a>
                                         {% endif %}

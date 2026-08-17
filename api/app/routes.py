@@ -53,7 +53,6 @@ def carregar_info_usuario(context):
         headers={"Authorization": f"Bearer {access_token}"}
     )
     groups = info2.json().get("value", [])
-    print(info2)
 
     info_user = {
         "displayName": info1.json().get("displayName", ""),
@@ -100,7 +99,6 @@ def carregar_info_form():
         valor = colig.get("VALORCOLIG")
         if label not in coligadas.values() and valor not in coligadas.keys():
             coligadas[valor] = label
-    print(coligadas)
     g.coligadasUnic = coligadas.items()
 
     g.ccusto = requests.get(
@@ -145,10 +143,11 @@ def index(*, context):
         Chamada.status,
         Etapas.nome.label("etapa_nome"),
         flows.alias.label("fluxo_nome"),
-        Execucao.iniciada_em
+        Execucao.iniciada_em,
+        Execucao.id_chamada,
+        flows.id.label("id_flow")
     ).all()
 )
-    print(tarefas_raw)
     minhas_tarefas = []
     for row in tarefas_raw:
         minhas_tarefas.append({
@@ -157,6 +156,8 @@ def index(*, context):
             "status":     row.status,
             "etapa_nome": row.etapa_nome,
             "fluxo_nome": row.fluxo_nome,
+            "id_chamada": row.id_chamada,
+            "id_flow": row.id_flow,
             "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
         })
     solicitacoes = (
@@ -170,7 +171,8 @@ def index(*, context):
         Chamada.id,
         flows.alias.label("fluxo_nome"),
         Execucao.iniciada_em,
-        Chamada.status
+        Chamada.status,
+        Etapas.nome
     )
     .distinct(Chamada.id)
     .all()
@@ -236,7 +238,6 @@ def caixaentrada(context):
         Etapas.nome.label("etapa_nome"),
         Execucao.iniciada_em.label("iniciada_em"),
         Execucao.executor,
-        Etapas.responsaveis,
         Chamada.status,
         Etapas.sla,
         Chamada.solicitante
@@ -256,6 +257,7 @@ def caixaentrada(context):
                 "status_label": row.status,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
+
     return render_template(
         "caixaentrada.html",
         user=user,
@@ -287,10 +289,10 @@ def ini_flow(id_fluxo, context):
     )
 
 
-@app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
+@app.route("/flow/<id_fluxo>/<id_etapa>/<acao>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def submit_flow(id_fluxo, id_etapa, context):
+def submit_flow(id_fluxo, id_etapa, context, acao):
     form_data = {}
     if flask_request.method == "POST":
         form_data = dict(flask_request.form)
@@ -301,10 +303,13 @@ def submit_flow(id_fluxo, id_etapa, context):
         nome = user.get("name")
         print(id_etapa)
         url = f"https://n8n.grupoimpper.com.br/webhook/{id_etapa}"
+        print(url)
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         data = {
         "id_fluxo": id_fluxo,
         "solicitante": user.get("oid") or user.get("id"),
+        "id_chamada": id_etapa,
+        "acao": acao,
         **form_data 
         }
 
@@ -484,12 +489,9 @@ def permissoes(context):
             ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
             nova_permissao = ",".join(ids_normalizados)
 
-        print("Fluxo ID:", fluxo_id)
-        print("Nova Permissão:", nova_permissao)
         if fluxo_id:
             try:
                 fluxo_db = flows.query.filter_by(id=int(fluxo_id)).first()
-                print(fluxo_db)
                 if fluxo_db is not None:
                     fluxo_db.acesso = nova_permissao
                     database.session.add(fluxo_db)
