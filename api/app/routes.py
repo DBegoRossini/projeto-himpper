@@ -145,7 +145,9 @@ def index(*, context):
         Chamada.status,
         Etapas.nome.label("etapa_nome"),
         flows.alias.label("fluxo_nome"),
-        Execucao.iniciada_em
+        Execucao.iniciada_em,
+        Execucao.id_chamada,
+        flows.id.label("id_flow")
     ).all()
 )
     print(tarefas_raw)
@@ -157,6 +159,8 @@ def index(*, context):
             "status":     row.status,
             "etapa_nome": row.etapa_nome,
             "fluxo_nome": row.fluxo_nome,
+            "id_chamada": row.id_chamada,
+            "id_flow": row.id_flow,
             "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
         })
     solicitacoes = (
@@ -170,7 +174,8 @@ def index(*, context):
         Chamada.id,
         flows.alias.label("fluxo_nome"),
         Execucao.iniciada_em,
-        Chamada.status
+        Chamada.status,
+        Etapas.nome
     )
     .distinct(Chamada.id)
     .all()
@@ -235,6 +240,7 @@ def caixaentrada(context):
         Chamada.data.label("data_solicitacao"),
         Etapas.nome.label("etapa_nome"),
         Execucao.iniciada_em.label("iniciada_em"),
+        Execucao.executor,
         Chamada.status,
         Etapas.sla,
         Chamada.solicitante
@@ -288,7 +294,7 @@ def ini_flow(id_fluxo, context):
 @app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def submit_flow(id_fluxo, id_etapa, context):
+def submit_flow(id_fluxo, id_etapa, context, acao):
     form_data = {}
     if flask_request.method == "POST":
         form_data = dict(flask_request.form)
@@ -303,6 +309,8 @@ def submit_flow(id_fluxo, id_etapa, context):
         data = {
         "id_fluxo": id_fluxo,
         "solicitante": user.get("oid") or user.get("id"),
+        "id_chamada": id_etapa,
+        "acao": acao,
         **form_data 
         }
 

@@ -5,133 +5,40 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Solicitação {{ id_chamada }}</h1>
+    <h1 class="imp-heading">Detalhes da solicitação</h1>
 {% endblock %}
 
 {% block main %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/08-execucao.css') }}"/>
 
-    <section class="imp-execution-page">
-        <header class="imp-execution-hero">
-            <span class="imp-kicker">Detalhes da solicitação</span>
+    <main class="imp-execution-page">
+        <header class="imp-execution-header border-bottom">
+            <span class="imp-kicker">Acompanhamento da solicitação #{{ id_chamada }}</span>
 
-            <div class="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3">
-                <div class="imp-execution-hero__copy">
-                    <p class="imp-execution-overline mb-2">Solicitação #{{ id_chamada }}</p>
-                    <h2 class="imp-title">
-                        {{ fluxo.alias if fluxo and fluxo.alias else "Informações da solicitação" }}
-                    </h2>
+            <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3">
+                <div>
+                    <h2 class="imp-title">Solicitação #{{ id_chamada }}</h2>
                     <p class="imp-subtitle mb-0">
-                        Consulte os dados registrados e acompanhe a etapa atual do fluxo.
+                        Consulte as informações registradas e, quando aplicável, atue na etapa atual.
                     </p>
                 </div>
-
-                <span class="badge rounded-pill imp-badge imp-badge--{{ situacao_variant }} align-self-start align-self-lg-end">
-                    {{ situacao_execucao }}
-                </span>
             </div>
         </header>
 
-        <section class="imp-execution-section" aria-labelledby="execution-summary-title">
-            <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
-                <div>
-                    <h3 class="imp-execution-section__title" id="execution-summary-title">Visão geral</h3>
-                    <p class="imp-execution-section__subtitle mb-0">Contexto atual da solicitação no fluxo.</p>
-                </div>
-            </div>
-
-            <dl class="row g-0 imp-execution-summary mb-0">
-                <div class="col-12 col-sm-6 col-xl-3 imp-execution-summary__item">
-                    <dt>Fluxo</dt>
-                    <dd>{{ fluxo.alias if fluxo and fluxo.alias else "Não informado" }}</dd>
-                </div>
-
-                <div class="col-12 col-sm-6 col-xl-3 imp-execution-summary__item">
-                    <dt>Etapa atual</dt>
-                    <dd>{{ etapa.nome if etapa and etapa.nome else "Não informada" }}</dd>
-                </div>
-
-                <div class="col-12 col-sm-6 col-xl-3 imp-execution-summary__item">
-                    <dt>Status</dt>
-                    <dd>{{ chamada.status if chamada and chamada.status else "Não informado" }}</dd>
-                </div>
-
-                <div class="col-12 col-sm-6 col-xl-3 imp-execution-summary__item">
-                    <dt>Iniciada em</dt>
-                    <dd>
-                        {% if execucao and execucao.iniciada_em %}
-                            {{ execucao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}
-                        {% else %}
-                            Não informado
-                        {% endif %}
-                    </dd>
-                </div>
-            </dl>
-
-            {% if execucao and execucao.assumida_em %}
-                <div class="imp-execution-assignment mt-4">
-                    <span class="imp-execution-assignment__label">Assumida em</span>
-                    <span>{{ execucao.assumida_em.strftime('%d/%m/%Y %H:%M') }}</span>
-                </div>
-            {% endif %}
-        </section>
-
         <section class="imp-execution-section" aria-labelledby="request-data-title">
-            <div class="mb-4">
-                <h3 class="imp-execution-section__title" id="request-data-title">Dados informados</h3>
-                <p class="imp-execution-section__subtitle mb-0">
-                    Informações registradas na abertura e nas etapas da solicitação.
+            <div class="imp-execution-section__head">
+                <h3 class="imp-card__title" id="request-data-title">Informações da solicitação</h3>
+                <p class="imp-card__subtitle mb-0">
+                    Os dados preenchidos na abertura e nas etapas anteriores serão exibidos aqui.
                 </p>
             </div>
 
-            {% if formularios %}
-                <dl class="imp-execution-fields mb-0">
-                    {% for formulario in formularios %}
-                        {% set tipo = (formulario.tp_campo or '')|lower %}
-                        {% set valor = formulario.valor %}
-                        {% set valor_texto = valor|string if valor is not none else '' %}
-                        {% set campo_longo = tipo in ['textarea', 'text-area', 'longtext', 'observacao', 'observação'] or valor_texto|length > 120 %}
-
-                        <div class="imp-execution-field{% if campo_longo %} imp-execution-field--full{% endif %}">
-                            <dt>{{ formulario.campo or "Campo sem identificação" }}</dt>
-                            <dd{% if campo_longo %} class="imp-execution-field__long-value"{% endif %}>
-                                {% if valor is none or valor_texto|trim == '' %}
-                                    <span class="imp-execution-empty-value">Não informado</span>
-                                {% elif tipo in ['checkbox', 'boolean', 'bool'] %}
-                                    {% if valor_texto|lower in ['1', 'true', 'sim', 'yes', 'on'] %}
-                                        Sim
-                                    {% elif valor_texto|lower in ['0', 'false', 'nao', 'não', 'no', 'off'] %}
-                                        Não
-                                    {% else %}
-                                        {{ valor }}
-                                    {% endif %}
-                                {% else %}
-                                    {{ valor }}
-                                {% endif %}
-                            </dd>
-                        </div>
-                    {% endfor %}
-                </dl>
-            {% else %}
-                <div class="imp-execution-empty">
-                    <p class="mb-1 fw-semibold">Nenhuma informação registrada.</p>
-                    <p class="mb-0">Ainda não existem campos associados a esta solicitação.</p>
+            <dl class="imp-execution-list mb-0">
+                <div class="imp-execution-list__row">
+                    <dt>Identificador</dt>
+                    <dd>{{ id_chamada }}</dd>
                 </div>
-            {% endif %}
+            </dl>
         </section>
-
-        {% if pode_executar %}
-            <section class="imp-execution-section imp-execution-section--current" aria-labelledby="current-step-title">
-                <div>
-                    <span class="imp-execution-overline">Etapa sob sua responsabilidade</span>
-                    <h3 class="imp-execution-section__title mt-1" id="current-step-title">
-                        {{ etapa.nome if etapa and etapa.nome else "Etapa atual" }}
-                    </h3>
-                    <p class="imp-execution-section__subtitle mb-0">
-                        Esta tarefa está assumida por você. Os campos e ações específicos desta etapa serão exibidos aqui quando forem configurados.
-                    </p>
-                </div>
-            </section>
-        {% endif %}
-    </section>
+    </main>
 {% endblock %}
