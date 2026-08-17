@@ -3,13 +3,13 @@ import os
 
 load_dotenv()
 
-AUTHORITY = os.getenv("AUTHORITY")
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI")
+AUTHORITY = ${{ secrets.AUTHORITY }}
+CLIENT_ID = ${{ secrets.CLIENT_ID }}
+CLIENT_SECRET = ${{ secrets.CLIENT_SECRET }}
+REDIRECT_URI = ${{ secrets.REDIRECT_URI }}
 SESSION_TYPE = "filesystem"
-SENHA_BANCO = os.getenv("senha_banco")
-US_BANCO = os.getenv("us_banco")
-SSH_PASSPHRASE = os.getenv("SSH_PASSPHRASE")
-SS_PATH = os.getenv("ss_path")
-SS_USER = os.getenv("ss_user")
+SENHA_BANCO = ${{ secrets.SENHA_BANCO }}
+US_BANCO = ${{ secrets.US_BANCO }}
+SSH_PASSPHRASE = ${{ secrets.SSH_PASSPHRASE }}
+SS_PATH = ${{ secrets.SS_PATH }}
+SS_USER = ${{ secrets.SS_USER }}
