@@ -6,7 +6,7 @@ from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios
 from sqlalchemy import cast, String, or_, and_
-from datetime import timedelta
+from datetime import datetime, timedelta
 import base64
 
 INFO_USER_CACHE_VERSION = 2
@@ -248,6 +248,10 @@ def caixaentrada(context):
             f"https://graph.microsoft.com/v1.0/users/{row.solicitante}?$select=displayName",
                     headers={"Authorization": f"Bearer {access_token}"}
         )
+        executor = requests.get(
+                    f"https://graph.microsoft.com/v1.0/users/{row.executor}?$select=displayName",
+                            headers={"Authorization": f"Bearer {access_token}"}
+                )
         pendencias.append({
                 "protocolo":   row.id,
                 "solicitante": solicitante.json().get("displayName", "Desconhecido"),
@@ -255,15 +259,47 @@ def caixaentrada(context):
                 "recebida_em": row.data_solicitacao,
                 "etapa": row.etapa_nome,
                 "status_label": row.status,
+                "executor": row.executor,
+                "exec_name": executor.json().get("displayName", "Desconhecido") if row.executor else None,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
 
     return render_template(
         "caixaentrada.html",
         user=user,
-        pendencias=pendencias
+        pendencias=pendencias,
+        user_id = user_oid
     )
 
+@app.route("/Assumir/<int:id_chamada>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def assumir_tarefa(context, id_chamada):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=None).first()
+    print(execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = user_oid
+        execucao.assumida_em = datetime.utcnow()
+        database.session.commit()
+    return redirect(url_for("caixaentrada"))
+
+@app.route("/abandonar/<int:id_chamada>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def abandonar_tarefa(context, id_chamada):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid).first()
+    print(execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = None
+        execucao.assumida_em = None
+        database.session.commit()
+    return redirect(url_for("caixaentrada"))
 
 @app.route("/novasolicitacao")
 @auth.login_required(scopes=["User.Read"])
