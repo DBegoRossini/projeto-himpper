@@ -699,6 +699,62 @@
   backdrop-filter: blur(2px);
 }
 
+.multi-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.multi-select-display {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+.multi-select-display:hover {
+    border-color: #999;
+}
+
+.multi-select-display .placeholder {
+    color: #666;
+}
+
+.multi-select-display .selected-items {
+    color: #333;
+}
+
+.multi-select-display .arrow {
+    transition: transform 0.3s;
+}
+
+.multi-select-display.open .arrow {
+    transform: rotate(180deg);
+}
+
+.multi-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    border-radius: 0 0 4px 4px;
+}
+
+.multi-select-dropdown.show {
+    display: block;
+}
+
 @media (max-width: 68rem) {
   .imp-grid--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));

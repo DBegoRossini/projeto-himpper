@@ -276,7 +276,27 @@
                             </table>
                             </div>
 
-                            <label class="imp-field" for="popup-novas-permissoes-combobox">
+                            <div class="cadastro-form-campo">
+                                <label for="linguagens-multi">Permissões:</label>
+                                <div class="multi-select-container">
+                                    <div class="multi-select-display" id="dia-display" onclick="toggleDropdown('dia')">
+                                        <span class="placeholder">Novas permissões</span>
+                                        <span class="arrow">▼</span>
+                                    </div>
+                                    <div class="multi-select-dropdown" id="dia-dropdown">
+                                        {% for permissao in opcoes_permissoes | default([], true) %}
+                                        <label class="dropdown-option">
+                                            <input type="checkbox" value="{{ permissao.id }}" data-display-name="{{ permissao.displayName }}" onchange="sincronizarNovasPermissoes()">
+                                            <span>{{ permissao.displayName }} ({{ permissao.id }})</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+
+                                    <input type="hidden" name="dias_selecionados" id="dia-hidden">
+                                </div>
+                            </div>
+                            
+                            <!--<label class="imp-field" for="popup-novas-permissoes-combobox">
                                 <span class="imp-label">Novas permissões</span>
                                 <select
                                     id="popup-novas-permissoes-combobox"
@@ -291,6 +311,7 @@
                                 </select>
                                 <small class="imp-help">Use Ctrl (ou Cmd) para selecionar múltiplos itens.</small>
                             </label>
+                            -->
                         </div>
                     </section>
 
@@ -325,10 +346,11 @@
                 .map((item) => item.trim())
                 .filter(Boolean);
 
-            const select = document.getElementById('popup-novas-permissoes-combobox');
-            Array.from(select.options).forEach((opt) => {
-                opt.selected = itens.includes((opt.value || '').trim());
+            const checkboxes = document.querySelectorAll('#dia-dropdown input[type="checkbox"]');
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = itens.includes((checkbox.value || '').trim());
             });
+            updateSelection('dia');
 
             if (!itens.length) {
                 tbody.innerHTML = `
@@ -339,8 +361,8 @@
                 `;
             } else {
                 tbody.innerHTML = itens.map((item) => {
-                    const option = Array.from(select.options).find((opt) => (opt.value || '').trim() === item);
-                    const label = option ? option.textContent : item;
+                    const checkbox = Array.from(checkboxes).find((cb) => (cb.value || '').trim() === item);
+                    const label = checkbox ? checkbox.nextElementSibling.textContent : item;
                     return `
                     <tr>
                         <td data-permissao-item data-permissao-id="${item}">${label}</td>
@@ -379,17 +401,78 @@
             bootstrap.Modal.getOrCreateInstance(document.getElementById('meuPopup')).show();
         }
 
+        function toggleDropdown(prefix) {
+            const dropdown = document.getElementById(`${prefix}-dropdown`);
+            const display = document.getElementById(`${prefix}-display`);
+            
+            dropdown.classList.toggle('show');
+            display.classList.toggle('open');
+        }
+
+        function updateSelection(prefix) {
+            const checkboxes = document.querySelectorAll(`#${prefix}-dropdown input[type="checkbox"]`);
+            const display = document.getElementById(`${prefix}-display`);
+            const hiddenInput = document.getElementById(`${prefix}-hidden`);
+            
+            selectedValues = [];
+            const selectedLabels = [];
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedValues.push(checkbox.value);
+                    selectedLabels.push({ value: checkbox.value, label: checkbox.dataset.displayName || checkbox.value });
+                }
+            });
+            
+            if (selectedValues.length === 0) {
+                display.innerHTML = '<span class="placeholder">Selecione as linguagens...</span><span class="arrow">▼</span>';
+            } else {
+                const tagsHtml = selectedLabels.map(({ value, label }) => 
+                    `<span class="selected-tag">${label} <span class="remove" onclick="removeTag('${value}', '${prefix}')">&times;</span></span>`
+                ).join('');
+                display.innerHTML = `<div class="selected-items">${tagsHtml}</div><span class="arrow">▼</span>`;
+            }
+            
+        
+            hiddenInput.value = selectedValues.join(',');
+        }
+
+        function removeTag(valueToRemove, prefix) {
+            event.stopPropagation(); 
+            
+            const checkbox = document.querySelector(`#${prefix}-dropdown input[value="${valueToRemove}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateSelection(prefix);
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const containers = document.querySelectorAll('.multi-select-container');
+            
+            containers.forEach(container => {
+                const dropdown = container.querySelector('.multi-select-dropdown');
+                const display = container.querySelector('.multi-select-display');
+                if (!container.contains(event.target)) {
+                    dropdown?.classList.remove('show');
+                    display?.classList.remove('open');
+                }
+            });
+        });
+
         function fecharPopup() {
             bootstrap.Modal.getOrCreateInstance(document.getElementById('meuPopup')).hide();
         }
 
         function sincronizarNovasPermissoes() {
-            const select = document.getElementById('popup-novas-permissoes-combobox');
-            const valores = Array.from(select.selectedOptions)
-                .map((opt) => (opt.value || '').trim())
+            const checkboxes = document.querySelectorAll('#dia-dropdown input[type="checkbox"]');
+            const valores = Array.from(checkboxes)
+                .filter((checkbox) => checkbox.checked)
+                .map((checkbox) => (checkbox.value || '').trim())
                 .filter(Boolean);
 
             document.getElementById('popup-novas-permissoes').value = valores.join(',');
+            updateSelection('dia');
         }
 
         function removerPermissao(botao) {
@@ -401,10 +484,10 @@
             }
 
             if (permissaoId) {
-                const select = document.getElementById('popup-novas-permissoes-combobox');
-                const option = Array.from(select.options).find((opt) => (opt.value || '').trim() === permissaoId);
-                if (option) {
-                    option.selected = false;
+                const checkbox = document.querySelector(`#dia-dropdown input[value="${permissaoId}"]`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                    updateSelection('dia');
                 }
             }
 
