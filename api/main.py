@@ -1,4 +1,4 @@
-from app import app, database
+from api.app import app, database
 from dotenv import load_dotenv
 load_dotenv(encoding='utf-8')
 
