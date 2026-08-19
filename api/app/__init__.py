@@ -9,29 +9,12 @@ from paramiko import Ed25519Key
 app = Flask(__name__)
 app.config.from_object(app_config)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance'))
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    raise RuntimeError("DATABASE_URL não definida nas variáveis de ambiente do Coolify.")
 
-SSH_HOST = '179.198.114.158'
-SSH_PORT = 22
-SSH_USER = app_config.SS_USER
-SSH_KEY = app_config.SS_PATH 
-SSH_PASSPHRASE = app_config.SSH_PASSPHRASE   
-pkey = Ed25519Key.from_private_key_file(SSH_KEY, password=SSH_PASSPHRASE)
-
-tunnel = SSHTunnelForwarder(
-    (SSH_HOST, SSH_PORT),
-    ssh_username=SSH_USER,
-    ssh_pkey=pkey,
-    remote_bind_address=('127.0.0.1', 5432)
-)
-
-tunnel.start()
-
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f'postgresql://{app_config.US_BANCO}:{app_config.SENHA_BANCO}'
-    f'@127.0.0.1:{tunnel.local_bind_port}/automacoes'
-)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 database = SQLAlchemy(app)
 
