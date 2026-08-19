@@ -3,8 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
 import os
 import app_config
-from sshtunnel import SSHTunnelForwarder
-from paramiko import Ed25519Key
 
 app = Flask(__name__)
 app.config.from_object(app_config)
