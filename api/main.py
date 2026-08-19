@@ -10,4 +10,4 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"❌ Falha na conexão: {e}")
     
-    app.run()
+    app.run(host="0.0.0.0", port=3000)
