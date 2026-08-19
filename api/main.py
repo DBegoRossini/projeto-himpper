@@ -1,6 +1,8 @@
-from api.app import app, database
+from app import app, database
 from dotenv import load_dotenv
-load_dotenv(encoding='utf-8')
+import os
+
+load_dotenv(encoding="utf-8")
 
 if __name__ == "__main__":
     with app.app_context():
@@ -9,5 +11,5 @@ if __name__ == "__main__":
             print("✅ Conexão OK!")
         except Exception as e:
             print(f"❌ Falha na conexão: {e}")
-    
-    app.run(host="0.0.0.0", port=3000)
+
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000)))
