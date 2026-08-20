@@ -1,14 +1,17 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
 import os
 import app_config
 from urllib.parse import quote_plus
+from flask import Flask
+from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
-app.config.from_object(app_config)
+app.config.from_object("app_config")
+
+Session(app)
 
 db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT")
