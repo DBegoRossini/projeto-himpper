@@ -9,6 +9,7 @@ from sqlalchemy import cast, String, or_, and_
 from datetime import datetime, timedelta
 import base64
 
+INFO_USER_CACHE_VERSION = 2
 
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
@@ -111,15 +112,15 @@ def inject_info_user():
         "notificacoes": getattr(g, 'notificacoes', [])
     }
 
-@app.route("/_s1")
-def _s1():
-    session["probe"] = "ok"
-    return "set"
-
-@app.route("/_s2")
-def _s2():
-    return session.get("probe", "none")
-
+@app.route("/_debug/request")
+def _debug_request():
+    from flask import request
+    return {
+        "host": request.host,
+        "scheme": request.scheme,
+        "is_secure": request.is_secure,
+        "url_root": request.url_root
+    }
 
 @app.route("/")
 @auth.login_required(scopes=["User.Read"])
