@@ -3,13 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
 import os
 import app_config
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 app.config.from_object(app_config)
+ db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    db_user = os.getenv("us_banco")
+    db_pass = os.getenv("senha_banco")
 
-database_url = os.getenv("DATABASE_URL")
-if not database_url:
-    raise RuntimeError("DATABASE_URL não definida nas variáveis de ambiente do Coolify.")
+db_url = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
