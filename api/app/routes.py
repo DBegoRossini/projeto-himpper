@@ -559,5 +559,6 @@ def permissoes(context):
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return "ok", 200
+#    return redirect(url_for('index'))
 
