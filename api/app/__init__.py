@@ -31,9 +31,13 @@ db_pass = os.getenv("senha_banco") or os.getenv("DB_PASSWORD")
 
 database_url = os.getenv("DATABASE_URL")
 if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
+    )
 
 database = SQLAlchemy(app)
 
