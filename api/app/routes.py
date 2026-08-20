@@ -113,6 +113,15 @@ def inject_info_user():
         "notificacoes": getattr(g, 'notificacoes', [])
     }
 
+@app.route("/_s1")
+def _s1():
+    session["probe"] = "ok"
+    return "set"
+
+@app.route("/_s2")
+def _s2():
+    return session.get("probe", "none")
+
 
 @app.route("/")
 @auth.login_required(scopes=["User.Read"])
@@ -554,14 +563,3 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-###    SELECT 	FT.DESCRICAO,
-#		FCFO.CODTCF,
-#		FCFO.NOMEFANTASIA
-# /*RUA,
-#NUMERO,
-#BAIRRO,
-#CEP,
-#CIDADE || '/' || CODETD AS CIDEST,
-#CGCCFO */
-#FROM FCFO
-#LEFT JOIN FTCF FT ON FCFO.CODTCF = FT.CODTCF
