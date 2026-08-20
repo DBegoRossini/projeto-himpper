@@ -19,6 +19,16 @@ db_name = os.getenv("DB_NAME")
 db_user = os.getenv("us_banco")
 db_pass = os.getenv("senha_banco")
 
+missing_db_env = [name for name, value in {
+    "DB_HOST": db_host,
+    "DB_PORT": db_port,
+    "DB_NAME": db_name,
+    "us_banco": db_user,
+    "senha_banco": db_pass,
+}.items() if not value]
+if missing_db_env:
+    raise RuntimeError(f"Missing required database environment variables: {', '.join(missing_db_env)}")
+
 db_url = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
@@ -26,14 +36,13 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 database = SQLAlchemy(app)
 
-auth = None
-if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET", "REDIRECT_URI")):
-    auth = Auth(
-        app,
-        authority=app.config["AUTHORITY"],
-        client_id=app.config["CLIENT_ID"],
-        client_credential=app.config["CLIENT_SECRET"],
-        redirect_uri=app.config["REDIRECT_URI"]
-    )
+auth = Auth(
+    None,
+    authority=app.config.get("AUTHORITY"),
+    client_id=app.config.get("CLIENT_ID"),
+    client_credential=app.config.get("CLIENT_SECRET"),
+    redirect_uri=app.config.get("REDIRECT_URI"),
+)
+auth.init_app(app)
 
 from app import routes
