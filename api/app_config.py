@@ -23,3 +23,4 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_FILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "flask_session")
 PERMANENT_SESSION_LIFETIME = 1800
+PREFERRED_URL_SCHEME = "https"
