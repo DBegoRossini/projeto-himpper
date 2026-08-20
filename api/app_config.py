@@ -12,9 +12,13 @@ US_BANCO = os.getenv("us_banco")
 SSH_PASSPHRASE = os.getenv("SSH_PASSPHRASE")
 SS_PATH = os.getenv("ss_path")
 SS_USER = os.getenv("ss_user")
-
-# Configuração de Sessão Flask
-# Usar filesystem com caminho persistente para produção
-SESSION_TYPE = "filesystem"
+SECRET_KEY = os.getenv("SECRET_KEY")
+SESSION_TYPE = "redis"
+SESSION_REDIS = os.getenv("SESSION_REDIS")
+SESSION_USE_SIGNER = True
+SESSION_PERMANENT = False
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_FILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "flask_session")
-PERMANENT_SESSION_LIFETIME = 1800  # 30 minutos
+PERMANENT_SESSION_LIFETIME = 1800 
