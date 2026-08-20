@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import redis
 
 load_dotenv()
 
@@ -14,7 +15,7 @@ SS_PATH = os.getenv("ss_path")
 SS_USER = os.getenv("ss_user")
 SECRET_KEY = os.getenv("SECRET_KEY")
 SESSION_TYPE = "redis"
-SESSION_REDIS = os.getenv("SESSION_REDIS")
+SESSION_REDIS = redis.from_url(os.getenv("SESSION_REDIS_URL"))
 SESSION_USE_SIGNER = True
 SESSION_PERMANENT = False
 SESSION_COOKIE_SECURE = True
