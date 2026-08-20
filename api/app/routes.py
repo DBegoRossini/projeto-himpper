@@ -9,8 +9,6 @@ from sqlalchemy import cast, String, or_, and_
 from datetime import datetime, timedelta
 import base64
 
-INFO_USER_CACHE_VERSION = 2
-
 
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
