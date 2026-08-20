@@ -36,6 +36,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 database = SQLAlchemy(app)
 
+print("AUTH REDIRECT_URI:", app.config.get("REDIRECT_URI"))
+print("AUTHORITY:", app.config.get("AUTHORITY"))
+
 auth = None
 if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET", "REDIRECT_URI")):
     auth = Auth(
