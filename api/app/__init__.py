@@ -6,6 +6,16 @@ from urllib.parse import quote_plus
 from flask import Flask
 from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
+import redis as redis_lib
+
+redis_url = app.config.get("SESSION_REDIS_URL") or os.getenv("SESSION_REDIS_URL") or os.getenv("REDIS_URL")
+print("SESSION REDIS URL EXISTS?", bool(redis_url))
+
+try:
+    r = redis_lib.from_url(redis_url)
+    print("REDIS PING:", r.ping())
+except Exception as e:
+    print("REDIS ERROR:", repr(e))
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
