@@ -96,7 +96,7 @@ def carregar_info_form():
     coligadas = {}
     movimentos = {}
     ccusto = {}
-    dados = resp.json()  # pode ser lista ou dict, depende da API
+    dados =  g.coligMov.json()  # pode ser lista ou dict, depende da API
     if isinstance(dados, dict):
         registros = dados.get("value") or dados.get("items") or dados.get("data") or []
     elif isinstance(dados, list):
