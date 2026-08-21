@@ -96,7 +96,15 @@ def carregar_info_form():
     coligadas = {}
     movimentos = {}
     ccusto = {}
-    for colig in g.coligMov.json():
+    dados = resp.json()  # pode ser lista ou dict, depende da API
+    if isinstance(dados, dict):
+        registros = dados.get("value") or dados.get("items") or dados.get("data") or []
+    elif isinstance(dados, list):
+        registros = dados
+    else:
+        registros = []
+    
+    for colig in registros:
         if colig.get("TIPO") == "COLIGADA":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
