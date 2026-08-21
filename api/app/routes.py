@@ -84,18 +84,25 @@ def with_info_user(view_func):
 
 def carregar_info_form():
     credentials = base64.b64encode(
-    f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
+        f"{os.getenv('rm_user')}:{base64.b64decode(os.getenv('rm_senha')).decode()}".encode()
+    ).decode()
     user_email = g.info_user.get("mail")
     user = user_email.split("@")[0]
     print(user)
     g.coligMov = requests.get(
-        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}",
+        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
     coligadas = {}
     movimentos = {}
     ccusto = {}
-    for colig in g.coligMov.json():
+    dados =  g.coligMov.json()
+    if isinstance(dados, dict):
+        registros = dados.get("value") or dados.get("items") or dados.get("data") or []
+    elif isinstance(dados, list):
+        registros = dados
+    
+    for colig in registros:
         if colig.get("TIPO") == "COLIGADA":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
@@ -112,8 +119,10 @@ def carregar_info_form():
             if label not in ccusto.values() and valor not in ccusto.keys():
                 ccusto[valor] = label
     g.coligadasUnic = coligadas.items()
+    print(g.coligadasUnic)
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
+
 
 @app.context_processor
 def inject_info_user():
@@ -274,7 +283,7 @@ def caixaentrada(context):
                 "protocolo":   row.id,
                 "solicitante": solicitante.json().get("displayName", "Desconhecido"),
                 "tipo":        row.fluxo_nome,
-                "recebida_em": row.data_solicitacao,
+                "recebida_em": row.data_solicitacao.strftime('%d/%m/%Y'),
                 "etapa": row.etapa_nome,
                 "status_label": row.status,
                 "executor": row.executor,
