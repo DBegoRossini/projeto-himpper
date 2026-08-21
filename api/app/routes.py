@@ -105,7 +105,6 @@ def carregar_info_form():
         headers={"Authorization": f"Basic {credentials}"}
     )
 
-    print(g.coligMov)
 
     try:
         dados = g.coligMov.json()
@@ -116,7 +115,7 @@ def carregar_info_form():
         g.movimentosUnic = []
         g.ccustoUnic = []
         return
-    print(dados)
+    print(f"Dados: {dados}")
 
     registros = []
     if isinstance(dados, list):
@@ -132,7 +131,7 @@ def carregar_info_form():
         )
         if not registros and all(k in dados for k in ("TIPO",)):
             registros = [dados]
-    print(registros)
+    print(f"Registros: {registros}")
 
     coligadas = {}
     movimentos = {}
@@ -166,9 +165,6 @@ def carregar_info_form():
     g.movimentosUnic = list(movimentos.items())
     g.ccustoUnic = list(ccusto.items())
 
-    print("COLIGADAS:", len(g.coligadasUnic))
-    print("MOVIMENTOS:", len(g.movimentosUnic))
-    print("CCUSTO:", len(g.ccustoUnic))
 @app.context_processor
 def inject_info_user():
     return {
