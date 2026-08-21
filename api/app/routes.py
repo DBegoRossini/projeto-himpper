@@ -88,6 +88,9 @@ def carregar_info_form():
         f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()
     ).decode()
 
+    print(os.getenv('rm_user'))
+    print(os.getenv('rm_senha'))
+
     user_email = (g.info_user.get("mail") or "").strip()
     if not user_email or "@" not in user_email:
         g.coligadasUnic = []
