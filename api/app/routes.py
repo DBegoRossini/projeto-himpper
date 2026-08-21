@@ -96,7 +96,7 @@ def carregar_info_form():
     coligadas = {}
     movimentos = {}
     ccustos = {}
-    for colig in g.coligMov.json():
+    for colig in g.coligMov:
         if colig.get("TIPO") == "COLIGADA":
             label = colig.get("LABELCOLIG")
             valor = colig.get("VALORCOLIG")
