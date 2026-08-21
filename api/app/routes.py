@@ -7,6 +7,7 @@ from flask import  abort, render_template, redirect, send_file, url_for,  g, ses
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios
 from sqlalchemy import cast, String, or_, and_
 from datetime import timedelta
+from datetime import datetime
 import base64
 
 INFO_USER_CACHE_VERSION = 2
@@ -258,26 +259,45 @@ def caixaentrada(context):
                 "recebida_em": row.data_solicitacao,
                 "etapa": row.etapa_nome,
                 "status_label": row.status,
-                "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
+                "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None,
+                "executor": row.executor
             })
-
-        for row in pendencias_raw:
-            print(
-                "DATA SOLICITACAO:",
-                row.data_solicitacao,
-                type(row.data_solicitacao)
-            )
-        
-            print(
-                "INICIADA EM:",
-                row.iniciada_em,
-                type(row.iniciada_em)
-            )
     return render_template(
         "caixaentrada.html",
         user=user,
-        pendencias=pendencias
+        pendencias=pendencias,
+        user_id = user_oid
     )
+
+@app.route("/Assumir/<int:id_chamada>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def assumir_tarefa(context, id_chamada):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=None).first()
+    print(execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = user_oid
+        execucao.assumida_em = datetime.utcnow()
+        database.session.commit()
+    return redirect(url_for("caixaentrada"))
+ 
+@app.route("/abandonar/<int:id_chamada>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def abandonar_tarefa(context, id_chamada):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid).first()
+    print(execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = None
+        execucao.assumida_em = None
+        database.session.commit()
+    return redirect(url_for("caixaentrada"))
 
 
 @app.route("/novasolicitacao")
@@ -307,7 +327,7 @@ def ini_flow(id_fluxo, context):
 @app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def submit_flow(id_fluxo, id_etapa, context, acao):
+def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
     if flask_request.method == "POST":
         form_data = dict(flask_request.form)
@@ -318,13 +338,13 @@ def submit_flow(id_fluxo, id_etapa, context, acao):
         nome = user.get("name")
         print(id_etapa)
         url = f"https://n8n.grupoimpper.com.br/webhook/{id_etapa}"
+        print(url)
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         data = {
         "id_fluxo": id_fluxo,
         "solicitante": user.get("oid") or user.get("id"),
         "id_chamada": id_etapa,
-        "acao": acao,
-        **form_data 
+        **form_data
         }
 
         files = []

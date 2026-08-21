@@ -114,9 +114,10 @@
                         <tbody>
                             {% for pendencia in pendencias %}
                                 <tr
-                                    class="imp-request-row"
+                                    class="imp-request-row js-clickable-row"
+                                    data-href="{{ url_for('exec_tarefas', id_chamada=pendencia.protocolo) }}"
                                     data-request-row
-                                    data-request-id="{{ pendencia.id }}"
+                                    data-request-id="{{ pendencia.protocolo }}"
                                     data-requester="{{ pendencia.solicitante }}"
                                     data-owner="{% if not pendencia.executor %}unassigned{% elif pendencia.executor == user_oid %}mine{% else %}other{% endif %}"
                                     data-deadline="{{ pendencia.prazo.isoformat() if pendencia.prazo else '' }}"
@@ -152,11 +153,11 @@
                                     <td data-label="Prazo">{{ pendencia.prazo.strftime('%d/%m/%Y %H:%M') if pendencia.prazo else '-' }}</td>
                                     <td data-label="Ação">
                                         {% if pendencia.executor != user.oid %}
-                                            <a class="btn btn-neutral btn-sm" href=""> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
+                                            <a class="btn btn-neutral btn-sm" href="{{ url_for('assumir_tarefa', id_chamada=pendencia.protocolo) }}"> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
                                                 Assumir
                                             </a>
                                         {% elif pendencia.executor == user.oid %}
-                                            <a class="btn btn-outline-primary btn-sm" href=""> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
+                                            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('abandonar_tarefa', id_chamada=pendencia.protocolo) }}"> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
                                                 Abandonar
                                             </a>
                                         {% endif %}
