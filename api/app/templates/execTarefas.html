@@ -5,40 +5,708 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Detalhes da solicitação</h1>
+    <h1 class="imp-heading">Execução da solicitação</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Solicitação #{{ id_chamada }}
+    </p>
 {% endblock %}
 
 {% block main %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/08-execucao.css') }}"/>
 
-    <main class="imp-execution-page">
-        <header class="imp-execution-header border-bottom">
-            <span class="imp-kicker">Acompanhamento da solicitação #{{ id_chamada }}</span>
+    {% set user_oid = user.get('oid') or user.get('id') %}
+    {% set executor_id = execucao.executor|string if execucao and execucao.executor else '' %}
+    {% set usuario_id = user_oid|string if user_oid else '' %}
+    {% set pode_editar = execucao and executor_id != '' and executor_id == usuario_id %}
 
-            <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/08-execucao.css') }}"
+    >
+
+    <section class="imp-execution-page">
+
+        <header class="imp-execution-header">
+
+            <div class="imp-execution-header__main">
+
                 <div>
-                    <h2 class="imp-title">Solicitação #{{ id_chamada }}</h2>
+
+                    <span class="imp-kicker">
+                        Solicitação #{{ id_chamada }}
+                    </span>
+
+                    <h2 class="imp-title">
+                        {{ fluxo.alias if fluxo and fluxo.alias else "Solicitação" }}
+                    </h2>
+
                     <p class="imp-subtitle mb-0">
-                        Consulte as informações registradas e, quando aplicável, atue na etapa atual.
+                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade, preencha os campos da etapa atual.
                     </p>
+
                 </div>
+
+                <div class="imp-execution-status">
+
+                    {% if not execucao %}
+
+                        <span class="badge rounded-pill imp-badge imp-badge--neutral">
+                            Sem execução aberta
+                        </span>
+
+                    {% elif not execucao.executor %}
+
+                        <span class="badge rounded-pill imp-badge imp-badge--warning">
+                            Não assumida
+                        </span>
+
+                    {% elif pode_editar %}
+
+                        <span class="badge rounded-pill imp-badge imp-badge--success">
+                            Assumida por você
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge rounded-pill imp-badge imp-badge--info">
+                            Assumida
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
             </div>
+
         </header>
 
-        <section class="imp-execution-section" aria-labelledby="request-data-title">
+        <section
+            class="imp-execution-section"
+            aria-labelledby="execution-overview-title"
+        >
+
             <div class="imp-execution-section__head">
-                <h3 class="imp-card__title" id="request-data-title">Informações da solicitação</h3>
-                <p class="imp-card__subtitle mb-0">
-                    Os dados preenchidos na abertura e nas etapas anteriores serão exibidos aqui.
-                </p>
+
+                <div>
+
+                    <h3
+                        class="imp-execution-section__title"
+                        id="execution-overview-title"
+                    >
+                        Visão geral
+                    </h3>
+
+                    <p class="imp-execution-section__subtitle">
+                        Situação atual desta solicitação no fluxo.
+                    </p>
+
+                </div>
+
             </div>
 
-            <dl class="imp-execution-list mb-0">
-                <div class="imp-execution-list__row">
-                    <dt>Identificador</dt>
-                    <dd>{{ id_chamada }}</dd>
+            <dl class="imp-execution-summary">
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Protocolo
+                    </dt>
+
+                    <dd>
+                        #{{ id_chamada }}
+                    </dd>
+
                 </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Fluxo
+                    </dt>
+
+                    <dd>
+                        {{ fluxo.alias if fluxo and fluxo.alias else "Não informado" }}
+                    </dd>
+
+                </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Etapa atual
+                    </dt>
+
+                    <dd>
+                        {{ etapa.nome if etapa and etapa.nome else "Não informada" }}
+                    </dd>
+
+                </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Status da solicitação
+                    </dt>
+
+                    <dd>
+                        {{ chamada.status if chamada and chamada.status else "Não informado" }}
+                    </dd>
+
+                </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Início da etapa
+                    </dt>
+
+                    <dd>
+
+                        {% if execucao and execucao.iniciada_em %}
+
+                            {{ execucao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}
+
+                        {% else %}
+
+                            Não informado
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Responsabilidade
+                    </dt>
+
+                    <dd>
+
+                        {% if not execucao %}
+
+                            Sem execução aberta
+
+                        {% elif not execucao.executor %}
+
+                            Não assumida
+
+                        {% elif pode_editar %}
+
+                            Assumida por você
+
+                        {% else %}
+
+                            Assumida por: {{ execucao.executor }}
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Assumida em
+                    </dt>
+
+                    <dd>
+
+                        {% if execucao and execucao.assumida_em %}
+
+                            {{ execucao.assumida_em.strftime('%d/%m/%Y %H:%M') }}
+
+                        {% else %}
+
+                            Não assumida
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
             </dl>
+
         </section>
-    </main>
+
+        {% if execucao and not execucao.executor %}
+
+            <section class="imp-execution-notice imp-execution-notice--warning">
+
+                <div>
+
+                    <strong>
+                        Esta tarefa ainda não foi assumida.
+                    </strong>
+
+                    <p>
+                        Você pode consultar os dados da solicitação, mas os campos da etapa atual só serão liberados após assumir a tarefa.
+                    </p>
+
+                </div>
+
+                <a
+                    class="btn btn-neutral"
+                    href="{{ url_for('caixaentrada') }}"
+                >
+                    Voltar para a caixa de entrada
+                </a>
+
+            </section>
+
+        {% elif execucao and execucao.executor and not pode_editar %}
+
+            <section class="imp-execution-notice imp-execution-notice--info">
+
+                <div>
+
+                    <strong>
+                        Esta tarefa está sendo executada por outro usuário.
+                    </strong>
+
+                    <p>
+                        Os dados permanecem disponíveis para consulta, mas não podem ser alterados por você nesta execução.
+                    </p>
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+        <section
+            class="imp-execution-section"
+            aria-labelledby="request-data-title"
+        >
+
+            <div class="imp-execution-section__head">
+
+                <div>
+
+                    <h3
+                        class="imp-execution-section__title"
+                        id="request-data-title"
+                    >
+                        Dados da solicitação
+                    </h3>
+
+                    <p class="imp-execution-section__subtitle">
+                        Informações registradas na abertura e nas etapas anteriores.
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% if formularios %}
+
+                {% set leitura = namespace(total=0) %}
+
+                <dl class="imp-execution-fields">
+
+                    {% for formulario in formularios %}
+
+                        {% set tipo = (formulario.tp_campo or 'string')|lower %}
+                        {% set valor = formulario.valor %}
+                        {% set valor_texto = valor|string if valor is not none else '' %}
+                        {% set possui_valor = valor is not none and valor_texto|trim != '' %}
+                        {% set mostrar_leitura = possui_valor and (not pode_editar or not formulario.editavel) %}
+                        {% set campo_label = formulario.campo|replace('_', ' ')|replace('-', ' ')|title if formulario.campo else 'Campo sem identificação' %}
+                        {% set campo_longo = tipo == 'string' and valor_texto|length > 120 %}
+
+                        {% if mostrar_leitura %}
+
+                            {% set leitura.total = leitura.total + 1 %}
+
+                            <div
+                                class="imp-execution-field{% if campo_longo or tipo == 'file' %} imp-execution-field--full{% endif %}"
+                            >
+
+                                <dt>
+                                    {{ campo_label }}
+                                </dt>
+
+                                <dd>
+
+                                    {% if tipo == 'file' %}
+
+                                        <div class="imp-execution-file">
+
+                                            <div class="imp-execution-file__info">
+
+                                                <strong>
+                                                    Arquivo anexado
+                                                </strong>
+
+                                                <span>
+                                                    Documento registrado nesta solicitação.
+                                                </span>
+
+                                            </div>
+
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{ url_for('download_arquivo', id_arquivo=formulario.id) }}"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                Visualizar arquivo
+                                            </a>
+
+                                        </div>
+
+                                    {% elif campo_longo %}
+
+                                        <div class="imp-execution-field__long-value">
+                                            {{ valor }}
+                                        </div>
+
+                                    {% else %}
+
+                                        {{ valor }}
+
+                                    {% endif %}
+
+                                </dd>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </dl>
+
+                {% if leitura.total == 0 %}
+
+                    <div class="imp-execution-empty">
+
+                        <strong>
+                            Nenhuma informação anterior para exibir.
+                        </strong>
+
+                        <p>
+                            Os campos disponíveis nesta solicitação ainda não possuem valores registrados.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="imp-execution-empty">
+
+                    <strong>
+                        Nenhum campo registrado.
+                    </strong>
+
+                    <p>
+                        Esta solicitação ainda não possui informações associadas na tabela de formulários.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        {% if pode_editar %}
+
+            <section
+                class="imp-execution-section imp-execution-section--current"
+                aria-labelledby="current-step-title"
+            >
+
+                <div class="imp-execution-section__head">
+
+                    <div>
+
+                        <span class="imp-execution-overline">
+                            Tarefa sob sua responsabilidade
+                        </span>
+
+                        <h3
+                            class="imp-execution-section__title"
+                            id="current-step-title"
+                        >
+                            {{ etapa.nome if etapa and etapa.nome else "Atuação na etapa" }}
+                        </h3>
+
+                        <p class="imp-execution-section__subtitle">
+                            Preencha ou altere somente os campos liberados para esta etapa.
+                        </p>
+
+                    </div>
+
+                    <span class="badge rounded-pill imp-badge imp-badge--success">
+                        Edição liberada
+                    </span>
+
+                </div>
+
+                {% set editaveis = namespace(total=0) %}
+
+                <div
+                    class="imp-execution-edit-grid"
+                    data-execution-form
+                    data-id-chamada="{{ id_chamada }}"
+                >
+
+                    {% for formulario in formularios %}
+
+                        {% if formulario.editavel %}
+
+                            {% set editaveis.total = editaveis.total + 1 %}
+                            {% set tipo = (formulario.tp_campo or 'string')|lower %}
+                            {% set valor = formulario.valor %}
+                            {% set valor_texto = valor|string if valor is not none else '' %}
+                            {% set campo_label = formulario.campo|replace('_', ' ')|replace('-', ' ')|title if formulario.campo else 'Campo sem identificação' %}
+                            {% set campo_longo = tipo == 'string' and valor_texto|length > 120 %}
+
+                            <div
+                                class="imp-field{% if tipo == 'file' or campo_longo %} imp-field--full{% endif %}"
+                                data-formulario-id="{{ formulario.id }}"
+                                data-campo="{{ formulario.campo }}"
+                                data-tipo-campo="{{ tipo }}"
+                            >
+
+                                {% if tipo == 'file' %}
+
+                                    <span class="imp-label">
+                                        {{ campo_label }}
+                                    </span>
+
+                                    {% if valor_texto|trim %}
+
+                                        <div class="imp-execution-current-file">
+
+                                            <div>
+
+                                                <strong>
+                                                    Arquivo atual
+                                                </strong>
+
+                                                <span>
+                                                    Já existe um arquivo registrado neste campo.
+                                                </span>
+
+                                            </div>
+
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{ url_for('download_arquivo', id_arquivo=formulario.id) }}"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                Visualizar
+                                            </a>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                    <div class="imp-upload">
+
+                                        <input
+                                            id="campo_{{ formulario.id }}"
+                                            name="{{ formulario.campo }}"
+                                            type="file"
+                                            class="imp-upload__input"
+                                            data-formulario-id="{{ formulario.id }}"
+                                            data-impper-file-output="#arquivoCampo{{ formulario.id }}"
+                                        >
+
+                                        <label
+                                            class="imp-upload__label"
+                                            for="campo_{{ formulario.id }}"
+                                        >
+
+                                            <span class="imp-upload__copy">
+
+                                                <strong>
+                                                    {% if valor_texto|trim %}
+                                                        Substituir arquivo
+                                                    {% else %}
+                                                        Selecionar arquivo
+                                                    {% endif %}
+                                                </strong>
+
+                                                <span>
+                                                    Escolha o documento que será registrado neste campo.
+                                                </span>
+
+                                            </span>
+
+                                            <span class="imp-upload__action">
+                                                Selecionar
+                                            </span>
+
+                                        </label>
+
+                                    </div>
+
+                                    <div
+                                        id="arquivoCampo{{ formulario.id }}"
+                                        class="imp-file-name"
+                                    >
+                                        Nenhum novo arquivo selecionado.
+                                    </div>
+
+                                {% elif tipo == 'float' %}
+
+                                    <label
+                                        class="imp-label"
+                                        for="campo_{{ formulario.id }}"
+                                    >
+                                        {{ campo_label }}
+                                    </label>
+
+                                    <input
+                                        id="campo_{{ formulario.id }}"
+                                        name="{{ formulario.campo }}"
+                                        type="text"
+                                        class="form-control"
+                                        inputmode="decimal"
+                                        value="{{ valor_texto }}"
+                                        autocomplete="off"
+                                        data-formulario-id="{{ formulario.id }}"
+                                    >
+
+                                {% elif campo_longo %}
+
+                                    <label
+                                        class="imp-label"
+                                        for="campo_{{ formulario.id }}"
+                                    >
+                                        {{ campo_label }}
+                                    </label>
+
+                                    <textarea
+                                        id="campo_{{ formulario.id }}"
+                                        name="{{ formulario.campo }}"
+                                        class="form-control"
+                                        rows="5"
+                                        data-formulario-id="{{ formulario.id }}"
+                                    >{{ valor_texto }}</textarea>
+
+                                {% else %}
+
+                                    <label
+                                        class="imp-label"
+                                        for="campo_{{ formulario.id }}"
+                                    >
+                                        {{ campo_label }}
+                                    </label>
+
+                                    <input
+                                        id="campo_{{ formulario.id }}"
+                                        name="{{ formulario.campo }}"
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ valor_texto }}"
+                                        autocomplete="off"
+                                        data-formulario-id="{{ formulario.id }}"
+                                    >
+
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                {% if editaveis.total == 0 %}
+
+                    <div class="imp-execution-empty">
+
+                        <strong>
+                            Nenhum campo disponível para edição.
+                        </strong>
+
+                        <p>
+                            A etapa está sob sua responsabilidade, mas não existem campos marcados como editáveis para esta execução.
+                        </p>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="imp-execution-actions">
+
+                        <div class="imp-execution-actions__copy">
+
+                            <strong>
+                                Revise as informações antes de concluir.
+                            </strong>
+
+                            <span>
+                                Somente os campos desta seção poderão ser alterados.
+                            </span>
+
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+
+                            <button
+                                type="button"
+                                class="btn btn-neutral"
+                                data-execution-save
+                            >
+                                Salvar alterações
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-execution-complete
+                            >
+                                Concluir etapa
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        {% endif %}
+
+        <footer class="imp-execution-footer">
+
+            <a
+                class="btn btn-neutral"
+                href="{{ url_for('caixaentrada') }}"
+            >
+                Voltar para a caixa de entrada
+            </a>
+
+            <a
+                class="btn btn-outline-primary"
+                href="{{ url_for('solicitacoes') }}"
+            >
+                Minhas solicitações
+            </a>
+
+        </footer>
+
+    </section>
+
+    <script
+        defer
+        src="{{ url_for('static', filename='js/forms.js') }}"
+    ></script>
+
 {% endblock %}

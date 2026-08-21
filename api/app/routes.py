@@ -283,7 +283,7 @@ def caixaentrada(context):
                 "protocolo":   row.id,
                 "solicitante": solicitante.json().get("displayName", "Desconhecido"),
                 "tipo":        row.fluxo_nome,
-                "recebida_em": row.data_solicitacao.strftime('%d/%m/%Y'),
+                "recebida_em": row.data_solicitacao,
                 "etapa": row.etapa_nome,
                 "status_label": row.status,
                 "executor": row.executor,
@@ -405,10 +405,42 @@ def submit_flow(id_fluxo, id_etapa, context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def exec_tarefas(id_chamada, context):
-    chamada = Chamada.query.get(id_chamada)
-    fluxo = flows.query.get(chamada.id_fluxo) if chamada else None
-    execucao = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
-    etapa = Etapas.query.get(execucao.id_etapa) if execucao else None
+    access_token = context['access_token']
+    chamada_raw = Chamada.query.get(id_chamada)
+    chamada=[]
+    
+    solicitante = requests.get(
+            f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
+                    headers={"Authorization": f"Bearer {access_token}"}
+        )
+    chamada.append({
+            "id": chamada_raw.id,
+            "id_fluxo": chamada_raw.id_fluxo,
+            "status": chamada_raw.status,
+            "solicitante": solicitante.json().get("displayName", "Desconhecido") if solicitante else None,
+            "data": chamada_raw.data,
+    })
+    fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).all() if chamada else []
+    execucao = []
+    for row in exec_raw:
+        if row.executor:
+            executor = requests.get(
+                f"https://graph.microsoft.com/v1.0/users/{row.executor}?$select=displayName",
+                        headers={"Authorization": f"Bearer {access_token}"}
+            )
+        else:
+            executor = None
+        execucao.append({
+                "id": row.id,
+                "id_chamada": row.id_chamada,
+                "id_etapa": row.id_etapa,
+                "iniciada_em": row.iniciada_em,
+                "finalizada_em": row.finalizada_em,
+                "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
+                "assumida_em": row.assumida_em
+            })
+    etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
     return render_template(
         "execTarefas.html",

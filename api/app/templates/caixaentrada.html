@@ -114,9 +114,10 @@
                         <tbody>
                             {% for pendencia in pendencias %}
                                 <tr
-                                    class="imp-request-row"
+                                    class="imp-request-row js-clickable-row"
+                                    data-href="{{ url_for('exec_tarefas', id_chamada=pendencia.protocolo) }}"
                                     data-request-row
-                                    data-request-id="{{ pendencia.id }}"
+                                    data-request-id="{{ pendencia.protocolo }}"
                                     data-requester="{{ pendencia.solicitante }}"
                                     data-owner="{% if not pendencia.executor %}unassigned{% elif pendencia.executor == user_oid %}mine{% else %}other{% endif %}"
                                     data-deadline="{{ pendencia.prazo.isoformat() if pendencia.prazo else '' }}"
