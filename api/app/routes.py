@@ -101,8 +101,7 @@ def carregar_info_form():
         registros = dados.get("value") or dados.get("items") or dados.get("data") or []
     elif isinstance(dados, list):
         registros = dados
-    else:
-        registros = []
+    print(registros)
     
     for colig in registros:
         print(colig)
