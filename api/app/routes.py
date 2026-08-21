@@ -85,47 +85,96 @@ def with_info_user(view_func):
 
 def carregar_info_form():
     credentials = base64.b64encode(
-    f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()).decode()
-    user_email = g.info_user.get("mail")
-    user = user_email.split("@")[0]
-    print(user)
-    g.coligMov = requests.get(
-        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}",
-        headers={"Authorization": f"Basic {credentials}"}
-    )
-    coligadas = {}
-    movimentos = {}
-    ccusto = {}
-    dados =  g.coligMov.json()  # pode ser lista ou dict, depende da API
-    if isinstance(dados, dict):
-        registros = dados.get("value") or dados.get("items") or dados.get("data") or []
-    elif isinstance(dados, list):
-        registros = dados
-    print(registros)
-    
-    for colig in registros:
-        print(colig)
-        if colig.get("TIPO") == "COLIGADA":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            if label not in coligadas.values() and valor not in coligadas.keys():
-                coligadas[valor] = label
-        elif colig.get("TIPO") == "MOVIMENTO":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            if label not in movimentos.values() and valor not in movimentos.keys():
-                movimentos[valor] = label
-        elif colig.get("TIPO") == "CENTRO DE CUSTO":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            if label not in ccusto.values() and valor not in ccusto.keys():
-                ccusto[valor] = label
-    g.coligadasUnic = coligadas.items()
-    print(coligadas)
-    print(g.coligadasUnic)
-    g.movimentosUnic = movimentos.items()
-    g.ccustoUnic = ccusto.items()
+        f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()
+    ).decode()
 
+    user_email = (g.info_user.get("mail") or "").strip()
+    if not user_email or "@" not in user_email:
+        g.coligadasUnic = []
+        g.movimentosUnic = []
+        g.ccustoUnic = []
+        print("mail inválido:", user_email)
+        return
+
+    user = user_email.split("@")[0]
+    url = (
+        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/"
+        f"api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}"
+    )
+
+    resp = requests.get(
+        url,
+        headers={"Authorization": f"Basic {credentials}"},
+        timeout=20
+    )
+
+    print("STATUS:", resp.status_code)
+    print("CONTENT-TYPE:", resp.headers.get("Content-Type"))
+    print("TEXT (500):", resp.text[:500])  # debug curto
+
+    resp.raise_for_status()
+
+    try:
+        dados = resp.json()
+    except ValueError:
+        print("Resposta não é JSON")
+        g.coligadasUnic = []
+        g.movimentosUnic = []
+        g.ccustoUnic = []
+        return
+
+    # RM pode devolver em vários formatos
+    registros = []
+    if isinstance(dados, list):
+        registros = dados
+    elif isinstance(dados, dict):
+        registros = (
+            dados.get("value")
+            or dados.get("items")
+            or dados.get("data")
+            or dados.get("resultado")
+            or dados.get("results")
+            or []
+        )
+        # fallback: às vezes o dict já é 1 registro
+        if not registros and all(k in dados for k in ("TIPO",)):
+            registros = [dados]
+
+    print("QTD REGISTROS:", len(registros))
+
+    coligadas, movimentos, ccusto = {}, {}, {}
+
+    for colig in registros:
+        if not isinstance(colig, dict):
+            continue
+
+        tipo = (colig.get("TIPO") or "").strip().upper()
+
+        if tipo == "COLIGADA":
+            label = colig.get("LABELCOLIG")
+            valor = colig.get("VALORCOLIG")
+            if label and valor and valor not in coligadas:
+                coligadas[valor] = label
+
+        elif tipo == "MOVIMENTO":
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
+            if label and valor and valor not in movimentos:
+                movimentos[valor] = label
+
+        elif tipo == "CENTRO DE CUSTO":
+            label = colig.get("LABELCCUSTO")   # <- aqui era LABELMOV antes
+            valor = colig.get("VALORCCUSTO")   # <- aqui era VALORMOV antes
+            if label and valor and valor not in ccusto:
+                ccusto[valor] = label
+
+    g.coligadasUnic = list(coligadas.items())
+    g.movimentosUnic = list(movimentos.items())
+    g.ccustoUnic = list(ccusto.items())
+
+    print("COLIGADAS:", len(g.coligadasUnic))
+    print("MOVIMENTOS:", len(g.movimentosUnic))
+    print("CCUSTO:", len(g.ccustoUnic))
 @app.context_processor
 def inject_info_user():
     return {
