@@ -97,25 +97,20 @@ def carregar_info_form():
         return
 
     user = user_email.split("@")[0]
-    url = (
-        "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/"
-        f"api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G?parameters=USUARIO={user}"
+    g.coligMov = requests.get(
+        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
     )
 
-    resp = requests.get(
-        url,
-        headers={"Authorization": f"Basic {credentials}"},
-        timeout=20
-    )
 
-    print("STATUS:", resp.status_code)
-    print("CONTENT-TYPE:", resp.headers.get("Content-Type"))
-    print("TEXT (500):", resp.text[:500])  # debug curto
+    print("STATUS:", g.coligMov.status_code)
+    print("CONTENT-TYPE:", g.coligMov.headers.get("Content-Type"))
+    print("TEXT (500):", g.coligMov.text[:500])  # debug curto
 
-    resp.raise_for_status()
+    g.coligMov.raise_for_status()
 
     try:
-        dados = resp.json()
+        dados = g.coligMov.json()
     except ValueError:
         print("Resposta não é JSON")
         g.coligadasUnic = []
@@ -123,7 +118,6 @@ def carregar_info_form():
         g.ccustoUnic = []
         return
 
-    # RM pode devolver em vários formatos
     registros = []
     if isinstance(dados, list):
         registros = dados
