@@ -508,19 +508,6 @@
                                 data-centro-custo-combobox
                             >
 
-                                <input
-                                    id="centro_custo_search"
-                                    type="search"
-                                    class="form-control"
-                                    placeholder="Pesquise por código ou descrição"
-                                    autocomplete="off"
-                                    role="combobox"
-                                    aria-autocomplete="list"
-                                    aria-expanded="false"
-                                    aria-controls="centroCustoDropdown"
-                                    data-centro-custo-search
-                                    disabled
-                                >
 
                                 <input
                                     id="centro_custo"
@@ -532,65 +519,21 @@
 
                                 <select
                                     data-centro-custo-source
-                                    hidden
-                                    disabled
+                                    class="form-select"
+                                    autocomplete="organization"
+                                    required
                                 >
+                                    {% for key, label in g.ccustoUnic %}
 
-                                    {% if g.ccusto is defined and g.ccusto %}
+                                        <option
+                                            value="{{ key }}"
+                                            data-coligada="{{ label }}"
+                                        >
+                                            {{ label }}
+                                        </option>
 
-                                        {% for centro in g.ccusto.json() %}
+                                    {% endfor %}
 
-                                            {% set centro_codigo =
-                                                centro.get('CODCCUSTO')
-                                                or centro.get('CODCENTROCUSTO')
-                                                or centro.get('VALORCCUSTO')
-                                                or centro.get('CODIGO')
-                                                or centro.get('VALUE')
-                                                or centro.get('ID')
-                                            %}
-
-                                            {% set centro_descricao =
-                                                centro.get('NOME')
-                                                or centro.get('NOMECCUSTO')
-                                                or centro.get('LABELCCUSTO')
-                                                or centro.get('DESCRICAO')
-                                                or centro.get('DESCR')
-                                                or centro.get('LABEL')
-                                            %}
-
-                                            {% set centro_coligada =
-                                                centro.get('CODCOLIGADA')
-                                                or centro.get('CODCOLIG')
-                                                or centro.get('VALORCOLIG')
-                                                or centro.get('IDCOLIGADA')
-                                                or centro.get('COLIGADA')
-                                                or ''
-                                            %}
-
-                                            {% if centro_codigo or centro_descricao %}
-
-                                                <option
-                                                    value="{{ centro_codigo or centro_descricao }}"
-                                                    data-coligada="{{ centro_coligada }}"
-                                                >
-
-                                                    {% if centro_codigo and centro_descricao %}
-
-                                                        {{ centro_codigo }} - {{ centro_descricao }}
-
-                                                    {% else %}
-
-                                                        {{ centro_codigo or centro_descricao }}
-
-                                                    {% endif %}
-
-                                                </option>
-
-                                            {% endif %}
-
-                                        {% endfor %}
-
-                                    {% endif %}
 
                                 </select>
 
