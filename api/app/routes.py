@@ -144,8 +144,8 @@ def carregar_info_form():
         tipo = (colig.get("TIPO") or "").strip().upper()
 
         if tipo == "COLIGADA":
-            label = colig.get("LABELCOLIG")
-            valor = colig.get("VALORCOLIG")
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
             if label and valor and valor not in coligadas:
                 coligadas[valor] = label
 
@@ -156,8 +156,8 @@ def carregar_info_form():
                 movimentos[valor] = label
 
         elif tipo == "CENTRO DE CUSTO":
-            label = colig.get("LABELCCUSTO")   # <- aqui era LABELMOV antes
-            valor = colig.get("VALORCCUSTO")   # <- aqui era VALORMOV antes
+            label = colig.get("LABELMOV")   # <- aqui era LABELMOV antes
+            valor = colig.get("VALORMOV")   # <- aqui era VALORMOV antes
             if label and valor and valor not in ccusto:
                 ccusto[valor] = label
 
