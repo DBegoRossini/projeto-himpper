@@ -105,6 +105,7 @@ def carregar_info_form():
         registros = []
     
     for colig in registros:
+        print(colig)
         if colig.get("TIPO") == "COLIGADA":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
@@ -121,6 +122,8 @@ def carregar_info_form():
             if label not in ccusto.values() and valor not in ccusto.keys():
                 ccusto[valor] = label
     g.coligadasUnic = coligadas.items()
+    print(coligadas)
+    print(g.coligadasUnic)
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
 
