@@ -24,15 +24,30 @@ except Exception as e:
     print("REDIS ERROR:", repr(e))
 
 db_host = os.getenv("DB_HOST")
-db_port = os.getenv("DB_PORT")
-db_name = os.getenv("DB_NAME")
-db_user = os.getenv("us_banco")
-db_pass = os.getenv("senha_banco")
+db_port = os.getenv("DB_PORT", "5432")
+db_name = os.getenv("DB_NAME", "automacoes")
+db_user = os.getenv("us_banco") or os.getenv("DB_USER")
+db_pass = os.getenv("senha_banco") or os.getenv("DB_PASSWORD")
 
-db_url = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
+database_url = os.getenv("DATABASE_URL")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+# Se vier URL pronta do Coolify, normaliza e sobrescreve DB para automacoes
+if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    # força uso do banco automacoes
+    from urllib.parse import urlsplit, urlunsplit
+    parts = urlsplit(database_url)
+    database_url = urlunsplit((parts.scheme, parts.netloc, "/automacoes", parts.query, parts.fragment))
+else:
+    database_url = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/automacoes"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "connect_args": {"options": "-csearch_path=public"}
+}
 
 database = SQLAlchemy(app)
 
