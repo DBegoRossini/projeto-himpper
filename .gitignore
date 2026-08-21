@@ -12,6 +12,8 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+*__init__.py
+*app_config.py
 
 
 # Logs
