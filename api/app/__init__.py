@@ -1,37 +1,38 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from identity.flask import Auth
 import os
 import app_config
-from sshtunnel import SSHTunnelForwarder
-from paramiko import Ed25519Key
+from urllib.parse import quote_plus
+from flask import Flask
+from flask_session import Session
+from werkzeug.middleware.proxy_fix import ProxyFix
+import redis as redis_lib
 
 app = Flask(__name__)
-app.config.from_object(app_config)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+app.config.from_object("app_config")
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'instance'))
+Session(app)
 
-SSH_HOST = '179.198.114.158'
-SSH_PORT = 22
-SSH_USER = app_config.SS_USER
-SSH_KEY = app_config.SS_PATH 
-SSH_PASSPHRASE = app_config.SSH_PASSPHRASE   
-pkey = Ed25519Key.from_private_key_file(SSH_KEY, password=SSH_PASSPHRASE)
+redis_url = app.config.get("SESSION_REDIS_URL") or os.getenv("SESSION_REDIS_URL") or os.getenv("REDIS_URL")
+print("SESSION REDIS URL EXISTS?", bool(redis_url))
 
-tunnel = SSHTunnelForwarder(
-    (SSH_HOST, SSH_PORT),
-    ssh_username=SSH_USER,
-    ssh_pkey=pkey,
-    remote_bind_address=('127.0.0.1', 5432)
-)
+try:
+    r = redis_lib.from_url(redis_url)
+    print("REDIS PING:", r.ping())
+except Exception as e:
+    print("REDIS ERROR:", repr(e))
 
-tunnel.start()
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("DB_NAME")
+db_user = os.getenv("us_banco")
+db_pass = os.getenv("senha_banco")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f'postgresql://{app_config.US_BANCO}:{app_config.SENHA_BANCO}'
-    f'@127.0.0.1:{tunnel.local_bind_port}/automacoes'
-)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db_url = f"postgresql://{quote_plus(db_user)}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 database = SQLAlchemy(app)
 
