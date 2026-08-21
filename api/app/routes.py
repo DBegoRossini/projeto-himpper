@@ -95,11 +95,11 @@ def carregar_info_form():
     )
     coligadas = {}
     movimentos = {}
-    ccustos = {}
-    for colig in g.coligMov:
+    ccusto = {}
+    for colig in g.coligMov.json():
         if colig.get("TIPO") == "COLIGADA":
-            label = colig.get("LABELCOLIG")
-            valor = colig.get("VALORCOLIG")
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
             if label not in coligadas.values() and valor not in coligadas.keys():
                 coligadas[valor] = label
         elif colig.get("TIPO") == "MOVIMENTO":
@@ -108,14 +108,13 @@ def carregar_info_form():
             if label not in movimentos.values() and valor not in movimentos.keys():
                 movimentos[valor] = label
         elif colig.get("TIPO") == "CENTRO DE CUSTO":
-            label = colig.get("LABELCCUSTO")
-            valor = colig.get("VALORCCUSTO")
-            if label not in ccustos.values() and valor not in ccustos.keys():
-                ccustos[valor] = label
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
+            if label not in ccusto.values() and valor not in ccusto.keys():
+                ccusto[valor] = label
     g.coligadasUnic = coligadas.items()
     g.movimentosUnic = movimentos.items()
-    g.ccustosUnic = ccustos.items()
-
+    g.ccustoUnic = ccusto.items()
 
 @app.context_processor
 def inject_info_user():
