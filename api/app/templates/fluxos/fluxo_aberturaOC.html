@@ -536,16 +536,16 @@
                                     disabled
                                 >
 
-                                    {% if g.ccusto is defined and g.ccusto %}
+                                    {% if g.coligMov is defined and g.coligMov %}
 
-                                        {% for centro in g.ccusto.json() %}
-
+                                        {% for centro in g.coligMov.json() %}
+                                        {% if centro.get('TIPO') == 'CENTRO DE CUSTO' %}
                                             {% set centro_codigo =
                                                 centro.get('CODCCUSTO')
                                                 or centro.get('CODCENTROCUSTO')
                                                 or centro.get('VALORCCUSTO')
                                                 or centro.get('CODIGO')
-                                                or centro.get('VALUE')
+                                                or centro.get('VALORMOV')
                                                 or centro.get('ID')
                                             %}
 
@@ -555,9 +555,10 @@
                                                 or centro.get('LABELCCUSTO')
                                                 or centro.get('DESCRICAO')
                                                 or centro.get('DESCR')
-                                                or centro.get('LABEL')
+                                                or centro.get('LABELMOV')
                                             %}
-
+                                        {% endif %}
+                                        {% if centro.get('TIPO') == 'COLIGADA' %}
                                             {% set centro_coligada =
                                                 centro.get('CODCOLIGADA')
                                                 or centro.get('CODCOLIG')
@@ -566,6 +567,7 @@
                                                 or centro.get('COLIGADA')
                                                 or ''
                                             %}
+                                        {% endif %}
 
                                             {% if centro_codigo or centro_descricao %}
 

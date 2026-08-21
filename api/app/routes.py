@@ -94,17 +94,28 @@ def carregar_info_form():
         headers={"Authorization": f"Basic {credentials}"}
     )
     coligadas = {}
+    movimentos = {}
+    ccustos = {}
     for colig in g.coligMov.json():
-        label = colig.get("LABELCOLIG")
-        valor = colig.get("VALORCOLIG")
-        if label not in coligadas.values() and valor not in coligadas.keys():
-            coligadas[valor] = label
+        if colig.get("TIPO") == "COLIGADA":
+            label = colig.get("LABELCOLIG")
+            valor = colig.get("VALORCOLIG")
+            if label not in coligadas.values() and valor not in coligadas.keys():
+                coligadas[valor] = label
+        elif colig.get("TIPO") == "MOVIMENTO":
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
+            if label not in movimentos.values() and valor not in movimentos.keys():
+                movimentos[valor] = label
+        elif colig.get("TIPO") == "CENTRO DE CUSTO":
+            label = colig.get("LABELCCUSTO")
+            valor = colig.get("VALORCCUSTO")
+            if label not in ccustos.values() and valor not in ccustos.keys():
+                ccustos[valor] = label
     g.coligadasUnic = coligadas.items()
+    g.movimentosUnic = movimentos.items()
+    g.ccustosUnic = ccustos.items()
 
-    g.ccusto = requests.get(
-        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/TESTEDBR/1/G?parameters=USUARIO={user}",
-                headers={"Authorization": f"Basic {credentials}"}
-)
 
 @app.context_processor
 def inject_info_user():
@@ -325,10 +336,10 @@ def ini_flow(id_fluxo, context):
     )
 
 
-@app.route("/flow/<id_fluxo>/<id_etapa>/<acao>", methods=["POST", "GET"])
+@app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def submit_flow(id_fluxo, id_etapa, context, acao):
+def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
     if flask_request.method == "POST":
         form_data = dict(flask_request.form)
@@ -345,7 +356,6 @@ def submit_flow(id_fluxo, id_etapa, context, acao):
         "id_fluxo": id_fluxo,
         "solicitante": user.get("oid") or user.get("id"),
         "id_chamada": id_etapa,
-        "acao": acao,
         **form_data 
         }
 

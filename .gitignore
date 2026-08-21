@@ -7,7 +7,7 @@
 venv/
 env/
 
-*__init__.py
+*app/__init__.py
 *app_config.py
 
 # Bytecode Python
