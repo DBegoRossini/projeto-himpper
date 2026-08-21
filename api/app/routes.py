@@ -105,21 +105,18 @@ def carregar_info_form():
         headers={"Authorization": f"Basic {credentials}"}
     )
 
-
-    print("STATUS:", g.coligMov.status_code)
-    print("CONTENT-TYPE:", g.coligMov.headers.get("Content-Type"))
-    print("TEXT (500):", g.coligMov.text[:500])  # debug curto
-
-    g.coligMov.raise_for_status()
+    print(g.coligMov)
 
     try:
         dados = g.coligMov.json()
+        
     except ValueError:
         print("Resposta não é JSON")
         g.coligadasUnic = []
         g.movimentosUnic = []
         g.ccustoUnic = []
         return
+    print(dados)
 
     registros = []
     if isinstance(dados, list):
@@ -133,13 +130,13 @@ def carregar_info_form():
             or dados.get("results")
             or []
         )
-        # fallback: às vezes o dict já é 1 registro
         if not registros and all(k in dados for k in ("TIPO",)):
             registros = [dados]
+    print(registros)
 
-    print("QTD REGISTROS:", len(registros))
-
-    coligadas, movimentos, ccusto = {}, {}, {}
+    coligadas = {}
+    movimentos = {}
+    ccusto = {}
 
     for colig in registros:
         if not isinstance(colig, dict):
