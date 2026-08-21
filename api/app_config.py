@@ -22,7 +22,7 @@ if not redis_url:
     raise RuntimeError("Defina SESSION_REDIS_URL ou REDIS_URL no ambiente.")
 
 SESSION_TYPE = "redis"
-SESSION_REDIS = redis.from_url(redis_url, decode_responses=False)
+SESSION_REDIS = Redis.from_url(redis_url, decode_responses=False)
 SESSION_USE_SIGNER = True
 SESSION_PERMANENT = False
 SESSION_COOKIE_SECURE = True
