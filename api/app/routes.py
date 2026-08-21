@@ -85,7 +85,7 @@ def with_info_user(view_func):
 
 def carregar_info_form():
     credentials = base64.b64encode(
-        f"{os.getenv('rm_user')}:{os.getenv('rm_senha')}".encode()
+        f"{os.getenv('rm_user')}:{base64.b64decode(os.getenv('rm_senha')).decode()}".encode()
     ).decode()
 
     print(os.getenv('rm_user'))
