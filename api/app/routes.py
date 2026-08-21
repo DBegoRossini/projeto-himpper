@@ -114,7 +114,7 @@ def carregar_info_form():
     g.coligadasUnic = coligadas.items()
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
-    
+
 @app.context_processor
 def inject_info_user():
     return {
@@ -343,10 +343,10 @@ def ini_flow(id_fluxo, context):
     )
 
 
-@app.route("/flow/<id_fluxo>/<id_etapa>/<acao>", methods=["POST", "GET"])
+@app.route("/flow/<id_fluxo>/<id_etapa>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def submit_flow(id_fluxo, id_etapa, context, acao):
+def submit_flow(id_fluxo, id_etapa, context):
     form_data = {}
     if flask_request.method == "POST":
         form_data = dict(flask_request.form)
@@ -363,8 +363,7 @@ def submit_flow(id_fluxo, id_etapa, context, acao):
         "id_fluxo": id_fluxo,
         "solicitante": user.get("oid") or user.get("id"),
         "id_chamada": id_etapa,
-        "acao": acao,
-        **form_data 
+        **form_data
         }
 
         files = []
