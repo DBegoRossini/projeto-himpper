@@ -664,37 +664,21 @@
 
                         {% if editaveis.total > 0 %}
 
-                            <button
-                                type="button"
-                                class="btn btn-neutral"
-                                data-execution-save
-                            >
+                            <button type="button" class="btn btn-neutral">
                                 Salvar alterações
                             </button>
 
                         {% endif %}
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary"
-                            data-execution-correction
-                        >
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#correctionModal">
                             Pedir correção
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-execution-complete
-                        >
+                        <button      type="button" class="btn btn-primary">
                             Concluir
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger"
-                            data-execution-cancel
-                        >
+                        <button type="button" class="btn btn-outline-danger">
                             Cancelar
                         </button>
 
@@ -725,6 +709,147 @@
         </footer>
 
     </section>
+
+    {% if pode_editar %}
+
+        <div
+            class="modal fade"
+            id="correctionModal"
+            tabindex="-1"
+            aria-labelledby="correctionModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <div>
+                            <span class="imp-kicker">
+                                Solicitação #{{ id_chamada }}
+                            </span>
+
+                            <h2
+                                class="modal-title fs-5"
+                                id="correctionModalLabel"
+                            >
+                                Pedir correção
+                            </h2>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fechar"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="imp-stack imp-gap-5">
+
+                            <div>
+                                <p class="imp-subtitle mb-0">
+                                    Informe para qual etapa a solicitação deverá retornar
+                                    e descreva o que precisa ser corrigido.
+                                </p>
+                            </div>
+
+                            <div class="imp-field">
+
+                                <label
+                                    class="imp-label"
+                                    for="correctionTarget"
+                                >
+                                    Enviar correção para
+                                    <span class="imp-label__required">*</span>
+                                </label>
+
+                                <select
+                                    id="correctionTarget"
+                                    name="correction_target"
+                                    class="form-select"
+                                    required
+                                    data-correction-target
+                                >
+                                    <option value="" selected disabled>
+                                        Selecione uma etapa
+                                    </option>
+
+                                    <option value="ETAPA_CORRECAO_1">
+                                        Etapa de correção 1
+                                    </option>
+
+                                    <option value="ETAPA_CORRECAO_2">
+                                        Etapa de correção 2
+                                    </option>
+
+                                </select>
+
+                                <p class="imp-help">
+                                    A solicitação será encaminhada para a etapa selecionada.
+                                </p>
+
+                            </div>
+
+                            <div class="imp-field">
+
+                                <label
+                                    class="imp-label"
+                                    for="correctionReason"
+                                >
+                                    Motivo da correção
+                                    <span class="imp-label__required">*</span>
+                                </label>
+
+                                <textarea
+                                    id="correctionReason"
+                                    name="correction_reason"
+                                    class="form-control"
+                                    rows="5"
+                                    placeholder="Descreva claramente o que precisa ser corrigido..."
+                                    required
+                                    data-correction-reason
+                                ></textarea>
+
+                                <p class="imp-help">
+                                    Essa informação ficará disponível para o responsável
+                                    que receber a solicitação.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-neutral"
+                            data-bs-dismiss="modal"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-correction-submit
+                        >
+                            Pedir correção
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 
     <script
         defer
