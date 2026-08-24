@@ -45,7 +45,8 @@
                     </h2>
 
                     <p class="imp-subtitle mb-0">
-                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade, preencha os campos da etapa atual.
+                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade,
+                        preencha os campos da etapa atual.
                     </p>
 
                 </div>
@@ -247,7 +248,8 @@
                     </strong>
 
                     <p>
-                        Você pode consultar os dados da solicitação, mas os campos da etapa atual só serão liberados após assumir a tarefa.
+                        Você pode consultar os dados da solicitação, mas os campos da etapa atual
+                        só serão liberados após assumir a tarefa.
                     </p>
 
                 </div>
@@ -272,7 +274,8 @@
                     </strong>
 
                     <p>
-                        Os dados permanecem disponíveis para consulta, mas não podem ser alterados por você nesta execução.
+                        Os dados permanecem disponíveis para consulta,
+                        mas não podem ser alterados por você nesta execução.
                     </p>
 
                 </div>
@@ -635,28 +638,31 @@
                         </strong>
 
                         <p>
-                            A etapa está sob sua responsabilidade, mas não existem campos marcados como editáveis para esta execução.
+                            Esta etapa não possui campos adicionais para preenchimento.
+                            Você ainda pode concluir, pedir correção ou cancelar a tarefa.
                         </p>
 
                     </div>
 
-                {% else %}
+                {% endif %}
 
-                    <div class="imp-execution-actions">
+                <div class="imp-execution-actions">
 
-                        <div class="imp-execution-actions__copy">
+                    <div class="imp-execution-actions__copy">
 
-                            <strong>
-                                Revise as informações antes de concluir.
-                            </strong>
+                        <strong>
+                            Revise a solicitação antes de prosseguir.
+                        </strong>
 
-                            <span>
-                                Somente os campos desta seção poderão ser alterados.
-                            </span>
+                        <span>
+                            Escolha a ação que deseja realizar nesta etapa.
+                        </span>
 
-                        </div>
+                    </div>
 
-                        <div class="d-flex flex-column flex-sm-row gap-2">
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+
+                        {% if editaveis.total > 0 %}
 
                             <button
                                 type="button"
@@ -666,19 +672,35 @@
                                 Salvar alterações
                             </button>
 
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                data-execution-complete
-                            >
-                                Concluir etapa
-                            </button>
+                        {% endif %}
 
-                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            data-execution-correction
+                        >
+                            Pedir correção
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-execution-complete
+                        >
+                            Concluir
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger"
+                            data-execution-cancel
+                        >
+                            Cancelar
+                        </button>
 
                     </div>
 
-                {% endif %}
+                </div>
 
             </section>
 
