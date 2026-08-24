@@ -438,7 +438,8 @@ def exec_tarefas(id_chamada, context):
                 "iniciada_em": row.iniciada_em,
                 "finalizada_em": row.finalizada_em,
                 "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
-                "assumida_em": row.assumida_em
+                "assumida_em": row.assumida_em,
+                "comentarios": row.comentarios
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
