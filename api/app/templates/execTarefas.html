@@ -320,9 +320,10 @@
                         {% set valor = formulario.valor %}
                         {% set valor_texto = valor|string if valor is not none else '' %}
                         {% set possui_valor = valor is not none and valor_texto|trim != '' %}
-                        {% set mostrar_leitura = possui_valor and (not pode_editar or not formulario.editavel) %}
+                        {% set campo_editavel = formulario.editavel|string|lower in ['1', 'true'] %}
+                        {% set mostrar_leitura = possui_valor and not campo_editavel %}
                         {% set campo_label = formulario.campo|replace('_', ' ')|replace('-', ' ')|title if formulario.campo else 'Campo sem identificação' %}
-                        {% set campo_longo = tipo == 'string' and valor_texto|length > 120 %}
+                        {% set campo_longo = tipo == 'string' and valor_texto|length > 10000000 %}
 
                         {% if mostrar_leitura %}
 
@@ -464,8 +465,8 @@
                 >
 
                     {% for formulario in formularios %}
-
-                        {% if formulario.editavel %}
+                        {% set campo_editavel = formulario.editavel|string|lower in ['1', 'true'] %}
+                        {% if campo_editavel %}
 
                             {% set editaveis.total = editaveis.total + 1 %}
                             {% set tipo = (formulario.tp_campo or 'string')|lower %}
@@ -674,11 +675,11 @@
                             Pedir correção
                         </button>
 
-                        <button      type="button" class="btn btn-primary">
+                        <button      type="button" class="btn btn-primary" onclick="enviarFormulario(document, 3, 'OC-00')">
                             Concluir
                         </button>
 
-                        <button type="button" class="btn btn-outline-danger">
+                        <button type="button" class="btn btn-outline-danger" onclick="enviarFormulario(document, 3, 'OC-00')">
                             Cancelar
                         </button>
 
@@ -839,6 +840,7 @@
                             type="button"
                             class="btn btn-primary"
                             data-correction-submit
+                            onclick="enviarFormulario(document, 3, 'OC-00')"
                         >
                             Pedir correção
                         </button>
