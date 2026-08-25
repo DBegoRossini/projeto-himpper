@@ -13,10 +13,8 @@
 
 {% block main %}
 
-    {% set user_oid = user.get('oid') or user.get('id') %}
-    {% set executor_id = execucao.executor|string if execucao and execucao.executor else '' %}
-    {% set usuario_id = user_oid|string if user_oid else '' %}
-    {% set pode_editar = execucao and executor_id != '' and executor_id == usuario_id %}
+    {% set executor_id = execucao[0].executor_id|string if execucao and execucao[0].executor_id else '' %}
+    {% set pode_editar = execucao and executor_id != '' and executor_id == user_id %}
 
     <link
         rel="stylesheet"
@@ -59,7 +57,7 @@
                             Sem execução aberta
                         </span>
 
-                    {% elif not execucao.executor %}
+                    {% elif not execucao[0].executor %}
 
                         <span class="badge rounded-pill imp-badge imp-badge--warning">
                             Não assumida
@@ -691,7 +689,7 @@
                             </button>
 
                         {% endif %}
-
+                        
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#correctionModal">
                             Pedir correção
                         </button>
@@ -800,13 +798,11 @@
                                         Selecione uma etapa
                                     </option>
 
-                                    <option value="ETAPA_CORRECAO_1">
-                                        Etapa de correção 1
-                                    </option>
-
-                                    <option value="ETAPA_CORRECAO_2">
-                                        Etapa de correção 2
-                                    </option>
+                                    {% for etapa in etapas_correcao %}
+                                        <option value="{{ etapa.id }}">
+                                            {{ etapa.nome }}
+                                        </option>
+                                    {% endfor %}
 
                                 </select>
 
@@ -856,15 +852,14 @@
                         >
                             Voltar
                         </button>
-
-                        <button
+                        <button 
+                            onclick="enviarEtapa(document, '{{ id_chamada }}','OC-01', 'Selecionado')"
                             type="button"
                             class="btn btn-primary"
                             data-correction-submit
                         >
                             Pedir correção
                         </button>
-
                     </div>
 
                 </div>

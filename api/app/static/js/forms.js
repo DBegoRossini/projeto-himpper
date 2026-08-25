@@ -212,8 +212,11 @@
   });
 })();
 
-async function enviarFormulario(document, id_fluxo, id_etapa, acao) {
-  const form = document.querySelector('form');
+async function enviarFormulario(document, id_fluxo, id_etapa) {
+  let form = document.querySelector('form');
+  if (!form) {
+    form = document
+  }
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
       .filter(f => f.id);
   const formData = new FormData();
@@ -226,11 +229,43 @@ async function enviarFormulario(document, id_fluxo, id_etapa, acao) {
       formData.append(field.id, field.value);
     }
   });
-  
+
+  if (id_etapa === 'Selecionado'){
+    const etapaSelect = document.getElementById('correctionTarget');
+    id_etapa = etapaSelect.value
+  } 
    const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
       method: 'POST',
       body: formData
     });
-  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}/${acao}`;
+  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}`;
   return formData;
-}
+};
+
+async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
+  const form = document
+  const fields = Array.from(form.querySelectorAll('input, textarea, select'))
+      .filter(f => f.id);
+  const formData = new FormData();
+  fields.forEach(field => {
+    if (field.type === 'file'){
+      Array.from(field.files || []).forEach(file => {
+        if (file.size > 0) formData.append(field.id, file);
+      });
+    } else if (field.type !== 'radio' || field.checked){
+      formData.append(field.id, field.value);
+    }
+  });
+
+  if (id_etapa === 'Selecionado'){
+    const etapaSelect = document.getElementById('correctionTarget');
+    id_etapa = etapaSelect.value
+  }
+   console.log(id_etapa);
+   const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
+      method: 'POST',
+      body: formData
+    });
+  window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
+  return formData;
+};

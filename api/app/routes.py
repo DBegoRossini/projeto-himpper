@@ -363,10 +363,7 @@ def submit_flow(id_fluxo, id_etapa, context):
         for key in flask_request.files:
             files[key] = flask_request.files.getlist(key)
         user = context['user']
-        nome = user.get("name")
-        print(id_etapa)
         url = f"https://n8n.grupoimpper.com.br/webhook/{id_etapa}"
-        print(url)
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         data = {
         "id_fluxo": id_fluxo,
@@ -374,18 +371,16 @@ def submit_flow(id_fluxo, id_etapa, context):
         "id_chamada": id_etapa,
         **form_data
         }
-
         files = []
         for key in flask_request.files:
             for file in flask_request.files.getlist(key):
                 if file.filename:
                     files.append((key, (file.filename, file.stream, file.content_type)))
-
         try:
             resp = requests.post(
             url,
             headers=headers,
-            data=data, 
+            data=data,
             files=files if files else None, 
             timeout=10
         )
@@ -400,11 +395,56 @@ def submit_flow(id_fluxo, id_etapa, context):
         message="Solicitação enviada com sucesso!" if flask_request.method == "POST" else None
     )
 
+@app.route("/exec/<id_etapa>/<id_chamada>/<id_proxet>", methods=["POST", "GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def execFlow(id_etapa, id_chamada, id_proxet, context):
+    form_data = {}
+    if flask_request.method == "POST":
+        form_data = dict(flask_request.form)
+        files = {}
+        for key in flask_request.files:
+            files[key] = flask_request.files.getlist(key)
+        user = context['user']
+        url = f"https://n8n.grupoimpper.com.br/webhook/{id_etapa}"
+        headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
+        print("ID ETAPA:", id_etapa)
+        responsavel = Etapas.query.get(id_etapa).responsaveis
+        if responsavel == "Solicitante":
+            resp = Chamada.query.get(id_chamada).solicitante
+        else:
+            resp = None
+        data = {
+        "id_chamada": id_chamada,
+        "id_etapa": id_proxet,
+        "responsavel": resp,
+        **form_data
+        }
+        files = []
+        for key in flask_request.files:
+            for file in flask_request.files.getlist(key):
+                if file.filename:
+                    files.append((key, (file.filename, file.stream, file.content_type)))
+        try:
+            resp = requests.post(
+            url,
+            headers=headers,
+            data=data,
+            files=files if files else None, 
+            timeout=10
+        )
+            print("STATUS:", resp.status_code, "BODY:", resp.text)
+        except requests.exceptions.RequestException as e:
+            print("ERRO DE CONEXÃO:", repr(e))
+
+    return redirect(url_for("caixaentrada"))
+
 
 @app.route("/execucao/<int:id_chamada>")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def exec_tarefas(id_chamada, context):
+    user_oid = context['user'].get("oid") or context['user'].get("id")
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
@@ -438,10 +478,11 @@ def exec_tarefas(id_chamada, context):
                 "iniciada_em": exec_raw.iniciada_em,
                 "finalizada_em": exec_raw.finalizada_em,
                 "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
-                "assumida_em": exec_raw.assumida_em,
-               # "comentarios": exec_raw.comentarios
+                "executor_id": exec_raw.executor,
+                "assumida_em": exec_raw.assumida_em
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
+    etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
     formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
     return render_template(
         "execTarefas.html",
@@ -451,7 +492,9 @@ def exec_tarefas(id_chamada, context):
         fluxo=fluxo,
         execucao=execucao,
         etapa=etapa,
-        formularios=formulario
+        formularios=formulario,
+        user_id = user_oid,
+        etapas_correcao=etapas_correcao
     )
 
 def detect_mime(file_bytes: bytes) -> str:
