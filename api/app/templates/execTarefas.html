@@ -45,7 +45,8 @@
                     </h2>
 
                     <p class="imp-subtitle mb-0">
-                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade, preencha os campos da etapa atual.
+                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade,
+                        preencha os campos da etapa atual.
                     </p>
 
                 </div>
@@ -247,7 +248,8 @@
                     </strong>
 
                     <p>
-                        Você pode consultar os dados da solicitação, mas os campos da etapa atual só serão liberados após assumir a tarefa.
+                        Você pode consultar os dados da solicitação, mas os campos da etapa atual
+                        só serão liberados após assumir a tarefa.
                     </p>
 
                 </div>
@@ -272,7 +274,8 @@
                     </strong>
 
                     <p>
-                        Os dados permanecem disponíveis para consulta, mas não podem ser alterados por você nesta execução.
+                        Os dados permanecem disponíveis para consulta,
+                        mas não podem ser alterados por você nesta execução.
                     </p>
 
                 </div>
@@ -635,50 +638,53 @@
                         </strong>
 
                         <p>
-                            A etapa está sob sua responsabilidade, mas não existem campos marcados como editáveis para esta execução.
+                            Esta etapa não possui campos adicionais para preenchimento.
+                            Você ainda pode concluir, pedir correção ou cancelar a tarefa.
                         </p>
 
                     </div>
 
-                {% else %}
+                {% endif %}
 
-                    <div class="imp-execution-actions">
+                <div class="imp-execution-actions">
 
-                        <div class="imp-execution-actions__copy">
+                    <div class="imp-execution-actions__copy">
 
-                            <strong>
-                                Revise as informações antes de concluir.
-                            </strong>
+                        <strong>
+                            Revise a solicitação antes de prosseguir.
+                        </strong>
 
-                            <span>
-                                Somente os campos desta seção poderão ser alterados.
-                            </span>
-
-                        </div>
-
-                        <div class="d-flex flex-column flex-sm-row gap-2">
-
-                            <button
-                                type="button"
-                                class="btn btn-neutral"
-                                data-execution-save
-                            >
-                                Salvar alterações
-                            </button>
-
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                data-execution-complete
-                            >
-                                Concluir etapa
-                            </button>
-
-                        </div>
+                        <span>
+                            Escolha a ação que deseja realizar nesta etapa.
+                        </span>
 
                     </div>
 
-                {% endif %}
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+
+                        {% if editaveis.total > 0 %}
+
+                            <button type="button" class="btn btn-neutral">
+                                Salvar alterações
+                            </button>
+
+                        {% endif %}
+
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#correctionModal">
+                            Pedir correção
+                        </button>
+
+                        <button      type="button" class="btn btn-primary">
+                            Concluir
+                        </button>
+
+                        <button type="button" class="btn btn-outline-danger">
+                            Cancelar
+                        </button>
+
+                    </div>
+
+                </div>
 
             </section>
 
@@ -703,6 +709,147 @@
         </footer>
 
     </section>
+
+    {% if pode_editar %}
+
+        <div
+            class="modal fade"
+            id="correctionModal"
+            tabindex="-1"
+            aria-labelledby="correctionModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <div>
+                            <span class="imp-kicker">
+                                Solicitação #{{ id_chamada }}
+                            </span>
+
+                            <h2
+                                class="modal-title fs-5"
+                                id="correctionModalLabel"
+                            >
+                                Pedir correção
+                            </h2>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fechar"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="imp-stack imp-gap-5">
+
+                            <div>
+                                <p class="imp-subtitle mb-0">
+                                    Informe para qual etapa a solicitação deverá retornar
+                                    e descreva o que precisa ser corrigido.
+                                </p>
+                            </div>
+
+                            <div class="imp-field">
+
+                                <label
+                                    class="imp-label"
+                                    for="correctionTarget"
+                                >
+                                    Enviar correção para
+                                    <span class="imp-label__required">*</span>
+                                </label>
+
+                                <select
+                                    id="correctionTarget"
+                                    name="correction_target"
+                                    class="form-select"
+                                    required
+                                    data-correction-target
+                                >
+                                    <option value="" selected disabled>
+                                        Selecione uma etapa
+                                    </option>
+
+                                    <option value="ETAPA_CORRECAO_1">
+                                        Etapa de correção 1
+                                    </option>
+
+                                    <option value="ETAPA_CORRECAO_2">
+                                        Etapa de correção 2
+                                    </option>
+
+                                </select>
+
+                                <p class="imp-help">
+                                    A solicitação será encaminhada para a etapa selecionada.
+                                </p>
+
+                            </div>
+
+                            <div class="imp-field">
+
+                                <label
+                                    class="imp-label"
+                                    for="correctionReason"
+                                >
+                                    Motivo da correção
+                                    <span class="imp-label__required">*</span>
+                                </label>
+
+                                <textarea
+                                    id="correctionReason"
+                                    name="correction_reason"
+                                    class="form-control"
+                                    rows="5"
+                                    placeholder="Descreva claramente o que precisa ser corrigido..."
+                                    required
+                                    data-correction-reason
+                                ></textarea>
+
+                                <p class="imp-help">
+                                    Essa informação ficará disponível para o responsável
+                                    que receber a solicitação.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-neutral"
+                            data-bs-dismiss="modal"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-correction-submit
+                        >
+                            Pedir correção
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 
     <script
         defer
