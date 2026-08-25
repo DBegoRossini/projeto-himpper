@@ -257,9 +257,9 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
     }
   });
 
-  if (id_etapa === 'Selecionado'){
+  if (id_proxet === 'Selecionado'){
     const etapaSelect = document.getElementById('correctionTarget');
-    id_etapa = etapaSelect.value
+    id_proxet = etapaSelect.value
   }
    console.log(id_etapa);
    const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {

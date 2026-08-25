@@ -409,7 +409,8 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
         url = f"https://n8n.grupoimpper.com.br/webhook/{id_etapa}"
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         print("ID ETAPA:", id_etapa)
-        responsavel = Etapas.query.get(id_etapa).responsaveis
+        responsavel = Etapas.query.get(id_proxet).responsaveis
+        print("RESPONSAVEL:", responsavel)
         if responsavel == "Solicitante":
             resp = Chamada.query.get(id_chamada).solicitante
         else:

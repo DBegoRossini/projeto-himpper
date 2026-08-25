@@ -45,3 +45,4 @@ class Formularios(database.Model):
     campo = database.Column(database.String(100), nullable=False)
     tp_campo = database.Column(database.String(50), nullable=False)
     valor = database.Column(database.String(900), nullable=True)
+    editavel = database.Column(database.String(1), nullable=False)
