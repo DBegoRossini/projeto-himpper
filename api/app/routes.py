@@ -421,25 +421,25 @@ def exec_tarefas(id_chamada, context):
             "data": chamada_raw.data,
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).all() if chamada else []
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
     execucao = []
-    for row in exec_raw:
-        if row.executor:
+    if exec_raw:
+        if exec_raw.executor:
             executor = requests.get(
-                f"https://graph.microsoft.com/v1.0/users/{row.executor}?$select=displayName",
+                f"https://graph.microsoft.com/v1.0/users/{exec_raw.executor}?$select=displayName",
                         headers={"Authorization": f"Bearer {access_token}"}
             )
         else:
             executor = None
         execucao.append({
-                "id": row.id,
-                "id_chamada": row.id_chamada,
-                "id_etapa": row.id_etapa,
-                "iniciada_em": row.iniciada_em,
-                "finalizada_em": row.finalizada_em,
+                "id": exec_raw.id,
+                "id_chamada": exec_raw.id_chamada,
+                "id_etapa": exec_raw.id_etapa,
+                "iniciada_em": exec_raw.iniciada_em,
+                "finalizada_em": exec_raw.finalizada_em,
                 "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
-                "assumida_em": row.assumida_em,
-               # "comentarios": row.comentarios
+                "assumida_em": exec_raw.assumida_em,
+               # "comentarios": exec_raw.comentarios
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None

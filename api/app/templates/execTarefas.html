@@ -154,7 +154,7 @@
                     </dt>
 
                     <dd>
-                        {{ chamada.status if chamada and chamada.status else "Não informado" }}
+                        {{ chamada[0].status if chamada and chamada.status else "Não informado" }}
                     </dd>
 
                 </div>
@@ -167,9 +167,9 @@
 
                     <dd>
 
-                        {% if execucao and execucao.iniciada_em %}
+                        {% if execucao and execucao[0].iniciada_em %}
 
-                            {{ execucao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}
+                            {{ execucao[0].iniciada_em.strftime('%d/%m/%Y %H:%M') }}
 
                         {% else %}
 
@@ -193,7 +193,7 @@
 
                             Sem execução aberta
 
-                        {% elif not execucao.executor %}
+                        {% elif not execucao[0].executor %}
 
                             Não assumida
 
@@ -203,7 +203,7 @@
 
                         {% else %}
 
-                            Assumida por: {{ execucao.executor }}
+                            Assumida por: {{ execucao[0].executor }}
 
                         {% endif %}
 
@@ -219,9 +219,9 @@
 
                     <dd>
 
-                        {% if execucao and execucao.assumida_em %}
+                        {% if execucao and execucao[0].assumida_em %}
 
-                            {{ execucao.assumida_em.strftime('%d/%m/%Y %H:%M') }}
+                            {{ execucao[0].assumida_em.strftime('%d/%m/%Y %H:%M') }}
 
                         {% else %}
 
@@ -232,12 +232,34 @@
                     </dd>
 
                 </div>
+                <div class="imp-execution-summary__item">
+
+                    <dt>
+                        Solicitante
+                    </dt>
+
+                    <dd>
+
+                        {% if chamada and chamada[0].solicitante %}
+
+                            {{ chamada[0].solicitante }}
+
+                        {% else %}
+
+                            Não informado
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
 
             </dl>
 
         </section>
 
-        {% if execucao and not execucao.executor %}
+        {% if execucao and not execucao[0].executor %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
