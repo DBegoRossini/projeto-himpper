@@ -253,6 +253,15 @@ def caixaentrada(context):
     user_job = g.info_user.get("jobTitle", "")
     groups   = g.info_user.get("groups", [])
     grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    etapa_solic = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(Execucao.finalizada_em.is_(None)).add_columns(
+        Etapas.responsaveis).all()
+    for row in etapa_solic:
+        print(row.responsaveis)
+        if row.responsaveis == "Solicitante":
+            grupos_conditions.append(Execucao.executor.like(f"%{user_oid}%"))
     pendencias_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
     .join(Execucao, Execucao.id_chamada == Chamada.id)\
     .join(Etapas, Etapas.id == Execucao.id_etapa)\
