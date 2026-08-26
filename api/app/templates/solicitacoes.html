@@ -93,13 +93,12 @@
                                     <th>Protocolo</th>
                                     <th>Tipo</th>
                                     <th>Abertura</th>
-                                    <th>Etapa atual</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for solicitacao in solicitacoes %}
-                                    {% set abertura_label = solicitacao.abertura.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura else '-' %}
+                                    {% set abertura_label = solicitacao.abertura_label.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura_label else '-' %}
                                     <tr
                                         class="imp-request-row"
                                         data-request-row
@@ -112,7 +111,6 @@
                                         </td>
                                         <td data-label="Tipo">{{ solicitacao.tipo }}</td>
                                         <td data-label="Abertura">{{ abertura_label }}</td>
-                                        <td data-label="Etapa atual">{{ solicitacao.etapa }}</td>
                                         <td data-label="Status">
                                             <span class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}">
                                                 {{ solicitacao.status_label }}

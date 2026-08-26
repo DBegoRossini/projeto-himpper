@@ -54,9 +54,14 @@ def carregar_info_usuario(context):
     )
 
     info3 = requests.get(
+        f"https://graph.microsoft.com/v1.0/users/{user_id}/manager",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    info4 = requests.get(
         f"https://graph.microsoft.com/v1.0/users/{user_id}/directReports",
         headers={"Authorization": f"Bearer {access_token}"}
     )
+
     groups = info2.json().get("value", [])
 
     info_user = {
@@ -64,7 +69,8 @@ def carregar_info_usuario(context):
         "jobTitle":    info1.json().get("jobTitle", ""),
         "mail":        info1.json().get("mail", ""),
         "groups":      [grp["id"] for grp in groups if grp.get("id")],
-        "subordinados": [sub["id"] for sub in info3.json().get("value", []) if sub.get("id")],
+        "superior":    info3.json().get("id", ""),
+        "subordinados": [sub["id"] for sub in info4.json().get("value", []) if sub.get("id")],
         "cache_version": INFO_USER_CACHE_VERSION
     }
 
@@ -157,6 +163,7 @@ def index(*, context):
     user_job = g.info_user.get("jobTitle", "")
     groups   = g.info_user.get("groups", [])
     grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    print(g.info_user.get("superior"))
     tarefas_raw = (
     database.session.query(Chamada)
     .join(Execucao, Execucao.id_chamada == Chamada.id)
@@ -225,15 +232,30 @@ def index(*, context):
 def solicitacoes(context):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
+    groups = g.info_user.get("groups", [])
+
+    solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
+    ids_por_grupo = []
+    for solic in solicitantes:
+        resp = requests.get(
+            f"https://graph.microsoft.com/v1.0/users/{solic.solicitante}/memberOf?$select=id",
+            headers={"Authorization": f"Bearer {context['access_token']}"}
+        )
+        grupos_solicitante = [grp.get("id") for grp in resp.json().get("value", [])]
+        if any(grp in groups for grp in grupos_solicitante):
+            ids_por_grupo.append(solic.id)
+
     solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
-    .join(Execucao, Execucao.id_chamada == Chamada.id)\
-    .join(Etapas, Etapas.id == Execucao.id_etapa)\
-    .filter(Chamada.solicitante == f"{user_oid}")\
+        .join(Execucao, Execucao.id_chamada == Chamada.id)\
+        .filter(or_(
+            Chamada.solicitante == f"{user_oid}",
+            Chamada.solicitante.in_(g.info_user.get("subordinados", [])),
+            Chamada.id.in_(ids_por_grupo)
+        ))\
     .add_columns(
         Chamada.id,
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
-        Etapas.nome.label("etapa"),
         Chamada.status.label("status_label"),
     ).all()
     return render_template(
@@ -335,8 +357,6 @@ def abandonar_tarefa(context, id_chamada):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid).first()
-    print(execucao)
-    print(id_chamada)
     if execucao:
         execucao.executor = None
         execucao.assumida_em = None
