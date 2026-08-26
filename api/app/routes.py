@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import base64
 
 INFO_USER_CACHE_VERSION = 2
+URL_RM = "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051"
 
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
@@ -51,6 +52,11 @@ def carregar_info_usuario(context):
         f"https://graph.microsoft.com/v1.0/users/{user_id}/memberOf?$select=id",
         headers={"Authorization": f"Bearer {access_token}"}
     )
+
+    info3 = requests.get(
+        f"https://graph.microsoft.com/v1.0/users/{user_id}/directReports",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
     groups = info2.json().get("value", [])
 
     info_user = {
@@ -58,6 +64,7 @@ def carregar_info_usuario(context):
         "jobTitle":    info1.json().get("jobTitle", ""),
         "mail":        info1.json().get("mail", ""),
         "groups":      [grp["id"] for grp in groups if grp.get("id")],
+        "subordinados": [sub["id"] for sub in info3.json().get("value", []) if sub.get("id")],
         "cache_version": INFO_USER_CACHE_VERSION
     }
 
@@ -90,7 +97,7 @@ def carregar_info_form():
     user = user_email.split("@")[0]
     print(user)
     g.coligMov = requests.get(
-        f"https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
     coligadas = {}
@@ -254,7 +261,6 @@ def caixaentrada(context):
         or_(
             Etapas.responsaveis.like(f"%{user_oid}%"),
             Etapas.responsaveis.like(f"%{user_job}%"),
-            cast(Execucao.executor, String).like(f"%{user_oid}%"),  # ← cast aqui
             *grupos_conditions
         )
     )\
