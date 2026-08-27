@@ -283,7 +283,6 @@ def caixaentrada(context):
     .filter(Execucao.finalizada_em.is_(None)).add_columns(
         Etapas.responsaveis).all()
     for row in etapa_solic:
-        print(row.responsaveis)
         if row.responsaveis == "Solicitante":
             grupos_conditions.append(Execucao.executor.like(f"%{user_oid}%"))
     pendencias_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
@@ -329,7 +328,7 @@ def caixaentrada(context):
                 "exec_name": executor.json().get("displayName", "Desconhecido") if row.executor else None,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
-
+        print(len(pendencias))
     return render_template(
         "caixaentrada.html",
         user=user,
