@@ -328,7 +328,6 @@ def caixaentrada(context):
                 "exec_name": executor.json().get("displayName", "Desconhecido") if row.executor else None,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
-        print(len(pendencias))
     return render_template(
         "caixaentrada.html",
         user=user,
@@ -343,8 +342,6 @@ def assumir_tarefa(context, id_chamada):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=None).first()
-    print(execucao)
-    print(id_chamada)
     if execucao:
         execucao.executor = user_oid
         execucao.assumida_em = datetime.utcnow()

@@ -100,7 +100,8 @@
                                 {% for solicitacao in solicitacoes %}
                                     {% set abertura_label = solicitacao.abertura_label.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura_label else '-' %}
                                     <tr
-                                        class="imp-request-row"
+                                        class="imp-request-row js-clickable-row"
+                                        data-href="{{ url_for('exec_tarefas', id_chamada=solicitacao.id) }}"
                                         data-request-row
                                         data-request-id="{{ solicitacao.id }}"
                                         data-status="{{ solicitacao.status_label }}"
