@@ -120,23 +120,19 @@ def carregar_info_form():
         if colig.get("TIPO") == "COLIGADA":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
-            if label not in coligadas.values() and valor not in coligadas.keys():
-                coligadas[valor] = label
+            coligadas[valor] = label
         elif colig.get("TIPO") == "MOVIMENTO":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
-            if label not in movimentos.values() and valor not in movimentos.keys():
-                movimentos[valor] = label
+            movimentos[valor] = label
         elif colig.get("TIPO") == "CENTRO DE CUSTO":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
-            if label not in ccusto.values() and valor not in ccusto.keys():
-                ccusto[valor] = label
+            ccusto[valor] = label
         elif colig.get("TIPO") == "FORNECEDOR":
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
-            if label not in fornecedores.values() and valor not in fornecedores.keys():
-                fornecedores[valor] = label
+            fornecedores[valor] = label
     g.coligadasUnic = coligadas.items()
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
