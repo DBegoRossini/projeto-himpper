@@ -109,6 +109,7 @@ def carregar_info_form():
     coligadas = {}
     movimentos = {}
     ccusto = {}
+    fornecedores = {}
     dados =  g.coligMov.json()
     if isinstance(dados, dict):
         registros = dados.get("value") or dados.get("items") or dados.get("data") or []
@@ -131,10 +132,15 @@ def carregar_info_form():
             valor = colig.get("VALORMOV")
             if label not in ccusto.values() and valor not in ccusto.keys():
                 ccusto[valor] = label
+        elif colig.get("TIPO") == "FORNECEDOR":
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
+            if label not in fornecedores.values() and valor not in fornecedores.keys():
+                fornecedores[valor] = label
     g.coligadasUnic = coligadas.items()
-    print(g.coligadasUnic)
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
+    g.fornUnic = fornecedores.items()
 
 
 @app.context_processor
