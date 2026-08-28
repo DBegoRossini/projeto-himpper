@@ -478,46 +478,58 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def exec_tarefas(id_chamada, context):
-    user_oid = context['user'].get("oid") or context['user'].get("id")
-    access_token = context['access_token']
-    chamada_raw = Chamada.query.get(id_chamada)
-    chamada=[]
-    
-    solicitante = requests.get(
-            f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
-                    headers={"Authorization": f"Bearer {access_token}"}
+    chamada = Chamada.query.get(id_chamada)
+
+    fluxo = (
+        flows.query.get(chamada.id_fluxo)
+        if chamada
+        else None
+    )
+
+    execucao = (
+        Execucao.query
+        .filter_by(
+            id_chamada=id_chamada,
+            finalizada_em=None
         )
-    chamada.append({
-            "id": chamada_raw.id,
-            "id_fluxo": chamada_raw.id_fluxo,
-            "status": chamada_raw.status,
-            "solicitante": solicitante.json().get("displayName", "Desconhecido") if solicitante else None,
-            "data": chamada_raw.data,
-    })
-    fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
-    execucao = []
-    if exec_raw:
-        if exec_raw.executor:
-            executor = requests.get(
-                f"https://graph.microsoft.com/v1.0/users/{exec_raw.executor}?$select=displayName",
-                        headers={"Authorization": f"Bearer {access_token}"}
-            )
-        else:
-            executor = None
-        execucao.append({
-                "id": exec_raw.id,
-                "id_chamada": exec_raw.id_chamada,
-                "id_etapa": exec_raw.id_etapa,
-                "iniciada_em": exec_raw.iniciada_em,
-                "finalizada_em": exec_raw.finalizada_em,
-                "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
-                "executor_id": exec_raw.executor,
-                "assumida_em": exec_raw.assumida_em
-            })
-    etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
-    etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
+        .first()
+        if chamada
+        else None
+    )
+
+    etapa = (
+        Etapas.query.get(execucao.id_etapa)
+        if execucao
+        else None
+    )
+
+    formularios = (
+        Formularios.query
+        .filter_by(id_chamada=id_chamada)
+        .order_by(Formularios.id.asc())
+        .all()
+        if chamada
+        else []
+    )
+
+    formularios_map = {}
+
+    for formulario in formularios:
+        campo = str(formulario.campo or "").strip()
+
+        editavel = (
+            str(formulario.editavel or "")
+            .strip()
+            .lower()
+            in ["1", "true"]
+        )
+
+        if campo and editavel:
+            formularios_map[campo] = formulario
+
+    if fluxo and fluxo.nome == "fluxo_aberturaOC":
+        carregar_info_form()
+
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -526,9 +538,8 @@ def exec_tarefas(id_chamada, context):
         fluxo=fluxo,
         execucao=execucao,
         etapa=etapa,
-        formularios=formulario,
-        user_id = user_oid,
-        etapas_correcao=etapas_correcao
+        formularios=formularios,
+        formularios_map=formularios_map
     )
 
 def detect_mime(file_bytes: bytes) -> str:

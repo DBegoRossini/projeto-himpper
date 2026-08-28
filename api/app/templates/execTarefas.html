@@ -6,6 +6,7 @@
 
 {% block topBar %}
     <h1 class="imp-heading">Execução da solicitação</h1>
+
     <p class="imp-subtitle imp-topbar__subtitle">
         Solicitação #{{ id_chamada }}
     </p>
@@ -13,8 +14,40 @@
 
 {% block main %}
 
-    {% set executor_id = execucao[0].executor_id|string if execucao and execucao[0].executor_id else '' %}
-    {% set pode_editar = execucao and executor_id != '' and executor_id == user_id %}
+    {% set user_oid = user.get('oid') or user.get('id') %}
+
+    {% set executor_id =
+        execucao.executor|string
+        if execucao and execucao.executor
+        else ''
+    %}
+
+    {% set usuario_id =
+        user_oid|string
+        if user_oid
+        else ''
+    %}
+
+    {% set pode_editar =
+        execucao
+        and executor_id != ''
+        and executor_id == usuario_id
+    %}
+
+    {% set controle = namespace(tem_editaveis=false) %}
+
+    {% for formulario in formularios %}
+
+        {% set campo_editavel =
+            (formulario.editavel|string|lower|trim)
+            in ['1', 'true']
+        %}
+
+        {% if campo_editavel %}
+            {% set controle.tem_editaveis = true %}
+        {% endif %}
+
+    {% endfor %}
 
     <link
         rel="stylesheet"
@@ -43,8 +76,8 @@
                     </h2>
 
                     <p class="imp-subtitle mb-0">
-                        Consulte os dados registrados e, quando a tarefa estiver sob sua responsabilidade,
-                        preencha os campos da etapa atual.
+                        Consulte os dados registrados e atue na etapa atual quando
+                        a tarefa estiver sob sua responsabilidade.
                     </p>
 
                 </div>
@@ -57,7 +90,7 @@
                             Sem execução aberta
                         </span>
 
-                    {% elif not execucao[0].executor %}
+                    {% elif not execucao.executor %}
 
                         <span class="badge rounded-pill imp-badge imp-badge--warning">
                             Não assumida
@@ -148,11 +181,11 @@
                 <div class="imp-execution-summary__item">
 
                     <dt>
-                        Status da solicitação
+                        Status
                     </dt>
 
                     <dd>
-                        {{ chamada[0].status if chamada and chamada.status else "Não informado" }}
+                        {{ chamada.status if chamada and chamada.status else "Não informado" }}
                     </dd>
 
                 </div>
@@ -165,9 +198,9 @@
 
                     <dd>
 
-                        {% if execucao and execucao[0].iniciada_em %}
+                        {% if execucao and execucao.iniciada_em %}
 
-                            {{ execucao[0].iniciada_em.strftime('%d/%m/%Y %H:%M') }}
+                            {{ execucao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}
 
                         {% else %}
 
@@ -191,7 +224,7 @@
 
                             Sem execução aberta
 
-                        {% elif not execucao[0].executor %}
+                        {% elif not execucao.executor %}
 
                             Não assumida
 
@@ -201,7 +234,7 @@
 
                         {% else %}
 
-                            Assumida por: {{ execucao[0].executor }}
+                            Assumida por outro usuário
 
                         {% endif %}
 
@@ -217,9 +250,9 @@
 
                     <dd>
 
-                        {% if execucao and execucao[0].assumida_em %}
+                        {% if execucao and execucao.assumida_em %}
 
-                            {{ execucao[0].assumida_em.strftime('%d/%m/%Y %H:%M') }}
+                            {{ execucao.assumida_em.strftime('%d/%m/%Y %H:%M') }}
 
                         {% else %}
 
@@ -230,34 +263,12 @@
                     </dd>
 
                 </div>
-                <div class="imp-execution-summary__item">
-
-                    <dt>
-                        Solicitante
-                    </dt>
-
-                    <dd>
-
-                        {% if chamada and chamada[0].solicitante %}
-
-                            {{ chamada[0].solicitante }}
-
-                        {% else %}
-
-                            Não informado
-
-                        {% endif %}
-
-                    </dd>
-
-                </div>
-
 
             </dl>
 
         </section>
 
-        {% if execucao and not execucao[0].executor %}
+        {% if execucao and not execucao.executor %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -268,8 +279,8 @@
                     </strong>
 
                     <p>
-                        Você pode consultar os dados da solicitação, mas os campos da etapa atual
-                        só serão liberados após assumir a tarefa.
+                        Você pode consultar os dados da solicitação, mas as ações
+                        da etapa só serão liberadas depois que a tarefa for assumida.
                     </p>
 
                 </div>
@@ -295,7 +306,7 @@
 
                     <p>
                         Os dados permanecem disponíveis para consulta,
-                        mas não podem ser alterados por você nesta execução.
+                        mas não podem ser alterados nesta execução.
                     </p>
 
                 </div>
@@ -321,7 +332,7 @@
                     </h3>
 
                     <p class="imp-execution-section__subtitle">
-                        Informações registradas na abertura e nas etapas anteriores.
+                        Informações já registradas nesta solicitação.
                     </p>
 
                 </div>
@@ -336,21 +347,61 @@
 
                     {% for formulario in formularios %}
 
-                        {% set tipo = (formulario.tp_campo or 'string')|lower %}
+                        {% set tipo =
+                            (formulario.tp_campo or '')|lower|trim
+                        %}
+
+                        {% set tipo_arquivo =
+                            tipo in ['file', 'arquivo', 'anexo']
+                        %}
+
                         {% set valor = formulario.valor %}
-                        {% set valor_texto = valor|string if valor is not none else '' %}
-                        {% set possui_valor = valor is not none and valor_texto|trim != '' %}
-                        {% set campo_editavel = formulario.editavel|string|lower in ['1', 'true'] %}
-                        {% set mostrar_leitura = possui_valor and not campo_editavel %}
-                        {% set campo_label = formulario.campo|replace('_', ' ')|replace('-', ' ')|title if formulario.campo else 'Campo sem identificação' %}
-                        {% set campo_longo = tipo == 'string' and valor_texto|length > 10000000 %}
+
+                        {% set valor_texto =
+                            valor|string
+                            if valor is not none
+                            else ''
+                        %}
+
+                        {% set campo_editavel =
+                            (formulario.editavel|string|lower|trim)
+                            in ['1', 'true']
+                        %}
+
+                        {% set possui_valor =
+                            valor is not none
+                            and valor_texto|trim != ''
+                        %}
+
+                        {% set mostrar_leitura =
+                            possui_valor
+                            and (
+                                tipo_arquivo
+                                or not campo_editavel
+                            )
+                        %}
+
+                        {% set campo_label =
+                            formulario.campo
+                            |replace('_', ' ')
+                            |replace('-', ' ')
+                            |title
+                            if formulario.campo
+                            else 'Campo sem identificação'
+                        %}
+
+                        {% set campo_longo =
+                            not tipo_arquivo
+                            and tipo == 'string'
+                            and valor_texto|length > 120
+                        %}
 
                         {% if mostrar_leitura %}
 
                             {% set leitura.total = leitura.total + 1 %}
 
                             <div
-                                class="imp-execution-field{% if campo_longo or tipo == 'file' %} imp-execution-field--full{% endif %}"
+                                class="imp-execution-field{% if campo_longo or tipo_arquivo %} imp-execution-field--full{% endif %}"
                             >
 
                                 <dt>
@@ -359,7 +410,7 @@
 
                                 <dd>
 
-                                    {% if tipo == 'file' %}
+                                    {% if tipo_arquivo %}
 
                                         <div class="imp-execution-file">
 
@@ -377,7 +428,10 @@
 
                                             <a
                                                 class="btn btn-outline-primary btn-sm"
-                                                href="{{ url_for('download_arquivo', id_arquivo=formulario.id) }}"
+                                                href="{{ url_for(
+                                                    'download_arquivo',
+                                                    id_arquivo=formulario.id
+                                                ) }}"
                                                 target="_blank"
                                                 rel="noopener"
                                             >
@@ -417,7 +471,7 @@
                         </strong>
 
                         <p>
-                            Os campos disponíveis nesta solicitação ainda não possuem valores registrados.
+                            Não existem informações preenchidas disponíveis para consulta.
                         </p>
 
                     </div>
@@ -433,7 +487,7 @@
                     </strong>
 
                     <p>
-                        Esta solicitação ainda não possui informações associadas na tabela de formulários.
+                        Esta solicitação ainda não possui informações associadas.
                     </p>
 
                 </div>
@@ -465,7 +519,7 @@
                         </h3>
 
                         <p class="imp-execution-section__subtitle">
-                            Preencha ou altere somente os campos liberados para esta etapa.
+                            Preencha ou altere os campos liberados para esta solicitação.
                         </p>
 
                     </div>
@@ -476,236 +530,158 @@
 
                 </div>
 
-                {% set editaveis = namespace(total=0) %}
-
-                <div
-                    class="imp-execution-edit-grid"
+                <form
+                    id="purchaseForm"
+                    class="imp-form"
+                    novalidate
                     data-execution-form
                     data-id-chamada="{{ id_chamada }}"
                 >
 
+                    <input
+                        type="hidden"
+                        name="id_chamada"
+                        value="{{ id_chamada }}"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="id_fluxo"
+                        value="{{ fluxo.id if fluxo else '' }}"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="id_execucao"
+                        value="{{ execucao.id if execucao else '' }}"
+                    >
+
                     {% for formulario in formularios %}
-                        {% set campo_editavel = formulario.editavel|string|lower in ['1', 'true'] %}
-                        {% if campo_editavel %}
 
-                            {% set editaveis.total = editaveis.total + 1 %}
-                            {% set tipo = (formulario.tp_campo or 'string')|lower %}
-                            {% set valor = formulario.valor %}
-                            {% set valor_texto = valor|string if valor is not none else '' %}
-                            {% set campo_label = formulario.campo|replace('_', ' ')|replace('-', ' ')|title if formulario.campo else 'Campo sem identificação' %}
-                            {% set campo_longo = tipo == 'string' and valor_texto|length > 120 %}
+                        {% set tipo =
+                            (formulario.tp_campo or '')|lower|trim
+                        %}
 
-                            <div
-                                class="imp-field{% if tipo == 'file' or campo_longo %} imp-field--full{% endif %}"
-                                data-formulario-id="{{ formulario.id }}"
-                                data-campo="{{ formulario.campo }}"
-                                data-tipo-campo="{{ tipo }}"
+                        {% set tipo_arquivo =
+                            tipo in ['file', 'arquivo', 'anexo']
+                        %}
+
+                        {% set campo_editavel =
+                            (formulario.editavel|string|lower|trim)
+                            in ['1', 'true']
+                        %}
+
+                        {% set possui_valor =
+                            formulario.valor is not none
+                            and formulario.valor|string|trim != ''
+                        %}
+
+                        {% if
+                            not campo_editavel
+                            and not tipo_arquivo
+                            and possui_valor
+                        %}
+
+                            <input
+                                type="hidden"
+                                name="{{ formulario.campo }}"
+                                value="{{ formulario.valor }}"
+                                data-execution-state-field
                             >
-
-                                {% if tipo == 'file' %}
-
-                                    <span class="imp-label">
-                                        {{ campo_label }}
-                                    </span>
-
-                                    {% if valor_texto|trim %}
-
-                                        <div class="imp-execution-current-file">
-
-                                            <div>
-
-                                                <strong>
-                                                    Arquivo atual
-                                                </strong>
-
-                                                <span>
-                                                    Já existe um arquivo registrado neste campo.
-                                                </span>
-
-                                            </div>
-
-                                            <a
-                                                class="btn btn-outline-primary btn-sm"
-                                                href="{{ url_for('download_arquivo', id_arquivo=formulario.id) }}"
-                                                target="_blank"
-                                                rel="noopener"
-                                            >
-                                                Visualizar
-                                            </a>
-
-                                        </div>
-
-                                    {% endif %}
-
-                                    <div class="imp-upload">
-
-                                        <input
-                                            id="campo_{{ formulario.id }}"
-                                            name="{{ formulario.campo }}"
-                                            type="file"
-                                            class="imp-upload__input"
-                                            data-formulario-id="{{ formulario.id }}"
-                                            data-impper-file-output="#arquivoCampo{{ formulario.id }}"
-                                        >
-
-                                        <label
-                                            class="imp-upload__label"
-                                            for="campo_{{ formulario.id }}"
-                                        >
-
-                                            <span class="imp-upload__copy">
-
-                                                <strong>
-                                                    {% if valor_texto|trim %}
-                                                        Substituir arquivo
-                                                    {% else %}
-                                                        Selecionar arquivo
-                                                    {% endif %}
-                                                </strong>
-
-                                                <span>
-                                                    Escolha o documento que será registrado neste campo.
-                                                </span>
-
-                                            </span>
-
-                                            <span class="imp-upload__action">
-                                                Selecionar
-                                            </span>
-
-                                        </label>
-
-                                    </div>
-
-                                    <div
-                                        id="arquivoCampo{{ formulario.id }}"
-                                        class="imp-file-name"
-                                    >
-                                        Nenhum novo arquivo selecionado.
-                                    </div>
-
-                                {% elif tipo == 'float' %}
-
-                                    <label
-                                        class="imp-label"
-                                        for="campo_{{ formulario.id }}"
-                                    >
-                                        {{ campo_label }}
-                                    </label>
-
-                                    <input
-                                        id="campo_{{ formulario.id }}"
-                                        name="{{ formulario.campo }}"
-                                        type="text"
-                                        class="form-control"
-                                        inputmode="decimal"
-                                        value="{{ valor_texto }}"
-                                        autocomplete="off"
-                                        data-formulario-id="{{ formulario.id }}"
-                                    >
-
-                                {% elif campo_longo %}
-
-                                    <label
-                                        class="imp-label"
-                                        for="campo_{{ formulario.id }}"
-                                    >
-                                        {{ campo_label }}
-                                    </label>
-
-                                    <textarea
-                                        id="campo_{{ formulario.id }}"
-                                        name="{{ formulario.campo }}"
-                                        class="form-control"
-                                        rows="5"
-                                        data-formulario-id="{{ formulario.id }}"
-                                    >{{ valor_texto }}</textarea>
-
-                                {% else %}
-
-                                    <label
-                                        class="imp-label"
-                                        for="campo_{{ formulario.id }}"
-                                    >
-                                        {{ campo_label }}
-                                    </label>
-
-                                    <input
-                                        id="campo_{{ formulario.id }}"
-                                        name="{{ formulario.campo }}"
-                                        type="text"
-                                        class="form-control"
-                                        value="{{ valor_texto }}"
-                                        autocomplete="off"
-                                        data-formulario-id="{{ formulario.id }}"
-                                    >
-
-                                {% endif %}
-
-                            </div>
 
                         {% endif %}
 
                     {% endfor %}
 
-                </div>
+                    {% if controle.tem_editaveis %}
 
-                {% if editaveis.total == 0 %}
+                        {% if fluxo and fluxo.nome %}
 
-                    <div class="imp-execution-empty">
+                            {% set template_campos =
+                                "fluxos/campos_"
+                                ~ (fluxo.nome|replace('fluxo_', ''))
+                                ~ ".html"
+                            %}
 
-                        <strong>
-                            Nenhum campo disponível para edição.
-                        </strong>
-
-                        <p>
-                            Esta etapa não possui campos adicionais para preenchimento.
-                            Você ainda pode concluir, pedir correção ou cancelar a tarefa.
-                        </p>
-
-                    </div>
-
-                {% endif %}
-
-                <div class="imp-execution-actions">
-
-                    <div class="imp-execution-actions__copy">
-
-                        <strong>
-                            Revise a solicitação antes de prosseguir.
-                        </strong>
-
-                        <span>
-                            Escolha a ação que deseja realizar nesta etapa.
-                        </span>
-
-                    </div>
-
-                    <div class="d-flex flex-column flex-sm-row gap-2">
-
-                        {% if editaveis.total > 0 %}
-
-                            <button type="button" class="btn btn-neutral">
-                                Salvar alterações
-                            </button>
+                            {% include template_campos %}
 
                         {% endif %}
-                        
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#correctionModal">
-                            Pedir correção
-                        </button>
 
-                        <button      type="button" class="btn btn-primary" onclick="enviarFormulario(document, 3, 'OC-00')">
-                            Concluir
-                        </button>
+                    {% else %}
 
-                        <button type="button" class="btn btn-outline-danger" onclick="enviarFormulario(document, 3, 'OC-00')">
-                            Cancelar
-                        </button>
+                        <div class="imp-execution-empty">
+
+                            <strong>
+                                Nenhum campo disponível para edição.
+                            </strong>
+
+                            <p>
+                                Esta etapa não possui campos adicionais para preenchimento.
+                                Você ainda pode concluir, pedir correção ou cancelar a tarefa.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                    <div class="imp-execution-actions">
+
+                        <div class="imp-execution-actions__copy">
+
+                            <strong>
+                                Revise a solicitação antes de prosseguir.
+                            </strong>
+
+                            <span>
+                                Escolha a ação que deseja realizar nesta etapa.
+                            </span>
+
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+
+                            {% if controle.tem_editaveis %}
+
+                                <button
+                                    type="button"
+                                    class="btn btn-neutral"
+                                    data-execution-save
+                                >
+                                    Salvar alterações
+                                </button>
+
+                            {% endif %}
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#correctionModal"
+                            >
+                                Pedir correção
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-execution-complete
+                            >
+                                Concluir
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger"
+                                data-execution-cancel
+                            >
+                                Cancelar
+                            </button>
+
+                        </div>
 
                     </div>
 
-                </div>
+                </form>
 
             </section>
 
@@ -740,12 +716,15 @@
             aria-labelledby="correctionModalLabel"
             aria-hidden="true"
         >
+
             <div class="modal-dialog modal-dialog-centered">
+
                 <div class="modal-content">
 
                     <div class="modal-header">
 
                         <div>
+
                             <span class="imp-kicker">
                                 Solicitação #{{ id_chamada }}
                             </span>
@@ -756,6 +735,7 @@
                             >
                                 Pedir correção
                             </h2>
+
                         </div>
 
                         <button
@@ -771,12 +751,10 @@
 
                         <div class="imp-stack imp-gap-5">
 
-                            <div>
-                                <p class="imp-subtitle mb-0">
-                                    Informe para qual etapa a solicitação deverá retornar
-                                    e descreva o que precisa ser corrigido.
-                                </p>
-                            </div>
+                            <p class="imp-subtitle mb-0">
+                                Informe para qual etapa a solicitação deverá retornar
+                                e descreva o que precisa ser corrigido.
+                            </p>
 
                             <div class="imp-field">
 
@@ -795,15 +773,22 @@
                                     required
                                     data-correction-target
                                 >
-                                    <option value="" selected disabled>
+
+                                    <option
+                                        value=""
+                                        selected
+                                        disabled
+                                    >
                                         Selecione uma etapa
                                     </option>
 
-                                    {% for etapa in etapas_correcao %}
-                                        <option value="{{ etapa.id }}">
-                                            {{ etapa.nome }}
-                                        </option>
-                                    {% endfor %}
+                                    <option value="ETAPA_CORRECAO_1">
+                                        Etapa de correção 1
+                                    </option>
+
+                                    <option value="ETAPA_CORRECAO_2">
+                                        Etapa de correção 2
+                                    </option>
 
                                 </select>
 
@@ -853,18 +838,21 @@
                         >
                             Voltar
                         </button>
-                        <button 
-                            onclick="enviarEtapa(document, '{{ id_chamada }}','OC-01', 'Selecionado')"
+
+                        <button
                             type="button"
                             class="btn btn-primary"
                             data-correction-submit
                         >
                             Pedir correção
                         </button>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
     {% endif %}
@@ -873,5 +861,14 @@
         defer
         src="{{ url_for('static', filename='js/forms.js') }}"
     ></script>
+
+    {% if fluxo and fluxo.nome == 'fluxo_aberturaOC' %}
+
+        <script
+            defer
+            src="{{ url_for('static', filename='js/formulario-oc.js') }}"
+        ></script>
+
+    {% endif %}
 
 {% endblock %}
