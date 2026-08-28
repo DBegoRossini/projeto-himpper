@@ -226,15 +226,15 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
     form = document
   }
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
-      .filter(f => f.id);
+      .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
     if (field.type === 'file'){
       Array.from(field.files || []).forEach(file => {
-        if (file.size > 0) formData.append(field.id, file);
+        if (file.size > 0) formData.append(field.name, file);
       });
     } else if (field.type !== 'radio' || field.checked){
-      formData.append(field.id, field.value);
+      formData.append(field.name, field.value);
     }
   });
 
@@ -253,15 +253,15 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
 async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   const form = document
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
-      .filter(f => f.id);
+      .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
     if (field.type === 'file'){
       Array.from(field.files || []).forEach(file => {
-        if (file.size > 0) formData.append(field.id, file);
+        if (file.size > 0) formData.append(field.name, file);
       });
     } else if (field.type !== 'radio' || field.checked){
-      formData.append(field.id, field.value);
+      formData.append(field.name, field.value);
     }
   });
 
