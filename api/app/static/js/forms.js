@@ -37,22 +37,29 @@
   };
 
   const toggleSectionControls = (section, visible) => {
-    section
-      .querySelectorAll("input, select, textarea, button")
-      .forEach(control => {
-        if (!control.dataset.impperRequiredCached) {
-          control.dataset.impperRequiredCached = String(
-            control.required
-          );
-        }
+  section
+    .querySelectorAll("input, select, textarea, button")
+    .forEach(control => {
+      if (!control.dataset.impperRequiredCached) {
+        control.dataset.impperRequiredCached = String(
+          control.required
+        );
+      }
 
-        if (visible) {
-          control.disabled = false;
-          control.required =
-            control.dataset.impperRequiredCached === "true";
-          return;
-        }
+      const locked =
+        control.dataset.impperLocked === "true";
 
+      if (visible) {
+        control.disabled = locked;
+
+        control.required =
+          !locked &&
+          control.dataset.impperRequiredCached === "true";
+
+        return;
+      }
+
+      if (!locked) {
         if (
           control.type === "radio" ||
           control.type === "checkbox"
@@ -63,11 +70,12 @@
         } else if (control.tagName === "SELECT") {
           control.selectedIndex = 0;
         }
+      }
 
-        control.required = false;
-        control.disabled = true;
-      });
-  };
+      control.required = false;
+      control.disabled = true;
+    });
+};
 
   const evaluateConditionalSection = section => {
     const form = section.closest("form");

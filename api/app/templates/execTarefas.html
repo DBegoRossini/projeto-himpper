@@ -5,11 +5,15 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Execução da solicitação</h1>
+
+    <h1 class="imp-heading">
+        Execução da solicitação
+    </h1>
 
     <p class="imp-subtitle imp-topbar__subtitle">
         Solicitação #{{ id_chamada }}
     </p>
+
 {% endblock %}
 
 {% block main %}
@@ -49,6 +53,7 @@
 
     {% endfor %}
 
+
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/06-forms.css') }}"
@@ -58,6 +63,7 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/08-execucao.css') }}"
     >
+
 
     <section class="imp-execution-page">
 
@@ -116,6 +122,7 @@
 
         </header>
 
+
         <section
             class="imp-execution-section"
             aria-labelledby="execution-overview-title"
@@ -140,6 +147,7 @@
 
             </div>
 
+
             <dl class="imp-execution-summary">
 
                 <div class="imp-execution-summary__item">
@@ -154,6 +162,7 @@
 
                 </div>
 
+
                 <div class="imp-execution-summary__item">
 
                     <dt>
@@ -165,6 +174,7 @@
                     </dd>
 
                 </div>
+
 
                 <div class="imp-execution-summary__item">
 
@@ -178,6 +188,7 @@
 
                 </div>
 
+
                 <div class="imp-execution-summary__item">
 
                     <dt>
@@ -189,6 +200,7 @@
                     </dd>
 
                 </div>
+
 
                 <div class="imp-execution-summary__item">
 
@@ -211,6 +223,7 @@
                     </dd>
 
                 </div>
+
 
                 <div class="imp-execution-summary__item">
 
@@ -242,6 +255,7 @@
 
                 </div>
 
+
                 <div class="imp-execution-summary__item">
 
                     <dt>
@@ -268,6 +282,7 @@
 
         </section>
 
+
         {% if execucao and not execucao.executor %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
@@ -279,8 +294,7 @@
                     </strong>
 
                     <p>
-                        Você pode consultar os dados da solicitação, mas as ações
-                        da etapa só serão liberadas depois que a tarefa for assumida.
+                        Você pode consultar os dados da solicitação, mas não pode alterá-los.
                     </p>
 
                 </div>
@@ -306,7 +320,7 @@
 
                     <p>
                         Os dados permanecem disponíveis para consulta,
-                        mas não podem ser alterados nesta execução.
+                        mas todos os campos estão bloqueados.
                     </p>
 
                 </div>
@@ -315,14 +329,19 @@
 
         {% endif %}
 
+
         <section
-            class="imp-execution-section"
+            class="imp-execution-section imp-execution-section--current"
             aria-labelledby="request-data-title"
         >
 
             <div class="imp-execution-section__head">
 
                 <div>
+
+                    <span class="imp-execution-overline">
+                        Solicitação
+                    </span>
 
                     <h3
                         class="imp-execution-section__title"
@@ -332,203 +351,29 @@
                     </h3>
 
                     <p class="imp-execution-section__subtitle">
-                        Informações já registradas nesta solicitação.
+                        Consulte os dados registrados e altere somente os campos liberados para esta etapa.
                     </p>
 
                 </div>
 
-            </div>
-
-            {% if formularios %}
-
-                {% set leitura = namespace(total=0) %}
-
-                <dl class="imp-execution-fields">
-
-                    {% for formulario in formularios %}
-
-                        {% set tipo =
-                            (formulario.tp_campo or '')|lower|trim
-                        %}
-
-                        {% set tipo_arquivo =
-                            tipo in ['file', 'arquivo', 'anexo']
-                        %}
-
-                        {% set valor = formulario.valor %}
-
-                        {% set valor_texto =
-                            valor|string
-                            if valor is not none
-                            else ''
-                        %}
-
-                        {% set campo_editavel =
-                            (formulario.editavel|string|lower|trim)
-                            in ['1', 'true']
-                        %}
-
-                        {% set possui_valor =
-                            valor is not none
-                            and valor_texto|trim != ''
-                        %}
-
-                        {% set mostrar_leitura =
-                            possui_valor
-                            and (
-                                tipo_arquivo
-                                or not campo_editavel
-                            )
-                        %}
-
-                        {% set campo_label =
-                            formulario.campo
-                            |replace('_', ' ')
-                            |replace('-', ' ')
-                            |title
-                            if formulario.campo
-                            else 'Campo sem identificação'
-                        %}
-
-                        {% set campo_longo =
-                            not tipo_arquivo
-                            and tipo == 'string'
-                            and valor_texto|length > 120
-                        %}
-
-                        {% if mostrar_leitura %}
-
-                            {% set leitura.total = leitura.total + 1 %}
-
-                            <div
-                                class="imp-execution-field{% if campo_longo or tipo_arquivo %} imp-execution-field--full{% endif %}"
-                            >
-
-                                <dt>
-                                    {{ campo_label }}
-                                </dt>
-
-                                <dd>
-
-                                    {% if tipo_arquivo %}
-
-                                        <div class="imp-execution-file">
-
-                                            <div class="imp-execution-file__info">
-
-                                                <strong>
-                                                    Arquivo anexado
-                                                </strong>
-
-                                                <span>
-                                                    Documento registrado nesta solicitação.
-                                                </span>
-
-                                            </div>
-
-                                            <a
-                                                class="btn btn-outline-primary btn-sm"
-                                                href="{{ url_for(
-                                                    'download_arquivo',
-                                                    id_arquivo=formulario.id
-                                                ) }}"
-                                                target="_blank"
-                                                rel="noopener"
-                                            >
-                                                Visualizar arquivo
-                                            </a>
-
-                                        </div>
-
-                                    {% elif campo_longo %}
-
-                                        <div class="imp-execution-field__long-value">
-                                            {{ valor }}
-                                        </div>
-
-                                    {% else %}
-
-                                        {{ valor }}
-
-                                    {% endif %}
-
-                                </dd>
-
-                            </div>
-
-                        {% endif %}
-
-                    {% endfor %}
-
-                </dl>
-
-                {% if leitura.total == 0 %}
-
-                    <div class="imp-execution-empty">
-
-                        <strong>
-                            Nenhuma informação anterior para exibir.
-                        </strong>
-
-                        <p>
-                            Não existem informações preenchidas disponíveis para consulta.
-                        </p>
-
-                    </div>
-
-                {% endif %}
-
-            {% else %}
-
-                <div class="imp-execution-empty">
-
-                    <strong>
-                        Nenhum campo registrado.
-                    </strong>
-
-                    <p>
-                        Esta solicitação ainda não possui informações associadas.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
-        </section>
-
-        {% if pode_editar %}
-
-            <section
-                class="imp-execution-section imp-execution-section--current"
-                aria-labelledby="current-step-title"
-            >
-
-                <div class="imp-execution-section__head">
-
-                    <div>
-
-                        <span class="imp-execution-overline">
-                            Tarefa sob sua responsabilidade
-                        </span>
-
-                        <h3
-                            class="imp-execution-section__title"
-                            id="current-step-title"
-                        >
-                            {{ etapa.nome if etapa and etapa.nome else "Atuação na etapa" }}
-                        </h3>
-
-                        <p class="imp-execution-section__subtitle">
-                            Preencha ou altere os campos liberados para esta solicitação.
-                        </p>
-
-                    </div>
+                {% if pode_editar %}
 
                     <span class="badge rounded-pill imp-badge imp-badge--success">
                         Edição liberada
                     </span>
 
-                </div>
+                {% else %}
+
+                    <span class="badge rounded-pill imp-badge imp-badge--neutral">
+                        Somente consulta
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if formularios %}
 
                 <form
                     id="purchaseForm"
@@ -556,136 +401,108 @@
                         value="{{ execucao.id if execucao else '' }}"
                     >
 
-                    {% for formulario in formularios %}
 
-                        {% set tipo =
-                            (formulario.tp_campo or '')|lower|trim
+                    {% set modo_execucao = true %}
+                    {% set permitir_edicao = pode_editar %}
+
+
+                    {% if fluxo and fluxo.nome %}
+
+                        {% set template_campos =
+                            "fluxos/campos_"
+                            ~ (fluxo.nome|replace('fluxo_', ''))
+                            ~ ".html"
                         %}
 
-                        {% set tipo_arquivo =
-                            tipo in ['file', 'arquivo', 'anexo']
-                        %}
+                        {% include template_campos %}
 
-                        {% set campo_editavel =
-                            (formulario.editavel|string|lower|trim)
-                            in ['1', 'true']
-                        %}
+                    {% endif %}
 
-                        {% set possui_valor =
-                            formulario.valor is not none
-                            and formulario.valor|string|trim != ''
-                        %}
 
-                        {% if
-                            not campo_editavel
-                            and not tipo_arquivo
-                            and possui_valor
-                        %}
+                    {% if pode_editar %}
 
-                            <input
-                                type="hidden"
-                                name="{{ formulario.campo }}"
-                                value="{{ formulario.valor }}"
-                                data-execution-state-field
-                            >
+                        <div class="imp-execution-actions">
 
-                        {% endif %}
+                            <div class="imp-execution-actions__copy">
 
-                    {% endfor %}
+                                <strong>
+                                    Revise a solicitação antes de prosseguir.
+                                </strong>
 
-                    {% if controle.tem_editaveis %}
+                                <span>
+                                    Escolha a ação que deseja realizar nesta etapa.
+                                </span>
 
-                        {% if fluxo and fluxo.nome %}
+                            </div>
 
-                            {% set template_campos =
-                                "fluxos/campos_"
-                                ~ (fluxo.nome|replace('fluxo_', ''))
-                                ~ ".html"
-                            %}
+                            <div class="d-flex flex-column flex-sm-row gap-2">
 
-                            {% include template_campos %}
+                                {% if controle.tem_editaveis %}
 
-                        {% endif %}
+                                    <button
+                                        type="button"
+                                        class="btn btn-neutral"
+                                        data-execution-save
+                                    >
+                                        Salvar alterações
+                                    </button>
 
-                    {% else %}
+                                {% endif %}
 
-                        <div class="imp-execution-empty">
 
-                            <strong>
-                                Nenhum campo disponível para edição.
-                            </strong>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#correctionModal"
+                                >
+                                    Pedir correção
+                                </button>
 
-                            <p>
-                                Esta etapa não possui campos adicionais para preenchimento.
-                                Você ainda pode concluir, pedir correção ou cancelar a tarefa.
-                            </p>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    data-execution-complete
+                                >
+                                    Concluir
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger"
+                                    data-execution-cancel
+                                >
+                                    Cancelar
+                                </button>
+
+                            </div>
 
                         </div>
 
                     {% endif %}
 
-                    <div class="imp-execution-actions">
-
-                        <div class="imp-execution-actions__copy">
-
-                            <strong>
-                                Revise a solicitação antes de prosseguir.
-                            </strong>
-
-                            <span>
-                                Escolha a ação que deseja realizar nesta etapa.
-                            </span>
-
-                        </div>
-
-                        <div class="d-flex flex-column flex-sm-row gap-2">
-
-                            {% if controle.tem_editaveis %}
-
-                                <button
-                                    type="button"
-                                    class="btn btn-neutral"
-                                    data-execution-save
-                                >
-                                    Salvar alterações
-                                </button>
-
-                            {% endif %}
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#correctionModal"
-                            >
-                                Pedir correção
-                            </button>
-
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                data-execution-complete
-                            >
-                                Concluir
-                            </button>
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger"
-                                data-execution-cancel
-                            >
-                                Cancelar
-                            </button>
-
-                        </div>
-
-                    </div>
-
                 </form>
 
-            </section>
+            {% else %}
 
-        {% endif %}
+                <div class="imp-execution-empty">
+
+                    <strong>
+                        Nenhum campo registrado.
+                    </strong>
+
+                    <p>
+                        Esta solicitação ainda não possui informações associadas.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
 
         <footer class="imp-execution-footer">
 
@@ -706,6 +523,7 @@
         </footer>
 
     </section>
+
 
     {% if pode_editar %}
 
@@ -747,6 +565,7 @@
 
                     </div>
 
+
                     <div class="modal-body">
 
                         <div class="imp-stack imp-gap-5">
@@ -755,6 +574,7 @@
                                 Informe para qual etapa a solicitação deverá retornar
                                 e descreva o que precisa ser corrigido.
                             </p>
+
 
                             <div class="imp-field">
 
@@ -798,6 +618,7 @@
 
                             </div>
 
+
                             <div class="imp-field">
 
                                 <label
@@ -829,6 +650,7 @@
 
                     </div>
 
+
                     <div class="modal-footer">
 
                         <button
@@ -857,10 +679,12 @@
 
     {% endif %}
 
+
     <script
         defer
         src="{{ url_for('static', filename='js/forms.js') }}"
     ></script>
+
 
     {% if fluxo and fluxo.nome == 'fluxo_aberturaOC' %}
 

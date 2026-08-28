@@ -506,26 +506,15 @@ def exec_tarefas(id_chamada, context):
     formularios = (
         Formularios.query
         .filter_by(id_chamada=id_chamada)
-        .order_by(Formularios.id.asc())
         .all()
         if chamada
         else []
     )
 
-    formularios_map = {}
-
-    for formulario in formularios:
-        campo = str(formulario.campo or "").strip()
-
-        editavel = (
-            str(formulario.editavel or "")
-            .strip()
-            .lower()
-            in ["1", "true"]
-        )
-
-        if campo and editavel:
-            formularios_map[campo] = formulario
+    formularios_map = {
+        formulario.campo: formulario
+        for formulario in formularios
+    }
 
     if fluxo and fluxo.nome == "fluxo_aberturaOC":
         carregar_info_form()
