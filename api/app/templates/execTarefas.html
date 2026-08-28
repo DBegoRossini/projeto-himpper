@@ -257,7 +257,7 @@
 
         </section>
 
-        {% if execucao and not execucao[0].executor %}
+        {% if execucao and not execucao[0].executor and user_id and atuante == True %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -276,7 +276,7 @@
 
                 <a
                     class="btn btn-neutral"
-                    href="{{ url_for('caixaentrada') }}"
+                    href="{{ url_for('assumir_tarefa', id_chamada=id_chamada) }}"
                 >
                     Voltar para a caixa de entrada
                 </a>

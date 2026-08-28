@@ -106,6 +106,7 @@ def carregar_info_form():
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
+    print("STATUS COLIGMOV:", g.coligMov.status_code)
     coligadas = {}
     movimentos = {}
     ccusto = {}
@@ -482,7 +483,7 @@ def exec_tarefas(id_chamada, context):
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
-    
+    us_atuante = False
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
                     headers={"Authorization": f"Bearer {access_token}"}
@@ -518,6 +519,11 @@ def exec_tarefas(id_chamada, context):
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
     formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
+    groups = g.info_user.get("groups", [])
+    etapas_split = etapa.responsaveis.split(",")
+    grupos_conditions = [grupo in etapas_split for grupo in groups]
+    if True in grupos_conditions:
+        us_atuante = True
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -528,7 +534,8 @@ def exec_tarefas(id_chamada, context):
         etapa=etapa,
         formularios=formulario,
         user_id = user_oid,
-        etapas_correcao=etapas_correcao
+        etapas_correcao=etapas_correcao,
+        atuante = us_atuante
     )
 
 def detect_mime(file_bytes: bytes) -> str:
