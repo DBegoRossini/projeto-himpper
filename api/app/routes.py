@@ -483,7 +483,7 @@ def exec_tarefas(id_chamada, context):
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
-    us_atuante = False
+    
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
                     headers={"Authorization": f"Bearer {access_token}"}
@@ -517,13 +517,30 @@ def exec_tarefas(id_chamada, context):
                 "assumida_em": exec_raw.assumida_em
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
-    etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    formulario = Formularios.query.filter_by(id_chamada=id_chamada).all() if chamada else None
+
+    formularios = (
+        Formularios.query
+        .filter_by(id_chamada=id_chamada)
+        .all()
+        if chamada
+        else []
+    )
+
+    formularios_map = {
+        formulario.campo: formulario
+        for formulario in formularios
+    }
+
+    if fluxo and fluxo.nome == "fluxo_aberturaOC":
+        carregar_info_form()
+    etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
     etapas_split = etapa.responsaveis.split(",")
     grupos_conditions = [grupo in etapas_split for grupo in groups]
     if True in grupos_conditions:
         us_atuante = True
+    else:
+        us_atuante = False
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -532,10 +549,9 @@ def exec_tarefas(id_chamada, context):
         fluxo=fluxo,
         execucao=execucao,
         etapa=etapa,
-        formularios=formulario,
-        user_id = user_oid,
-        etapas_correcao=etapas_correcao,
-        atuante = us_atuante
+        formularios=formularios,
+        formularios_map=formularios_map,
+        atuante=us_atuante,
     )
 
 def detect_mime(file_bytes: bytes) -> str:
