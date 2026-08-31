@@ -20,15 +20,16 @@
 
     {% set user_oid = user.get('oid') or user.get('id') %}
 
-    {% set executor_id =
-        execucao.executor|string
-        if execucao and execucao.executor
-        else ''
-    %}
-
     {% set usuario_id =
         user_oid|string
         if user_oid
+        else ''
+    %}
+
+    {% set executor_id =
+        execucao[0].get('executor_id')|string
+        if execucao
+        and execucao[0].get('executor_id')
         else ''
     %}
 
@@ -623,15 +624,17 @@
                                         Selecione uma etapa
                                     </option>
 
-                                    {% for etapa in etapas_correcao %}
+                                    {% if execucao and execucao[0].get('etapas_correcao') %}
 
-                                        <option
-                                            value="{{ etapa.id }}"
-                                        >
-                                            {{ etapa.nome }}
-                                        </option>
+                                        {% for etapa_correcao in execucao[0].get('etapas_correcao') %}
 
-                                    {% endfor %}
+                                            <option value="{{ etapa_correcao.id }}">
+                                                {{ etapa_correcao.nome }}
+                                            </option>
+
+                                        {% endfor %}
+
+                                    {% endif %}
 
                                 </select>
 

@@ -483,7 +483,6 @@ def exec_tarefas(id_chamada, context):
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
-    etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
     
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
@@ -497,6 +496,7 @@ def exec_tarefas(id_chamada, context):
             "data": chamada_raw.data,
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
+    etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
     exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
     execucao = []
     if exec_raw:
@@ -543,6 +543,14 @@ def exec_tarefas(id_chamada, context):
         us_atuante = True
     else:
         us_atuante = False
+
+    print(
+        "ETAPAS CORREÇÃO:",
+        [
+            (e.id, e.nome, e.id_flow)
+            for e in etapas_correcao
+        ]
+    )
     return render_template(
         "execTarefas.html",
         user=context["user"],
