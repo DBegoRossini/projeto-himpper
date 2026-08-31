@@ -623,13 +623,15 @@
                                         Selecione uma etapa
                                     </option>
 
-                                    <option value="ETAPA_CORRECAO_1">
-                                        Etapa de correção 1
-                                    </option>
+                                    {% for etapa in etapas_correcao %}
 
-                                    <option value="ETAPA_CORRECAO_2">
-                                        Etapa de correção 2
-                                    </option>
+                                        <option
+                                            value="{{ etapa.id }}"
+                                        >
+                                            {{ etapa.nome }}
+                                        </option>
+
+                                    {% endfor %}
 
                                 </select>
 
