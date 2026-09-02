@@ -673,84 +673,139 @@
 
 
         <div
-            class="imp-field"
+            class="imp-field imp-field--full"
             data-field-wrap="centro_custo"
         >
 
-            <label
-                class="imp-label"
-                for="centro_custo_search"
-            >
-                Centro de custo
-                <span class="imp-label__required">*</span>
-            </label>
-
             <div
-                class="imp-search-select position-relative"
-                data-centro-custo-combobox
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
             >
 
-                <input
-                    id="centro_custo_search"
-                    type="search"
-                    class="form-control"
-                    placeholder="Pesquise por código ou descrição"
-                    autocomplete="off"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    aria-expanded="false"
-                    aria-controls="centroCustoDropdown"
-                    value="{{ f_centro_custo.valor if modo_execucao and f_centro_custo and f_centro_custo.valor is not none else '' }}"
-                    data-centro-custo-search
-                    {% if not centro_custo_editavel %}disabled data-impper-locked="true"{% endif %}
-                >
+                <div>
 
-                <input
-                    id="centro_custo"
-                    type="hidden"
-                    name="centro_custo"
-                    value="{{ f_centro_custo.valor if modo_execucao and f_centro_custo and f_centro_custo.valor is not none else '' }}"
-                    data-centro-custo-value
-                >
+                    <span class="imp-label">
+                        Centro de custo
+                        <span class="imp-label__required">*</span>
+                    </span>
 
-                <select
-                    data-centro-custo-source
-                    hidden
-                    disabled
-                >
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos um centro de custo. Você pode adicionar outros quando necessário.
+                    </p>
 
-                    {% if g.ccustoUnic is defined %}
+                </div>
 
-                        {% for key, label in g.ccustoUnic %}
-
-                            <option
-                                value="{{ key }}"
-                                data-coligada="{{ label }}"
-                            >
-                                {{ label }}
-                            </option>
-
-                        {% endfor %}
-
+                <button
+                    type="button"
+                    class="btn btn-neutral btn-sm align-self-start"
+                    id="addCentroCustoButton"
+                    data-add-centro-custo
+                    {% if not centro_custo_editavel %}
+                        disabled
+                        data-impper-locked="true"
                     {% endif %}
-
-                </select>
-
-                <div
-                    id="centroCustoDropdown"
-                    class="dropdown-menu w-100 imp-search-select__menu"
-                    role="listbox"
-                    data-centro-custo-dropdown
-                ></div>
+                >
+                    + Adicionar centro de custo
+                </button>
 
             </div>
 
-            <p
-                id="centroCustoHint"
-                class="imp-help"
+
+            <input
+                type="hidden"
+                id="centro_custo"
+                name="centro_custo"
+                value="{{ f_centro_custo.valor if modo_execucao and f_centro_custo and f_centro_custo.valor is not none else '' }}"
+                data-centro-custo-value
             >
-                Selecione a coligada para habilitar os centros de custo.
-            </p>
+
+
+            <select
+                data-centro-custo-source
+                hidden
+                disabled
+            >
+
+                {% if g.ccustoUnic is defined %}
+
+                    {% for key, label in g.ccustoUnic %}
+
+                        <option
+                            value="{{ key }}"
+                            data-label="{{ label }}"
+                        >
+                            {{ key }} - {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+
+            <div
+                class="imp-nature-list"
+                id="centroCustoList"
+                data-centro-custo-list
+            >
+
+                <div
+                    class="imp-nature-row"
+                    data-centro-custo-row
+                >
+
+                    <div
+                        class="imp-search-select position-relative flex-grow-1"
+                        data-centro-custo-combobox
+                    >
+
+                        <input
+                            type="search"
+                            class="form-control"
+                            placeholder="Pesquise por código ou descrição"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            data-centro-custo-search
+                            {% if not centro_custo_editavel %}
+                                disabled
+                                data-impper-locked="true"
+                            {% endif %}
+                        >
+
+                        <input
+                            type="hidden"
+                            value=""
+                            data-centro-custo-selected-value
+                        >
+
+                        <div
+                            class="dropdown-menu w-100 imp-search-select__menu"
+                            role="listbox"
+                            data-centro-custo-dropdown
+                        ></div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm imp-nature-remove"
+                        data-remove-centro-custo
+                        aria-label="Remover centro de custo"
+                        hidden
+                        {% if not centro_custo_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+                        Remover
+                    </button>
+
+                </div>
+
+            </div>
 
         </div>
 
