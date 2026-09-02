@@ -481,20 +481,18 @@
                                     Pedir correção
                                 </button>
 
-
                                 <button
                                     type="button"
                                     class="btn btn-primary"
-                                    data-execution-complete
+                                    onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'OC-03')"
                                 >
                                     Concluir
                                 </button>
 
-
                                 <button
                                     type="button"
                                     class="btn btn-outline-danger"
-                                    data-execution-cancel
+                                    onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'OC-05')"
                                 >
                                     Cancelar
                                 </button>

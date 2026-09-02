@@ -559,6 +559,7 @@ def exec_tarefas(id_chamada, context):
         fluxo=fluxo,
         execucao=execucao,
         etapa=etapa,
+        etapa_id = etapa.id,
         formularios=formularios,
         formularios_map=formularios_map,
         atuante=us_atuante,
