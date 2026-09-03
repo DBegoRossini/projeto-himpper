@@ -260,7 +260,7 @@ def solicitacoes(context):
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
-    ).all()
+    ).order_by(Chamada.id.desc()).all()
     return render_template(
         "solicitacoes.html",
         user=user,
@@ -294,6 +294,10 @@ def caixaentrada(context):
         or_(
             Etapas.responsaveis.like(f"%{user_oid}%"),
             Etapas.responsaveis.like(f"%{user_job}%"),
+            and_(
+                Etapas.responsaveis == "Solicitante",
+                Chamada.solicitante == f"{user_oid}"
+            ),
             *grupos_conditions
         )
     )\
@@ -307,7 +311,7 @@ def caixaentrada(context):
         Chamada.status,
         Etapas.sla,
         Chamada.solicitante
-    ).all()
+    ).order_by(Chamada.id.asc()).all()
     pendencias = []
     for row in pendencias_raw:
         solicitante = requests.get(
@@ -544,13 +548,6 @@ def exec_tarefas(id_chamada, context):
     else:
         us_atuante = False
 
-    print(
-        "ETAPAS CORREÇÃO:",
-        [
-            (e.id, e.nome, e.id_flow)
-            for e in etapas_correcao
-        ]
-    )
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -562,7 +559,7 @@ def exec_tarefas(id_chamada, context):
         etapa_id = etapa.id,
         formularios=formularios,
         formularios_map=formularios_map,
-        atuante=us_atuante,
+        pode_editar=us_atuante,
     )
 
 def detect_mime(file_bytes: bytes) -> str:
