@@ -356,7 +356,6 @@
 
                                 </th>
 
-
                                 <!-- ETAPA -->
                                 <th
                                     scope="col"
@@ -460,7 +459,6 @@
                                     'Não assumido'
                                     if not pendencia.executor
                                     else (
-                                        'Assumido por ' ~
                                         (
                                             pendencia.exec_name
                                             if pendencia.exec_name
@@ -582,7 +580,6 @@
                                             <span
                                                 class="badge rounded-pill imp-badge imp-badge--success"
                                             >
-                                                Assumido por:
                                                 {{
                                                     pendencia.exec_name
                                                     if pendencia.exec_name
@@ -660,8 +657,6 @@
 
                 </div>
 
-
-                <!-- LISTA MOBILE -->
                 <div
                     class="imp-request-mobile-list"
                     data-request-mobile-list
