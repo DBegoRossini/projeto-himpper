@@ -614,19 +614,11 @@
                                     data-correction-target
                                 >
 
-                                    <option
-                                        value=""
-                                        selected
-                                        disabled
-                                    >
-                                        Selecione uma etapa
-                                    </option>
-
                                     {% if execucao and execucao[0].get('etapas_correcao') %}
 
                                         {% for etapa_correcao in execucao[0].get('etapas_correcao') %}
 
-                                            <option value="{{ etapa_correcao.id }}">
+                                            <option value="{{ etapa_correcao.id }}" selected>
                                                 {{ etapa_correcao.nome }}
                                             </option>
 
@@ -688,6 +680,7 @@
                             type="button"
                             class="btn btn-primary"
                             data-correction-submit
+                            onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'Selecionado')"
                         >
                             Pedir correção
                         </button>

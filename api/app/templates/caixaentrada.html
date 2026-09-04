@@ -5,239 +5,969 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Caixa de entrada</h1>
+    <h1 class="imp-heading">
+        Caixa de entrada
+    </h1>
+
     <p class="imp-subtitle imp-topbar__subtitle">
-        Solicitações pendentes de atuação para {{ info_user.displayName if info_user else "o usuário logado" }}.
+        Solicitações pendentes de atuação para
+        {{ info_user.displayName if info_user else "o usuário logado" }}.
     </p>
 {% endblock %}
 
 {% block main %}
+
     {% set user_oid = user.get('oid') or user.get('id') %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
 
-    <section class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"
+    >
+
+
+    <section
+        class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox"
+    >
+
         <div>
-            <span class="imp-kicker">Fila pessoal</span>
-            <h2 class="imp-title">Itens aguardando sua atuação</h2>
+
+            <span class="imp-kicker">
+                Fila pessoal
+            </span>
+
+            <h2 class="imp-title">
+                Itens aguardando sua atuação
+            </h2>
+
             <p class="imp-subtitle">
-                Consulte as pendências atribuídas ao usuário logado, filtre por texto ou status e acesse rapidamente o resumo de cada solicitação.
+                Consulte as pendências, aplique filtros e clique nos cabeçalhos
+                da tabela para ordenar os resultados.
             </p>
+
         </div>
 
-        <div class="imp-request-summary" data-request-summary>
-            <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">✉</div>
-                <div>
-                    <span class="imp-stat__label">Pendências na fila</span>
-                    <strong class="imp-stat__value" data-summary-total>{{ pendencias|length }}</strong>
+
+        <div
+            class="imp-request-summary"
+            data-request-summary
+        >
+
+            <article
+                class="imp-stat imp-request-stat"
+            >
+
+                <div class="imp-stat__icon">
+                    ✉
                 </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Pendências na fila
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-total
+                    >
+                        {{ pendencias|length }}
+                    </strong>
+
+                </div>
+
             </article>
 
-            <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">◷</div>
-                <div>
-                    <span class="imp-stat__label">Assumidas por mim</span>
-                    <strong class="imp-stat__value" data-summary-mine>0</strong>
+
+            <article
+                class="imp-stat imp-request-stat"
+            >
+
+                <div class="imp-stat__icon">
+                    ◷
                 </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Assumidas por mim
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-mine
+                    >
+                        0
+                    </strong>
+
+                </div>
+
             </article>
 
-            <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">⌕</div>
-                <div>
-                    <span class="imp-stat__label">Resultado atual</span>
-                    <strong class="imp-stat__value" data-summary-visible>{{ pendencias|length }}</strong>
+
+            <article
+                class="imp-stat imp-request-stat"
+            >
+
+                <div class="imp-stat__icon">
+                    ⌕
                 </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Resultado atual
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-visible
+                    >
+                        {{ pendencias|length }}
+                    </strong>
+
+                </div>
+
             </article>
+
         </div>
 
-        <article class="card imp-card imp-card--accent-orange imp-request-panel">
-            <header class="card-header imp-card__header imp-request-panel__header">
+
+        <article
+            class="card imp-card imp-card--accent-orange imp-request-panel"
+        >
+
+            <header
+                class="card-header imp-card__header imp-request-panel__header"
+            >
+
                 <div>
-                    <h3 class="imp-card__title">Pendências do usuário</h3>
+
+                    <h3 class="imp-card__title">
+                        Pendências do usuário
+                    </h3>
+
                     <p class="imp-card__subtitle">
-                        Cada item leva para um resumo detalhado dentro da própria página, sem depender de backend adicional.
+                        Clique no cabeçalho de uma coluna para ordenar
+                        em ordem crescente ou decrescente.
                     </p>
+
                 </div>
+
             </header>
 
-            <div class="card-body imp-card__body imp-stack imp-gap-5">
+
+            <div
+                class="card-body imp-card__body imp-stack imp-gap-5"
+            >
+
+                <!-- FILTROS -->
                 <div class="imp-request-toolbar">
+
                     <label
-                        class="imp-field imp-request-toolbar__search" for="requestSearch">
+                        class="imp-field imp-request-toolbar__search"
+                        for="requestSearch"
+                    >
+
                         <span class="imp-label">
                             Buscar pendência
                         </span>
-                        <input id="requestSearch" type="search" class="form-control" placeholder="Pesquise por protocolo, tipo, solicitante ou etapa" data-request-search>
+
+                        <input
+                            id="requestSearch"
+                            type="search"
+                            class="form-control"
+                            placeholder="Pesquise por protocolo, tipo, solicitante ou etapa"
+                            data-request-search
+                        >
+
                     </label>
 
-                    <label class="imp-field imp-request-toolbar__search" for="requestRequesterFilter">
+
+                    <label
+                        class="imp-field imp-request-toolbar__search"
+                        for="requestRequesterFilter"
+                    >
+
                         <span class="imp-label">
                             Solicitante
                         </span>
-                        <input id="requestRequesterFilter" type="search" class="form-control" placeholder="Filtre pelo nome do solicitante" data-request-requester-filter>
+
+                        <input
+                            id="requestRequesterFilter"
+                            type="search"
+                            class="form-control"
+                            placeholder="Filtre pelo nome do solicitante"
+                            data-request-requester-filter
+                        >
+
                     </label>
 
+
                     <label
-                        class="imp-field imp-request-toolbar__filter" for="requestOwnerFilter">
+                        class="imp-field imp-request-toolbar__filter"
+                        for="requestOwnerFilter"
+                    >
+
                         <span class="imp-label">
                             Fila
                         </span>
 
-                        <select id="requestOwnerFilter" class="form-select" data-request-owner-filter>
+                        <select
+                            id="requestOwnerFilter"
+                            class="form-select"
+                            data-request-owner-filter
+                        >
+
                             <option value="">
                                 Todas
                             </option>
+
                             <option value="mine">
                                 Assumidas por mim
                             </option>
+
                             <option value="unassigned">
                                 Não assumidas
                             </option>
+
+                            <option value="other">
+                                Assumidas por outro usuário
+                            </option>
+
                         </select>
+
                     </label>
+
                 </div>
 
-                <div class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox">
-                    <table class="table imp-table imp-request-table imp-request-table--inbox align-middle mb-0" data-request-table>
-                        <thead class="align-middle text-center">
+
+                <!-- TABELA DESKTOP -->
+                <div
+                    class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox"
+                >
+
+                    <table
+                        class="table imp-table imp-request-table imp-request-table--inbox align-middle mb-0"
+                        data-request-table
+                    >
+
+                        <thead
+                            class="align-middle text-center"
+                        >
+
                             <tr>
-                                <th>Protocolo</th>
-                                <th>Solicitante</th>
-                                <th>Tipo</th>
-                                <th>Recebida em</th>
-                                <th>Etapa atual</th>
-                                <th>Status</th>
-                                <th>Prazo</th>
-                                <th>Ação</th>
+
+                                <!-- PROTOCOLO -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="protocolo"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="protocolo"
+                                    >
+                                        Protocolo
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- SOLICITANTE -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="solicitante"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="solicitante"
+                                    >
+                                        Solicitante
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- TIPO -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="tipo"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="tipo"
+                                    >
+                                        Tipo
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- RECEBIDA -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="recebida"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="recebida"
+                                    >
+                                        Recebida em
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- ETAPA -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="etapa"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="etapa"
+                                    >
+                                        Etapa atual
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- STATUS -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="status"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="status"
+                                    >
+                                        Status
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <!-- PRAZO -->
+                                <th
+                                    scope="col"
+                                    data-sort-header="prazo"
+                                    aria-sort="none"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-link p-0 text-decoration-none"
+                                        data-request-sort-key="prazo"
+                                    >
+                                        Prazo
+
+                                        <span
+                                            aria-hidden="true"
+                                            data-sort-indicator
+                                        >
+                                            ↕
+                                        </span>
+                                    </button>
+
+                                </th>
+
+
+                                <th scope="col">
+                                    Ação
+                                </th>
+
                             </tr>
+
                         </thead>
+
+
                         <tbody>
+
                             {% for pendencia in pendencias %}
+
+                                {% set owner_status =
+                                    'unassigned'
+                                    if not pendencia.executor
+                                    else (
+                                        'mine'
+                                        if pendencia.executor == user_oid
+                                        else 'other'
+                                    )
+                                %}
+
+
+                                {% set status_text =
+                                    'Não assumido'
+                                    if not pendencia.executor
+                                    else (
+                                        'Assumido por ' ~
+                                        (
+                                            pendencia.exec_name
+                                            if pendencia.exec_name
+                                            else 'usuário'
+                                        )
+                                    )
+                                %}
+
+
                                 <tr
                                     class="imp-request-row js-clickable-row"
-                                    data-href="{{ url_for('exec_tarefas', id_chamada=pendencia.protocolo) }}"
+
+                                    data-href="{{ url_for(
+                                        'exec_tarefas',
+                                        id_chamada=pendencia.protocolo
+                                    ) }}"
+
                                     data-request-row
+
                                     data-request-id="{{ pendencia.protocolo }}"
+
                                     data-requester="{{ pendencia.solicitante }}"
-                                    data-owner="{% if not pendencia.executor %}unassigned{% elif pendencia.executor == user_oid %}mine{% else %}other{% endif %}"
-                                    data-deadline="{{ pendencia.prazo.isoformat() if pendencia.prazo else '' }}"
+
+                                    data-owner="{{ owner_status }}"
+
                                     data-original-order="{{ loop.index0 }}"
-                                    data-search="{{ (
-                                        pendencia.protocolo ~ ' ' ~
-                                        pendencia.tipo ~ ' ' ~
-                                        pendencia.etapa ~ ' ' ~
-                                        pendencia.solicitante ~ ' ' ~
-                                        ('não assumido' if not pendencia.executor else 'assumido ' ~ pendencia.executor)
-                                    )|lower }}"
+
+
+                                    data-sort-protocolo="{{ pendencia.protocolo }}"
+
+                                    data-sort-solicitante="{{ pendencia.solicitante }}"
+
+                                    data-sort-tipo="{{ pendencia.tipo }}"
+
+                                    data-sort-recebida="{{
+                                        pendencia.recebida_em.isoformat()
+                                        if pendencia.recebida_em
+                                        else ''
+                                    }}"
+
+                                    data-sort-etapa="{{ pendencia.etapa }}"
+
+                                    data-sort-status="{{ status_text }}"
+
+                                    data-sort-prazo="{{
+                                        pendencia.prazo.isoformat()
+                                        if pendencia.prazo
+                                        else ''
+                                    }}"
+
+
+                                    data-search="{{
+                                        (
+                                            pendencia.protocolo ~ ' ' ~
+                                            pendencia.tipo ~ ' ' ~
+                                            pendencia.etapa ~ ' ' ~
+                                            pendencia.solicitante ~ ' ' ~
+                                            status_text
+                                        )|lower
+                                    }}"
                                 >
+
+
                                     <td data-label="Protocolo">
-                                        <a class="imp-request-row__primary" href="#{{ pendencia.id }}">
+
+                                        <a
+                                            class="imp-request-row__primary"
+                                            href="{{ url_for(
+                                                'exec_tarefas',
+                                                id_chamada=pendencia.protocolo
+                                            ) }}"
+                                        >
                                             {{ pendencia.protocolo }}
                                         </a>
+
                                     </td>
-                                    <td data-label="Solicitante">{{ pendencia.solicitante }}</td>
-                                    <td data-label="Tipo">{{ pendencia.tipo }}</td>
-                                    <td data-label="Recebida em">{{ pendencia.recebida_em.strftime('%d/%m/%Y %H:%M') if pendencia.recebida_em else '-' }}</td>
-                                    <td data-label="Etapa atual">{{ pendencia.etapa }}</td>
+
+
+                                    <td data-label="Solicitante">
+                                        {{ pendencia.solicitante }}
+                                    </td>
+
+
+                                    <td data-label="Tipo">
+                                        {{ pendencia.tipo }}
+                                    </td>
+
+
+                                    <td data-label="Recebida em">
+
+                                        {{
+                                            pendencia.recebida_em.strftime(
+                                                '%d/%m/%Y %H:%M'
+                                            )
+                                            if pendencia.recebida_em
+                                            else '-'
+                                        }}
+
+                                    </td>
+
+
+                                    <td data-label="Etapa atual">
+                                        {{ pendencia.etapa }}
+                                    </td>
+
+
                                     <td data-label="Status">
-                                         {% if not pendencia.executor %}
-                                            <span class="badge rounded-pill imp-badge imp-badge--warning">
+
+                                        {% if not pendencia.executor %}
+
+                                            <span
+                                                class="badge rounded-pill imp-badge imp-badge--warning"
+                                            >
                                                 Não assumido
                                             </span>
+
                                         {% else %}
-                                            <span class="badge rounded-pill imp-badge imp-badge--success">
-                                                Assumido por: {{ pendencia.exec_name }}
+
+                                            <span
+                                                class="badge rounded-pill imp-badge imp-badge--success"
+                                            >
+                                                Assumido por:
+                                                {{
+                                                    pendencia.exec_name
+                                                    if pendencia.exec_name
+                                                    else "Não informado"
+                                                }}
                                             </span>
+
                                         {% endif %}
+
                                     </td>
-                                    <td data-label="Prazo">{{ pendencia.prazo.strftime('%d/%m/%Y %H:%M') if pendencia.prazo else '-' }}</td>
+
+
+                                    <td data-label="Prazo">
+
+                                        {{
+                                            pendencia.prazo.strftime(
+                                                '%d/%m/%Y %H:%M'
+                                            )
+                                            if pendencia.prazo
+                                            else '-'
+                                        }}
+
+                                    </td>
+
+
                                     <td data-label="Ação">
-                                        {% if pendencia.executor != user_id %}
-                                            <a class="btn btn-neutral btn-sm" href="{{ url_for('assumir_tarefa', id_chamada=pendencia.protocolo) }}"> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
+
+                                        {% if not pendencia.executor %}
+
+                                            <a
+                                                class="btn btn-neutral btn-sm"
+                                                href="{{ url_for(
+                                                    'assumir_tarefa',
+                                                    id_chamada=pendencia.protocolo
+                                                ) }}"
+                                            >
                                                 Assumir
                                             </a>
-                                        {% elif pendencia.executor == user_id %}
-                                            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('abandonar_tarefa', id_chamada=pendencia.protocolo) }}"> <!-- TROCAR PARA CONEXÃO DIRETA E NÃO USAR WEBHOOK. ASSUMIR NÃO É MAIS ETAPA -->
+
+
+                                        {% elif pendencia.executor == user_oid %}
+
+                                            <a
+                                                class="btn btn-outline-primary btn-sm"
+                                                href="{{ url_for(
+                                                    'abandonar_tarefa',
+                                                    id_chamada=pendencia.protocolo
+                                                ) }}"
+                                            >
                                                 Abandonar
                                             </a>
+
+
+                                        {% else %}
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-neutral btn-sm"
+                                                disabled
+                                            >
+                                                Em atendimento
+                                            </button>
+
                                         {% endif %}
+
                                     </td>
+
                                 </tr>
+
                             {% endfor %}
+
                         </tbody>
+
                     </table>
+
                 </div>
 
-                <div class="imp-request-mobile-list" data-request-mobile-list>
+
+                <!-- LISTA MOBILE -->
+                <div
+                    class="imp-request-mobile-list"
+                    data-request-mobile-list
+                >
+
                     {% for pendencia in pendencias %}
+
+                        {% set owner_status =
+                            'unassigned'
+                            if not pendencia.executor
+                            else (
+                                'mine'
+                                if pendencia.executor == user_oid
+                                else 'other'
+                            )
+                        %}
+
+
+                        {% set status_text =
+                            'Não assumido'
+                            if not pendencia.executor
+                            else (
+                                'Assumido por ' ~
+                                (
+                                    pendencia.exec_name
+                                    if pendencia.exec_name
+                                    else 'usuário'
+                                )
+                            )
+                        %}
+
+
                         <article
                             class="card imp-card imp-request-mobile-card"
+
                             data-request-row
-                            data-request-id="{{ pendencia.id }}"
-                            data-status="{{ pendencia.status_label }}"
+
+                            data-request-id="{{ pendencia.protocolo }}"
+
                             data-requester="{{ pendencia.solicitante }}"
-                            data-search="{{ (pendencia.protocolo ~ ' ' ~ pendencia.tipo ~ ' ' ~ pendencia.area ~ ' ' ~ pendencia.etapa ~ ' ' ~ pendencia.solicitante ~ ' ' ~ pendencia.status_label ~ ' ' ~ pendencia.prioridade)|lower }}"
+
+                            data-owner="{{ owner_status }}"
+
+                            data-original-order="{{ loop.index0 }}"
+
+
+                            data-sort-protocolo="{{ pendencia.protocolo }}"
+
+                            data-sort-solicitante="{{ pendencia.solicitante }}"
+
+                            data-sort-tipo="{{ pendencia.tipo }}"
+
+                            data-sort-recebida="{{
+                                pendencia.recebida_em.isoformat()
+                                if pendencia.recebida_em
+                                else ''
+                            }}"
+
+                            data-sort-etapa="{{ pendencia.etapa }}"
+
+                            data-sort-status="{{ status_text }}"
+
+                            data-sort-prazo="{{
+                                pendencia.prazo.isoformat()
+                                if pendencia.prazo
+                                else ''
+                            }}"
+
+
+                            data-search="{{
+                                (
+                                    pendencia.protocolo ~ ' ' ~
+                                    pendencia.tipo ~ ' ' ~
+                                    pendencia.etapa ~ ' ' ~
+                                    pendencia.solicitante ~ ' ' ~
+                                    status_text
+                                )|lower
+                            }}"
                         >
-                            <div class="card-body imp-card__body imp-stack imp-gap-4">
-                                <div class="imp-request-mobile-card__top">
+
+                            <div
+                                class="card-body imp-card__body imp-stack imp-gap-4"
+                            >
+
+                                <div
+                                    class="imp-request-mobile-card__top"
+                                >
+
                                     <div>
-                                        <p class="imp-kicker imp-request-mobile-card__kicker">{{ pendencia.protocolo }}</p>
-                                        <h3 class="imp-card__title">{{ pendencia.tipo }}</h3>
+
+                                        <p
+                                            class="imp-kicker imp-request-mobile-card__kicker"
+                                        >
+                                            {{ pendencia.protocolo }}
+                                        </p>
+
+                                        <h3 class="imp-card__title">
+                                            {{ pendencia.tipo }}
+                                        </h3>
+
                                     </div>
-                                    <span class="badge rounded-pill imp-badge imp-badge--{{ pendencia.status_variant }}">{{ pendencia.status_label }}</span>
+
+
+                                    {% if not pendencia.executor %}
+
+                                        <span
+                                            class="badge rounded-pill imp-badge imp-badge--warning"
+                                        >
+                                            Não assumido
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="badge rounded-pill imp-badge imp-badge--success"
+                                        >
+                                            Assumido
+                                        </span>
+
+                                    {% endif %}
+
                                 </div>
 
-                                <dl class="imp-request-mobile-card__meta">
+
+                                <dl
+                                    class="imp-request-mobile-card__meta"
+                                >
+
                                     <div>
-                                        <dt>Solicitante</dt>
-                                        <dd>{{ pendencia.solicitante }}</dd>
+
+                                        <dt>
+                                            Solicitante
+                                        </dt>
+
+                                        <dd>
+                                            {{ pendencia.solicitante }}
+                                        </dd>
+
                                     </div>
+
+
                                     <div>
-                                        <dt>Recebida em</dt>
-                                        <dd>{{ pendencia.recebida_em }}</dd>
+
+                                        <dt>
+                                            Recebida em
+                                        </dt>
+
+                                        <dd>
+                                            {{
+                                                pendencia.recebida_em.strftime(
+                                                    '%d/%m/%Y %H:%M'
+                                                )
+                                                if pendencia.recebida_em
+                                                else '-'
+                                            }}
+                                        </dd>
+
                                     </div>
+
+
                                     <div>
-                                        <dt>Etapa atual</dt>
-                                        <dd>{{ pendencia.etapa }}</dd>
+
+                                        <dt>
+                                            Etapa atual
+                                        </dt>
+
+                                        <dd>
+                                            {{ pendencia.etapa }}
+                                        </dd>
+
                                     </div>
+
+
                                     <div>
-                                        <dt>Prazo</dt>
-                                        <dd>{{ pendencia.prazo }}</dd>
+
+                                        <dt>
+                                            Status
+                                        </dt>
+
+                                        <dd>
+                                            {{ status_text }}
+                                        </dd>
+
                                     </div>
+
+
+                                    <div>
+
+                                        <dt>
+                                            Prazo
+                                        </dt>
+
+                                        <dd>
+                                            {{
+                                                pendencia.prazo.strftime(
+                                                    '%d/%m/%Y %H:%M'
+                                                )
+                                                if pendencia.prazo
+                                                else '-'
+                                            }}
+                                        </dd>
+
+                                    </div>
+
                                 </dl>
 
-                                {% if pendencia.status_label == "Pendente" %}
-                                    <a class="btn btn-neutral w-100" href="#">
+
+                                <a
+                                    class="btn btn-outline-primary w-100"
+                                    href="{{ url_for(
+                                        'exec_tarefas',
+                                        id_chamada=pendencia.protocolo
+                                    ) }}"
+                                >
+                                    Abrir solicitação
+                                </a>
+
+
+                                {% if not pendencia.executor %}
+
+                                    <a
+                                        class="btn btn-neutral w-100"
+                                        href="{{ url_for(
+                                            'assumir_tarefa',
+                                            id_chamada=pendencia.protocolo
+                                        ) }}"
+                                    >
                                         Assumir
                                     </a>
-                                {% else %}
-                                    <a class="btn btn-outline-primary w-100" href="#">
+
+
+                                {% elif pendencia.executor == user_oid %}
+
+                                    <a
+                                        class="btn btn-outline-primary w-100"
+                                        href="{{ url_for(
+                                            'abandonar_tarefa',
+                                            id_chamada=pendencia.protocolo
+                                        ) }}"
+                                    >
                                         Abandonar
                                     </a>
+
                                 {% endif %}
+
                             </div>
+
                         </article>
+
                     {% endfor %}
+
                 </div>
 
-                <div class="imp-request-empty imp-hidden" data-request-empty>
-                    <p class="imp-title imp-mb-4">Nenhum resultado para os filtros aplicados</p>
-                    <p class="imp-subtitle imp-m-0">
-                        Ajuste a busca ou limpe o filtro de status para visualizar outras pendências.
+
+                <!-- EMPTY STATE -->
+                <div
+                    class="imp-request-empty imp-hidden"
+                    data-request-empty
+                >
+
+                    <p class="imp-title imp-mb-4">
+                        Nenhum resultado para os filtros aplicados
                     </p>
+
+                    <p class="imp-subtitle imp-m-0">
+                        Ajuste a busca ou limpe os filtros
+                        para visualizar outras pendências.
+                    </p>
+
                 </div>
+
             </div>
 
-            <footer class="card-footer imp-card__footer">
-                <a class="btn btn-neutral" href="{{ url_for('index') }}">
+
+            <footer
+                class="card-footer imp-card__footer"
+            >
+
+                <a
+                    class="btn btn-neutral"
+                    href="{{ url_for('index') }}"
+                >
                     Voltar ao início
                 </a>
-                <a class="btn btn-primary" href="{{ url_for('solicitacoes') }}">
+
+
+                <a
+                    class="btn btn-primary"
+                    href="{{ url_for('solicitacoes') }}"
+                >
                     Ver minhas solicitações
                 </a>
+
             </footer>
+
         </article>
+
     </section>
 
-    <script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
+
+    <script
+        defer
+        src="{{ url_for(
+            'static',
+            filename='js/solicitacoes.js'
+        ) }}"
+    ></script>
+
 {% endblock %}
