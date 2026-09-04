@@ -5,277 +5,132 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Emissão de Contrato</h1>
-        <p class="imp-subtitle imp-topbar__subtitle">
-            Preencha os campos abaixo. Os campos exibidos mudam de acordo com o tipo de solicitação e o tipo de contrato selecionados.
-        </p>
+
+    <h1 class="imp-heading">
+        Emissão de Contrato
+    </h1>
+
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Preencha os campos abaixo. Os campos exibidos mudam de acordo
+        com o tipo de solicitação e o tipo de contrato selecionados.
+    </p>
+
 {% endblock %}
 
 {% block main %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/06-forms.css') }}"/>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    >
 
     <section class="imp-stack imp-gap-6 imp-form-page">
+
         <div>
-            <span class="imp-kicker">Fluxo contratual</span>
-            <h2 class="imp-title">Emissão de contrato</h2>
+
+            <span class="imp-kicker">
+                Fluxo contratual
+            </span>
+
+            <h2 class="imp-title">
+                Emissão de contrato
+            </h2>
+
             <p class="imp-subtitle">
                 Preencha os dados conforme o tipo de solicitação e contrato.
             </p>
+
         </div>
+
 
         <div class="imp-form-shell">
-            <form class="solicit imp-form" id="n8n-form" novalidate>
 
-                <section class="imp-form-section">
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Tipo de solicitação</h3>
-                        </div>
-                    </div>
+            <form
+                class="solicit imp-form"
+                id="n8n-form"
+                novalidate
+            >
 
-                    <div class="imp-form-grid">
+                {% set modo_execucao = false %}
+                {% set permitir_edicao = true %}
 
-                        <div class="imp-field imp-field--full" data-field-wrap="field-0">
-                            <label class="imp-label" for="field-0">Tipo de Solicitação <span class="imp-label__required">*</span></label>
-                            <select id="tp_solicitacao" name="tp_solicitacao" class="form-select" required>
-                                <option value="" disabled selected>Selecione uma opção...</option>
-                                <option value="Emissão de contratos para engenharia">Emissão de contratos para engenharia</option>
-                                <option value="Emissão de contratos para projetos">Emissão de contratos para projetos</option>
-                                <option value="Emissão de contratos diversos">Emissão de contratos diversos</option>
-                            </select>
-                        </div>
+                {% include "fluxos/campos_solitcontratos.html" %}
 
-                        <div class="imp-field imp-field--full" data-field-wrap="field-1">
-                            <span class="imp-label">Tipo de Contrato <span class="imp-label__required">*</span></span>
-                            <div class="imp-choice-grid imp-choice-grid--three" id="tp_contrato" role="radiogroup" aria-label="Tipo de Contrato">
-                                <label class="imp-choice">
-                                    <input type="radio" id="tp_contrato" name="tp_contrato" value="Novo" required>
-                                    <span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Novo</span></span>
-                                </label>
-                                <label class="imp-choice">
-                                    <input type="radio" id="tp_contrato" name="tp_contrato" value="Aditivo">
-                                    <span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Aditivo</span></span>
-                                </label>
-                                <label class="imp-choice">
-                                    <input type="radio" id="tp_contrato" name="tp_contrato" value="Distrato">
-                                    <span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Distrato</span></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="imp-field imp-field--full" id="form-adit" data-shown-when="tipo-contrato:Aditivo" data-impper-show-when="tp_contrato:Aditivo" hidden>
-                            <label class="imp-label" for="mot_adit">Motivo do Aditamento <span class="imp-label__required">*</span></label>
-                            <textarea class="form-control" id="mot_adit" name="mot_adit" required></textarea>
-                        </div>
-
-                        <div class="imp-field" id="form-distrato" data-shown-when="tipo-contrato:Distrato" data-impper-show-when="tp_contrato:Distrato" hidden>
-                            <label class="imp-label" for="vl_pago">Valores Pagos Até o Momento <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="vl_pago" name="vl_pago" placeholder="R$ 0,00" data-impper-mask="currency" value="" required>
-                        </div>
-
-                        <div class="imp-field" id="tp-wrapper" data-shown-when="tipo-contrato:Aditivo,Distrato" data-impper-show-when="tp_contrato:Aditivo|Distrato" hidden>
-                            <label class="imp-label" for="n_contrato">N° do Contrato Original <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="number" id="n_contrato" name="n_contrato" value="" required>
-                        </div>
-                    </div>
-                </section>
-
-
-                <section class="imp-form-section">
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Dados da contratada</h3>
-                        </div>
-                    </div>
-
-                    <div class="imp-form-grid">
-
-                        <div class="imp-field" data-field-wrap="field-6">
-                            <label class="imp-label" for="cnpj_contratada">CNPJ Contratada <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="cnpj_contratada" name="cnpj_contratada" placeholder="00.000.000/0000-00" data-impper-mask="cnpj" value="" required>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="field-7">
-                            <label class="imp-label" for="email_contratada">E-Mail Contratada Para Assinatura <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="email" id="email_contratada" name="email_contratada" value="" required>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="field-8">
-                            <label class="imp-label" for="nm_representante">Nome Completo do Representante <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="nm_representante" name="nm_representante" value="" required>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="field-9">
-                            <label class="imp-label" for="cpf_representante">CPF do Representante <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="cpf_representante" name="cpf_representante" placeholder="000.000.000-00" maxlength="14" data-impper-mask="cpf" value="" required>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="imp-form-section">
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Dados do contrato</h3>
-                        </div>
-                    </div>
-
-                    <div class="imp-form-grid">
-                        <div class="imp-field" data-field-wrap="codcoligada">
-                            <label class="imp-label" for="codcoligada">Coligada Empreendimento Contratante <span class="imp-label__required">*</span></label>
-                            <select id="codcoligada" name="codcoligada" class="form-select" autocomplete="organization" required>
-                                <option value="">Selecione uma coligada</option>
-                                {% for key, label in g.coligadasUnic %}
-                                    <option value="{{ key }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="imp-field imp-field--full" data-field-wrap="field-11">
-                            <label class="imp-label" for="res_escopo">Resumo do Escopo do Contrato <span class="imp-label__required">*</span></label>
-                            <textarea class="form-control" id="res_escopo" name="res_escopo" required></textarea>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="valor_contrato">
-                            <label class="imp-label" for="valor_contrato">Valor do Contrato <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="valor_contrato" name="valor_contrato" placeholder="R$ 0,00" data-impper-mask="currency" value="" required>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="caucao">
-                            <span class="imp-label">Caução? <span class="imp-label__required">*</span></span>
-                            <div class="imp-choice-grid imp-choice-grid--two" id="caucao" role="radiogroup" aria-label="Caução">
-                                <label class="imp-choice">
-                                    <input type="radio" id="caucao" name="caucao" value="Sim" required>
-                                    <span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Sim</span></span>
-                                </label>
-                                <label class="imp-choice">
-                                    <input type="radio" id="caucao" name="caucao" value="Não">
-                                    <span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Não</span></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="imp-field" data-field-wrap="pz_entrega" data-impper-show-when="tp_solicitacao:Emissão de contratos para projetos|Emissão de contratos diversos">
-                            <label class="imp-label" for="pz_entrega">Prazo para entrega <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="pz_entrega" name="Prazo para entrega" value="" required>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="imp-form-section" id="eng-wrapper" data-shown-when="tipo-solicitacao:Emissão de contratos para engenharia" data-impper-show-when="tp_solicitacao:Emissão de contratos para engenharia" hidden>
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Execução — engenharia</h3>
-                        </div>
-                    </div>
-
-                    <div class="imp-form-grid">
-                        <div class="imp-field imp-field--full" data-field-wrap="pz_entrega_objeto">
-                            <label class="imp-label" for="pz_entrega_objeto">Prazo Para Entrega do Objeto/Serviço <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="date" id="pz_entrega_objeto" name="Prazo Para Entrega do Objeto/Serviço" value="" required>
-                        </div>
-
-                        <div class="imp-field imp-field--full" data-field-wrap="field-15">
-                            <span class="imp-label">Planilha de Serviços Contratados <span class="imp-label__required">*</span></span>
-                            <div class="imp-upload">
-                                <input class="imp-upload__input" type="file" id="planilha_servicos" name="Planilha de Serviços Contratados" accept="" data-impper-file-output="#field15FileName" required>
-                                <label class="imp-upload__label" for="planilha_servicos">
-                                    <span class="imp-upload__copy"><strong>Anexe o arquivo</strong><span>Selecione um arquivo.</span></span>
-                                    <span class="imp-upload__action">Selecionar arquivo</span>
-                                </label>
-                            </div>
-                            <div id="field15FileName" class="imp-file-name">Nenhum arquivo selecionado.</div>
-                        </div>
-
-                        <div class="imp-field imp-field--full" data-field-wrap="field-16">
-                            <span class="imp-label">Cronograma de Execução de Serviços <span class="imp-label__required">*</span></span>
-                            <div class="imp-upload">
-                                <input class="imp-upload__input" type="file" id="cronograma_execucao" name="Cronograma de Execução de Serviços" accept="" data-impper-file-output="#field16FileName" required>
-                                <label class="imp-upload__label" for="cronograma_execucao">
-                                    <span class="imp-upload__copy"><strong>Anexe o arquivo</strong><span>Selecione um arquivo.</span></span>
-                                    <span class="imp-upload__action">Selecionar arquivo</span>
-                                </label>
-                            </div>
-                            <div id="field16FileName" class="imp-file-name">Nenhum arquivo selecionado.</div>
-                        </div>
-
-                        <div class="imp-field imp-field--full" data-field-wrap="field-17">
-                            <span class="imp-label">Quadro de Concorrência Aprovado <span class="imp-label__required">*</span></span>
-                            <div class="imp-upload">
-                                <input class="imp-upload__input" type="file" id="quadro_concorrencia" name="Quadro de Concorrência Aprovado" accept="" data-impper-file-output="#field17FileName" required>
-                                <label class="imp-upload__label" for="quadro_concorrencia">
-                                    <span class="imp-upload__copy"><strong>Anexe o arquivo</strong><span>Selecione um arquivo.</span></span>
-                                    <span class="imp-upload__action">Selecionar arquivo</span>
-                                </label>
-                            </div>
-                            <div id="field17FileName" class="imp-file-name">Nenhum arquivo selecionado.</div>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="field-19">
-                            <label class="imp-label" for="percentual_mdo">Percentual de MDO <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="percentual_mdo" name="Percentual de MDO" oninput="mascaraPercent(this)" placeholder="%" value="" required>
-                        </div>
-
-                        <div class="imp-field" data-field-wrap="field-20">
-                            <label class="imp-label" for="percentual_mat">Percentual de MAT <span class="imp-label__required">*</span></label>
-                            <input class="form-control" type="text" id="percentual_mat" name="Percentual de MAT" oninput="mascaraPercent(this)" placeholder="%" value="" required>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="imp-form-section" id="proj-wrapper" data-shown-when="tipo-solicitacao:Emissão de contratos para projetos" data-impper-show-when="tp_solicitacao:Emissão de contratos para projetos" hidden>
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Anexos — projetos</h3>
-                        </div>
-                    </div>
-
-                    <div class="imp-form-grid">
-                        <div class="imp-field imp-field--full" data-field-wrap="field-18">
-                            <span class="imp-label">Proposta <span class="imp-label__required">*</span></span>
-                            <div class="imp-upload">
-                                <input class="imp-upload__input" type="file" id="Proposta" name="Proposta" accept="" data-impper-file-output="#field18FileName" required>
-                                <label class="imp-upload__label" for="Proposta">
-                                    <span class="imp-upload__copy"><strong>Anexe o arquivo</strong><span>Selecione um arquivo.</span></span>
-                                    <span class="imp-upload__action">Selecionar arquivo</span>
-                                </label>
-                            </div>
-                            <div id="field18FileName" class="imp-file-name">Nenhum arquivo selecionado.</div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="imp-form-section">
-                    <div class="imp-form-section__head">
-                        <div class="imp-form-section__copy">
-                            <h3 class="imp-card__title">Observações</h3>
-                        </div>
-                    </div>
-
-                    <div class="imp-form-grid">
-                        <div class="imp-field imp-field--full" data-field-wrap="field-21">
-                            <label class="imp-label" for="Observacoes">Observações <span class="imp-label__required">*</span></label>
-                            <textarea class="form-control" id="observacoes" name="Observacoes" required></textarea>
-                        </div>
-                    </div>
-                </section>
 
                 <div class="imp-form-actions">
-                    <div class="imp-form-note">Campos com <span class="imp-label__required">*</span> são obrigatórios.</div>
-                    <div class="imp-cluster">
-                        <button type="button" id="submitButton" class="btn btn-primary" onclick="enviarFormulario(document, 1, 'EC-00')">
-                            <span class="imp-spinner imp-spinner--sm imp-spinner--light" id="submitSpinner" hidden></span>
-                            <span id="submitLabel">Enviar solicitação</span>
-                        </button>
+
+                    <div class="imp-form-note">
+
+                        Campos com
+                        <span class="imp-label__required">*</span>
+                        são obrigatórios.
+
                     </div>
+
+
+                    <div class="imp-cluster">
+
+                        <button
+                            type="button"
+                            id="submitButton"
+                            class="btn btn-primary"
+                            onclick="enviarFormulario(
+                                document,
+                                1,
+                                'EC-00'
+                            )"
+                        >
+
+                            <span
+                                class="imp-spinner imp-spinner--sm imp-spinner--light"
+                                id="submitSpinner"
+                                hidden
+                            ></span>
+
+                            <span id="submitLabel">
+                                Enviar solicitação
+                            </span>
+
+                        </button>
+
+                    </div>
+
                 </div>
+
             </form>
+
         </div>
 
-        <div class="imp-form-message" id="submitted-form" hidden>
-            <p class="imp-help">Protocolo</p>
-            <h3 class="imp-card__title" id="submitted-header">Solicitação enviada</h3>
-            <p id="submitted-content">Sua solicitação foi registrada com sucesso.</p>
+
+        <div
+            class="imp-form-message"
+            id="submitted-form"
+            hidden
+        >
+
+            <p class="imp-help">
+                Protocolo
+            </p>
+
+            <h3
+                class="imp-card__title"
+                id="submitted-header"
+            >
+                Solicitação enviada
+            </h3>
+
+            <p id="submitted-content">
+                Sua solicitação foi registrada com sucesso.
+            </p>
+
         </div>
+
     </section>
 
-    <script defer src="{{ url_for('static', filename='js/forms.js') }}"></script>
+
+    <script
+        defer
+        src="{{ url_for('static', filename='js/forms.js') }}"
+    ></script>
+
 {% endblock %}
