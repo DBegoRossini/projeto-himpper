@@ -243,7 +243,7 @@
 
                 <!-- TABELA DESKTOP -->
                 <div
-                    class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox"
+                    class="table-responsive imp-table-wrap imp-request-table-wrap"
                 >
 
                     <table
@@ -266,10 +266,10 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="protocolo"
                                     >
-                                        Protocolo
+                                        ID
 
                                         <span
                                             aria-hidden="true"
@@ -291,7 +291,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="solicitante"
                                     >
                                         Solicitante
@@ -316,7 +316,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="tipo"
                                     >
                                         Tipo
@@ -341,7 +341,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="recebida"
                                     >
                                         Recebida em
@@ -365,7 +365,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="etapa"
                                     >
                                         Etapa atual
@@ -390,7 +390,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="status"
                                     >
                                         Status
@@ -415,7 +415,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="prazo"
                                     >
                                         Prazo
@@ -580,11 +580,7 @@
                                             <span
                                                 class="badge rounded-pill imp-badge imp-badge--success"
                                             >
-                                                {{
-                                                    pendencia.exec_name
-                                                    if pendencia.exec_name
-                                                    else "Não informado"
-                                                }}
+                                                Assumido 
                                             </span>
 
                                         {% endif %}
