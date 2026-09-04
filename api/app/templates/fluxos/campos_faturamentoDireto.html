@@ -1,0 +1,331 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+{% set f_tp_solic = formularios_map.get('tp_solicitacao') if modo_execucao else none %}
+{% set f_contrato = formularios_map.get('contrato') if modo_execucao else none %}
+{% set f_obraColig = formularios_map.get('obraColig') if modo_execucao else none %}
+{% set f_fornecedor = formularios_map.get('fornecedor') if modo_execucao else none %}
+{% set f_valor = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
+{% set f_valor_empreiteiro = formularios_map.get('valor_empreiteiro') if modo_execucao else none %}
+
+{% set f_valor_previsto = formularios_map.get('valor_previsto') if modo_execucao else none %}
+{% set f_saldo = formularios_map.get('saldo') if modo_execucao else none %}
+{% set f_condPag = formularios_map.get('condPag') if modo_execucao else none %}
+{% set f_eMail = formularios_map.get('eMail') if modo_execucao else none %}
+
+{% set f_local_receb_rb = formularios_map.get('local_receb_rb') if modo_execucao else none %}
+{% set f_local_receb = formularios_map.get('local_receb') if modo_execucao else none %}
+
+{% set f_anexos = formularios_map.get('anexos') if modo_execucao else none %}
+{% set f_anexos_retorno = formularios_map.get('anexos_retorno') if modo_execucao else none %}
+
+
+{% set tipo_solic_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tp_solic
+        and (f_tp_solic.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set contrato_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_contrato
+        and (f_contrato.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set obra_colig_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_obraColig
+        and (f_obraColig.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set fornecedor_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_fornecedor
+        and (f_fornecedor.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set valor_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_valor
+        and (f_valor.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set valor_empreiteiro_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_valor_empreiteiro
+        and (f_valor_empreiteiro.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set valor_previsto_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_valor_previsto
+        and (f_valor_previsto.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set cond_pag_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_condPag
+        and (f_condPag.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set e_mail_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_eMail
+        and (f_eMail.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set local_rb_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_local_receb_rb
+        and (f_local_receb_rb.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set local_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_local_receb
+        and (f_local_receb.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set anexos_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_anexos
+        and (f_anexos.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set anexos_ret_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_anexos_retorno
+        and (f_anexos_retorno.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Identificação do Contrato
+            </h3>
+
+            <p class="imp-card__subtitle">
+                Primeiro, precisamos entender em qual contrato esta despesa se enquadra.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div
+            class="imp-field imp-field--full"
+            data-field-wrap="condicao_pagamento"
+        >
+
+            <span class="imp-label">
+                Tipo de solicitação
+                <span class="imp-label__required">*</span>
+            </span>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Tipo de solicitação"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="tipo_solicitacao"
+                        value="NOVO_CONTRATO"
+                        {% if tipo_solic_editavel %}required{% endif %}
+                        {% if modo_execucao and f_tp_solic and f_tp_solic.valor == 'NOVO_CONTRATO' %}checked{% endif %}
+                        {% if not tipo_solic_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Novo Contrato</span>
+                    </span>
+
+                </label>
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="tipo_solicitacao"
+                        value="PAGAMENTO"
+                        {% if tipo_solic_editavel and modo_execucao and f_tp_solic and f_tp_solic.valor == 'PAGAMENTO' %}checked{% endif %}
+                        {% if not tipo_solic_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Pagamento</span>
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+</section>
+
+<section class="imp-form-section" data-impper-show-when="tipo_solicitacao:NOVO_CONTRATO" hidden>
+            Fluxo de Emissão de Contratos
+</section>
+
+<section class="imp-form-section" data-impper-show-when="tipo_solicitacao:PAGAMENTO" hidden>
+
+   <div
+            class="imp-field imp-field--full"
+            data-field-wrap="contrato"
+        >
+
+            <div
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+            >
+
+                <div>
+
+                    <span class="imp-label">
+                        Contrato
+                        <span class="imp-label__required">*</span>
+                    </span>
+
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos um contrato.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <input
+                type="hidden"
+                id="contrato"
+                name="contrato"
+                value="{{ f_contrato.valor if modo_execucao and f_contrato and f_contrato.valor is not none else '' }}"
+                data-contrato-value
+            >
+
+
+            <select
+                data-contrato-source
+                hidden
+                disabled
+            >
+
+                {% if g.contratosUnic is defined %}
+
+                    {% for key, label in g.contratosUnic %}
+
+                        <option
+                            value="{{ key }}"
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+
+            <div
+                class="imp-nature-list"
+                id="contratoList"
+                data-contrato-list
+            >
+
+                <div
+                    class="imp-nature-row"
+                    data-contrato-row
+                >
+
+                    <div
+                        class="imp-search-select position-relative flex-grow-1"
+                        data-contrato-combobox
+                    >
+
+                        <input
+                            type="search"
+                            class="form-control"
+                            placeholder="Pesquise por código ou descrição"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            data-contrato-search
+                            {% if not contrato_editavel %}
+                                disabled
+                                data-impper-locked="true"
+                            {% endif %}
+                        >
+
+                        <input
+                            type="hidden"
+                            value=""
+                            data-contrato-selected-value
+                        >
+
+                        <div
+                            class="dropdown-menu w-100 imp-search-select__menu"
+                            role="listbox"
+                            data-contrato-dropdown
+                        ></div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+</section>

@@ -1,0 +1,101 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Faturamento Direto
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">Faturamento Direto</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Preencha as informações abaixo para abrir um novo Faturamento Direto/Contrato.
+    </p>
+{% endblock %}
+
+{% block main %}
+<link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    />
+
+    <section class="imp-stack imp-gap-6 imp-form-page">
+
+        <div>
+            <span class="imp-kicker">Faturamento Direto</span>
+
+            <h2 class="imp-title">
+                Nova solicitação
+            </h2>
+
+            <p class="imp-subtitle">
+                Responda às perguntas abaixo. O formulário será ajustado conforme o tipo da sua solicitação.
+            </p>
+        </div>
+
+        <div class="imp-form-shell">
+
+            <form
+                id="purchaseForm"
+                class="imp-form"
+                novalidate
+            >
+
+                {% include "fluxos/campos_faturamentoDireto.html" %}
+
+                <div
+                    id="generalMessage"
+                    class="imp-form-message"
+                    role="alert"
+                    aria-live="polite"
+                    hidden
+                ></div>
+
+                <div class="imp-form-actions">
+
+                    <div class="imp-form-note">
+                        Revise os dados antes de enviar. Campos marcados com * são obrigatórios.
+                    </div>
+
+                    <div class="imp-cluster">
+
+                        <a
+                            class="btn btn-neutral"
+                            href="{{ url_for('novasolicitacao') }}"
+                        >
+                            Voltar
+                        </a>
+
+                        <button type="button" id="submitButton" class="btn btn-primary" onclick="enviarFormulario(document, 3, 'OC-00')">
+
+                            <span
+                                class="imp-spinner imp-spinner--sm imp-spinner--light"
+                                id="submitSpinner"
+                                hidden
+                            ></span>
+
+                            <span id="submitLabel" >
+                                Enviar solicitação
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <script
+        defer
+        src="{{ url_for('static', filename='js/forms.js') }}"
+    ></script>
+
+    <script
+        defer
+        src="{{ url_for('static', filename='js/formulario-oc.js') }}"
+    ></script>
+
+{% endblock %}

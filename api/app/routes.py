@@ -106,11 +106,11 @@ def carregar_info_form():
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
-    print("STATUS COLIGMOV:", g.coligMov.status_code)
     coligadas = {}
     movimentos = {}
     ccusto = {}
     fornecedores = {}
+    contratos = {}
     dados =  g.coligMov.json()
     if isinstance(dados, dict):
         registros = dados.get("value") or dados.get("items") or dados.get("data") or []
@@ -134,10 +134,15 @@ def carregar_info_form():
             label = colig.get("LABELMOV")
             valor = colig.get("VALORMOV")
             fornecedores[valor] = label
+        elif colig.get("TIPO") == "CONTRATO":
+            label = colig.get("LABELMOV")
+            valor = colig.get("VALORMOV")
+            contratos[valor] = label
     g.coligadasUnic = coligadas.items()
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
     g.fornUnic = fornecedores.items()
+    g.contratosUnic = contratos.items()
 
 
 @app.context_processor
@@ -381,9 +386,11 @@ def novasolicitacao(context):
 @auth.login_required(scopes=["User.Read"]) 
 @with_info_user
 def ini_flow(id_fluxo, context):
+    print(id_fluxo)
     fluxo = flows.query.get(id_fluxo)
     carregar_info_form()
     name = fluxo.nome
+    print(name)
     return render_template(f'fluxos/{name}.html', 
         user=context['user'],
         context=context
@@ -501,7 +508,9 @@ def exec_tarefas(id_chamada, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() if chamada else None
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() 
+    if exec_raw is None:
+        exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
     execucao = []
     if exec_raw:
         if exec_raw.executor:

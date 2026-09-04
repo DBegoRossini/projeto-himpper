@@ -256,7 +256,9 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
-    if (field.type === 'file'){
+    if (field.type === 'file' && field.files.length === 0){
+      return field.files.length;
+    } else if (field.type === 'file' && field.files.length > 0) {
       Array.from(field.files || []).forEach(file => {
         if (file.size > 0) formData.append(field.name, file);
       });
