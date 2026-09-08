@@ -1100,26 +1100,26 @@
 
         <div
                 class="imp-field imp-field--full"
-                data-field-wrap="outros_fac"
+                data-field-wrap="outros_assis"
             >
 
                 <label
                     class="imp-label"
-                    for="outros_fac"
+                    for="outros_assis"
                 >
-                    Outros - Facilities
+                    Outros - Assistência
                     <span class="imp-label__required">*</span>
                 </label>
 
                 <textarea
-                    id="outros_fac"
-                    name="outros_fac"
+                    id="outros_assis"
+                    name="outros_assis"
                     class="form-control"
                     maxlength="800"
                     data-impper-counter
-                    {% if outros_fac_editavel %}required{% endif %}
-                    {% if not outros_fac_editavel %}disabled data-impper-locked="true"{% endif %}
-                >{{ f_outros_fac.valor if modo_execucao and f_outros_fac and f_outros_fac.valor is not none else '' }}</textarea>
+                    {% if outros_assis_editavel %}required{% endif %}
+                    {% if not outros_assis_editavel %}disabled data-impper-locked="true"{% endif %}
+                >{{ f_outros_assis.valor if modo_execucao and f_outros_assis and f_outros_assis.valor is not none else '' }}</textarea>
 
                 <div class="imp-form-meta">
 
@@ -1145,7 +1145,7 @@
 
     <div class="imp-form-section__head">
         <h3 class="imp-card__title">
-            Assistência
+            Marketing
         </h3>
 
     </div>
