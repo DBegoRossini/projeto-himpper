@@ -83,7 +83,7 @@
                     </thead>
                     <tbody id="myTasksRows">
                       {% for tarefa in minhas_tarefas %}
-                      <tr class="js-clickable-row" data-href="{{ url_for('exec_tarefas', id_chamada=tarefa.id_chamada, id_etapa=tarefa.id_etapa) }}">
+                      <tr class="js-clickable-row" data-href="{{ url_for('exec_tarefas', id_chamada=tarefa.id_chamada, id_etapa=0) }}">
                         <td>{{ tarefa.etapa_nome }}</td>
                         <td>{{ tarefa.fluxo_nome }}</td>
                         <td>{{ tarefa.prazo_limite.strftime('%d/%m/%Y %H:%M') }}</td>
@@ -132,7 +132,7 @@
                     </thead>
                     <tbody id="myRequestsRows">
                       {% for solicitacao in solicitacoes %}
-                      <tr class="js-clickable-row" data-href="{{ url_for('exec_tarefas', id_chamada=solicitacao.id, id_etapa=solicitacao.id_etapa) }}">
+                      <tr class="js-clickable-row" data-href="{{ url_for('exec_tarefas', id_chamada=solicitacao.id, id_etapa=0) }}">
                         <td>{{ solicitacao.id }}</td>
                         <td>{{ solicitacao.fluxo_nome }}</td>
                         <td>{{ solicitacao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}</td>
