@@ -1,0 +1,1162 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+{% set f_tp_checagem = formularios_map.get('tp_checagem') if modo_execucao else none %}
+{% set f_empreendimento = formularios_map.get('empreendimento') if modo_execucao else none %}
+
+<!-- Facilities -->
+{% set f_piso = formularios_map.get('piso') if modo_execucao else none %}
+{% set f_piso_desc = formularios_map.get('piso_desc') if modo_execucao else none %}
+{% set f_piso_anexo = formularios_map.get('piso_anexo') if modo_execucao else none %}
+
+{% set f_mesa_limpa = formularios_map.get('mesa_limpa') if modo_execucao else none %}
+{% set f_mesa_limpa_desc = formularios_map.get('mesa_limpa_desc') if modo_execucao else none %}
+{% set f_mesa_limpa_anexo = formularios_map.get('mesa_limpa_anexo') if modo_execucao else none %}
+
+{% set f_vidros_janelas = formularios_map.get('vidros_janelas') if modo_execucao else none %}
+{% set f_vidros_janelas_desc = formularios_map.get('vidros_janelas_desc') if modo_execucao else none %}
+{% set f_vidros_janelas_anexo = formularios_map.get('vidros_janelas_anexo') if modo_execucao else none %}
+
+{% set f_banheiros = formularios_map.get('banheiros') if modo_execucao else none %}
+{% set f_banheiros_desc = formularios_map.get('banheiros_desc') if modo_execucao else none %}
+{% set f_banheiros_anexo = formularios_map.get('banheiros_anexo') if modo_execucao else none %}
+
+{% set f_lixeiras = formularios_map.get('lixeiras') if modo_execucao else none %}
+{% set f_lixeiras_desc = formularios_map.get('lixeiras_desc') if modo_execucao else none %}
+{% set f_lixeiras_anexo = formularios_map.get('lixeiras_anexo') if modo_execucao else none %}
+
+{% set f_ar_condicionado = formularios_map.get('ar_condicionado') if modo_execucao else none %}
+{% set f_ar_condicionado_desc = formularios_map.get('ar_condicionado_desc') if modo_execucao else none %}
+{% set f_ar_condicionado_anexo = formularios_map.get('ar_condicionado_anexo') if modo_execucao else none %}
+
+{% set f_iluminacao = formularios_map.get('iluminacao') if modo_execucao else none %}
+{% set f_iluminacao_desc = formularios_map.get('iluminacao_desc') if modo_execucao else none %}
+{% set f_iluminacao_anexo = formularios_map.get('iluminacao_anexo') if modo_execucao else none %}
+
+{% set f_jardim = formularios_map.get('jardim') if modo_execucao else none %}
+{% set f_jardim_desc = formularios_map.get('jardim_desc') if modo_execucao else none %}
+{% set f_jardim_anexo = formularios_map.get('jardim_anexo') if modo_execucao else none %}
+
+{% set f_tvs_monitores = formularios_map.get('tvs_monitores') if modo_execucao else none %}
+{% set f_tvs_monitores_desc = formularios_map.get('tvs_monitores_desc') if modo_execucao else none %}
+{% set f_tvs_monitores_anexo = formularios_map.get('tvs_monitores_anexo') if modo_execucao else none %}
+
+{% set f_tomadas = formularios_map.get('tomadas') if modo_execucao else none %}
+{% set f_tomadas_desc = formularios_map.get('tomadas_desc') if modo_execucao else none %}
+{% set f_tomadas_anexo = formularios_map.get('tomadas_anexo') if modo_execucao else none %}
+
+{% set f_outros_fac = formularios_map.get('outros_fac') if modo_execucao else none %}
+
+<!-- Assistência -->
+{% set f_infiltracao = formularios_map.get('infiltracao') if modo_execucao else none %}
+{% set f_infiltracao_desc = formularios_map.get('infiltracao_desc') if modo_execucao else none %}
+{% set f_infiltracao_anexo = formularios_map.get('infiltracao_anexo') if modo_execucao else none %}
+
+{% set f_janelas_portas = formularios_map.get('janelas_portas') if modo_execucao else none %}
+{% set f_janelas_portas_desc = formularios_map.get('janelas_portas_desc') if modo_execucao else none %}
+{% set f_janelas_portas_anexo = formularios_map.get('janelas_portas_anexo') if modo_execucao else none %}
+
+{% set f_torneiras = formularios_map.get('torneiras') if modo_execucao else none %}
+{% set f_torneiras_desc = formularios_map.get('torneiras_desc') if modo_execucao else none %}
+{% set f_torneiras_anexo = formularios_map.get('torneiras_anexo') if modo_execucao else none %}
+
+{% set f_outros_assis = formularios_map.get('outros_assis') if modo_execucao else none %}
+
+<!-- Marketing -->
+{% set f_marketing = formularios_map.get('marketing') if modo_execucao else none %}
+{% set f_marketing_desc = formularios_map.get('marketing_desc') if modo_execucao else none %}
+{% set f_marketing_anexo = formularios_map.get('marketing_anexo') if modo_execucao else none %}
+
+
+{% set tp_checagem_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tp_checagem
+        and (f_tp_checagem.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set empreendimento_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_empreendimento
+        and (f_empreendimento.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set piso_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_piso
+        and (f_piso.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set piso_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_piso_desc
+        and (f_piso_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set piso_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_piso_anexo
+        and (f_piso_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set mesa_limpa_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_mesa_limpa
+        and (f_mesa_limpa.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set mesa_limpa_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_mesa_limpa_desc
+        and (f_mesa_limpa_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set mesa_limpa_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_mesa_limpa_anexo
+        and (f_mesa_limpa_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set vidros_janelas_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_vidros_janelas
+        and (f_vidros_janelas.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set vidros_janelas_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_vidros_janelas_desc
+        and (f_vidros_janelas_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set vidros_janelas_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_vidros_janelas_anexo
+        and (f_vidros_janelas_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set banheiros_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_banheiros
+        and (f_banheiros.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set banheiros_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_banheiros_desc
+        and (f_banheiros_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set banheiros_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_banheiros_anexo
+        and (f_banheiros_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set lixeiras_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_lixeiras
+        and (f_lixeiras.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set lixeiras_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_lixeiras_desc
+        and (f_lixeiras_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set lixeiras_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_lixeiras_anexo
+        and (f_lixeiras_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set ar_condicionado_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_ar_condicionado
+        and (f_ar_condicionado.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set ar_condicionado_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_ar_condicionado_desc
+        and (f_ar_condicionado_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set ar_condicionado_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_ar_condicionado_anexo
+        and (f_ar_condicionado_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set iluminacao_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_iluminacao
+        and (f_iluminacao.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set iluminacao_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_iluminacao_desc
+        and (f_iluminacao_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set iluminacao_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_iluminacao_anexo
+        and (f_iluminacao_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set jardim_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_jardim
+        and (f_jardim.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set jardim_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_jardim_desc
+        and (f_jardim_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set jardim_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_jardim_anexo
+        and (f_jardim_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tvs_monitores_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tvs_monitores
+        and (f_tvs_monitores.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tvs_monitores_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tvs_monitores_desc
+        and (f_tvs_monitores_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tvs_monitores_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tvs_monitores_anexo
+        and (f_tvs_monitores_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tomadas_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tomadas
+        and (f_tomadas.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tomadas_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tomadas_desc
+        and (f_tomadas_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tomadas_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tomadas_anexo
+        and (f_tomadas_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set outros_fac_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_outros_fac
+        and (f_outros_fac.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set infiltracao_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_infiltracao
+        and (f_infiltracao.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set infiltracao_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_infiltracao_desc
+        and (f_infiltracao_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set infiltracao_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_infiltracao_anexo
+        and (f_infiltracao_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set janelas_portas_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_janelas_portas
+        and (f_janelas_portas.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set janelas_portas_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_janelas_portas_desc
+        and (f_janelas_portas_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set janelas_portas_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_janelas_portas_anexo
+        and (f_janelas_portas_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set torneiras_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_torneiras
+        and (f_torneiras.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set torneiras_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_torneiras_desc
+        and (f_torneiras_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set torneiras_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_torneiras_anexo
+        and (f_torneiras_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set outros_assis_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_outros_assis
+        and (f_outros_assis.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set marketing_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_marketing
+        and (f_marketing.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set marketing_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_marketing_desc
+        and (f_marketing_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set marketing_anexo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_marketing_anexo
+        and (f_marketing_anexo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set checklist_formularios = {
+    'piso': f_piso,
+    'piso_desc': f_piso_desc,
+    'piso_anexo': f_piso_anexo,
+    'mesa_limpa': f_mesa_limpa,
+    'mesa_limpa_desc': f_mesa_limpa_desc,
+    'mesa_limpa_anexo': f_mesa_limpa_anexo,
+    'vidros_janelas': f_vidros_janelas,
+    'vidros_janelas_desc': f_vidros_janelas_desc,
+    'vidros_janelas_anexo': f_vidros_janelas_anexo,
+    'banheiros': f_banheiros,
+    'banheiros_desc': f_banheiros_desc,
+    'banheiros_anexo': f_banheiros_anexo,
+    'lixeiras': f_lixeiras,
+    'lixeiras_desc': f_lixeiras_desc,
+    'lixeiras_anexo': f_lixeiras_anexo,
+    'ar_condicionado': f_ar_condicionado,
+    'ar_condicionado_desc': f_ar_condicionado_desc,
+    'ar_condicionado_anexo': f_ar_condicionado_anexo,
+    'iluminacao': f_iluminacao,
+    'iluminacao_desc': f_iluminacao_desc,
+    'iluminacao_anexo': f_iluminacao_anexo,
+    'jardim': f_jardim,
+    'jardim_desc': f_jardim_desc,
+    'jardim_anexo': f_jardim_anexo,
+    'tvs_monitores': f_tvs_monitores,
+    'tvs_monitores_desc': f_tvs_monitores_desc,
+    'tvs_monitores_anexo': f_tvs_monitores_anexo,
+    'tomadas': f_tomadas,
+    'tomadas_desc': f_tomadas_desc,
+    'tomadas_anexo': f_tomadas_anexo,
+    'outros_fac': f_outros_fac,
+    'infiltracao': f_infiltracao,
+    'infiltracao_desc': f_infiltracao_desc,
+    'infiltracao_anexo': f_infiltracao_anexo,
+    'janelas_portas': f_janelas_portas,
+    'janelas_portas_desc': f_janelas_portas_desc,
+    'janelas_portas_anexo': f_janelas_portas_anexo,
+    'torneiras': f_torneiras,
+    'torneiras_desc': f_torneiras_desc,
+    'torneiras_anexo': f_torneiras_anexo,
+    'outros_assis': f_outros_assis,
+    'marketing': f_marketing,
+    'marketing_desc': f_marketing_desc,
+    'marketing_anexo': f_marketing_anexo
+} %}
+
+{% set checklist_editaveis = {
+    'piso': piso_editavel,
+    'piso_desc': piso_desc_editavel,
+    'piso_anexo': piso_anexo_editavel,
+    'mesa_limpa': mesa_limpa_editavel,
+    'mesa_limpa_desc': mesa_limpa_desc_editavel,
+    'mesa_limpa_anexo': mesa_limpa_anexo_editavel,
+    'vidros_janelas': vidros_janelas_editavel,
+    'vidros_janelas_desc': vidros_janelas_desc_editavel,
+    'vidros_janelas_anexo': vidros_janelas_anexo_editavel,
+    'banheiros': banheiros_editavel,
+    'banheiros_desc': banheiros_desc_editavel,
+    'banheiros_anexo': banheiros_anexo_editavel,
+    'lixeiras': lixeiras_editavel,
+    'lixeiras_desc': lixeiras_desc_editavel,
+    'lixeiras_anexo': lixeiras_anexo_editavel,
+    'ar_condicionado': ar_condicionado_editavel,
+    'ar_condicionado_desc': ar_condicionado_desc_editavel,
+    'ar_condicionado_anexo': ar_condicionado_anexo_editavel,
+    'iluminacao': iluminacao_editavel,
+    'iluminacao_desc': iluminacao_desc_editavel,
+    'iluminacao_anexo': iluminacao_anexo_editavel,
+    'jardim': jardim_editavel,
+    'jardim_desc': jardim_desc_editavel,
+    'jardim_anexo': jardim_anexo_editavel,
+    'tvs_monitores': tvs_monitores_editavel,
+    'tvs_monitores_desc': tvs_monitores_desc_editavel,
+    'tvs_monitores_anexo': tvs_monitores_anexo_editavel,
+    'tomadas': tomadas_editavel,
+    'tomadas_desc': tomadas_desc_editavel,
+    'tomadas_anexo': tomadas_anexo_editavel,
+    'outros_fac': outros_fac_editavel,
+    'infiltracao': infiltracao_editavel,
+    'infiltracao_desc': infiltracao_desc_editavel,
+    'infiltracao_anexo': infiltracao_anexo_editavel,
+    'janelas_portas': janelas_portas_editavel,
+    'janelas_portas_desc': janelas_portas_desc_editavel,
+    'janelas_portas_anexo': janelas_portas_anexo_editavel,
+    'torneiras': torneiras_editavel,
+    'torneiras_desc': torneiras_desc_editavel,
+    'torneiras_anexo': torneiras_anexo_editavel,
+    'outros_assis': outros_assis_editavel,
+    'marketing': marketing_editavel,
+    'marketing_desc': marketing_desc_editavel,
+    'marketing_anexo': marketing_anexo_editavel
+} %}
+
+{% macro campo_inspecao(id_campo, label, label_required=true, ajuda_desc='Descreva local, estado ou qualquer outra informação relevante.', ajuda_anexo='Selecione a imagem.') %}
+
+{% set campo = checklist_formularios.get(id_campo) %}
+{% set campo_editavel = checklist_editaveis.get(id_campo, false) %}
+{% set campo_desc = checklist_formularios.get(id_campo ~ '_desc') %}
+{% set campo_desc_editavel = checklist_editaveis.get(id_campo ~ '_desc', false) %}
+{% set campo_anexo = checklist_formularios.get(id_campo ~ '_anexo') %}
+{% set campo_anexo_editavel = checklist_editaveis.get(id_campo ~ '_anexo', false) %}
+
+<div class="imp-form-grid">
+
+    <div
+        class="imp-field imp-field--full"
+        data-field-wrap="{{ id_campo }}"
+    >
+
+        <span class="imp-label">
+            {{ label }}
+            {% if label_required %}<span class="imp-label__required">*</span>{% endif %}
+        </span>
+
+        <div
+            class="imp-choice-grid imp-choice-grid--two"
+            role="radiogroup"
+            aria-label="{{ label }}"
+        >
+
+            <label class="imp-choice">
+
+                <input
+                    type="radio"
+                    name="{{ id_campo }}"
+                    value="SIM"
+                    {% if campo and campo.valor == 'SIM' %}checked{% endif %}
+                    {% if campo_editavel %}required{% endif %}
+                    {% if not campo_editavel %}disabled data-impper-locked="true"{% endif %}
+                >
+
+                <span class="imp-choice__content">
+                    <span class="imp-choice__dot"></span>
+                    <span class="imp-choice__text">Sim</span>
+                </span>
+
+            </label>
+
+            <label class="imp-choice">
+
+                <input
+                    type="radio"
+                    name="{{ id_campo }}"
+                    value="NAO"
+                    {% if campo and campo.valor == 'NAO' %}checked{% endif %}
+                    {% if not campo_editavel %}disabled data-impper-locked="true"{% endif %}
+                >
+
+                <span class="imp-choice__content">
+                    <span class="imp-choice__dot"></span>
+                    <span class="imp-choice__text">Não, anexar imagem</span>
+                </span>
+
+            </label>
+
+        </div>
+    </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="{{ id_campo }}_desc"
+            data-impper-show-when="{{ id_campo }}:NAO"
+        >
+
+            <label
+                class="imp-label"
+                for="{{ id_campo }}_desc"
+            >
+                Descrição do problema - {{ label }}
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <textarea
+                id="{{ id_campo }}_desc"
+                name="{{ id_campo }}_desc"
+                class="form-control"
+                {% if campo_desc_editavel %}required{% endif %}
+                {% if not campo_desc_editavel %}disabled data-impper-locked="true"{% endif %}
+            >{{ campo_desc.valor if campo_desc and campo_desc.valor is not none else '' }}</textarea>
+
+            <div class="imp-form-meta">
+
+                <p class="imp-help">
+                    {{ ajuda_desc }}
+                </p>
+
+            </div>
+
+        </div>
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="{{ id_campo }}_anexo"
+            data-impper-show-when="{{ id_campo }}:NAO"
+        >
+
+         {% if modo_execucao and campo_anexo and campo_anexo.valor %}
+
+            <div class="imp-execution-current-file"
+            data-impper-show-when="{{ id_campo }}:NAO">
+
+                <div>
+
+                    <strong>
+                        Arquivo atual
+                    </strong>
+
+                    <span>
+                        Anexo registrado nesta solicitação.
+                    </span>
+
+                </div>
+
+                <a
+                    class="btn btn-outline-primary btn-sm"
+                    href="{{ url_for('download_arquivo', id_arquivo=campo_anexo.id) }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Visualizar arquivo
+                </a>
+
+            </div>
+
+        {% endif %}
+
+        {% if campo_anexo_editavel %}
+
+            <div class="imp-upload" data-impper-show-when="{{ id_campo }}:NAO">
+
+                <input
+                    id="{{ id_campo }}_anexo"
+                    name="{{ id_campo }}_anexo"
+                    type="file"
+                    class="imp-upload__input"
+                    accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                    data-impper-file-output="#{{ id_campo }}AnexoName"
+                    {% if not modo_execucao or not (campo_anexo and campo_anexo.valor) %}required{% endif %}
+                >
+
+                <label
+                    class="imp-upload__label"
+                    for="{{ id_campo }}_anexo"
+                >
+
+                    <span class="imp-upload__copy">
+
+                        <strong>
+                            {% if modo_execucao and campo_anexo and campo_anexo.valor %}
+                                Substituir anexo
+                            {% else %}
+                                Anexe a imagem
+                            {% endif %}
+                        </strong>
+
+                        <span>
+                            {{ ajuda_anexo }}
+                        </span>
+
+                    </span>
+
+                    <span class="imp-upload__action">
+                        Selecionar arquivo
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div
+                id="{{ id_campo }}AnexoName"
+                class="imp-file-name"
+                data-impper-show-when="{{ id_campo }}:NAO"
+            >
+                Nenhum novo arquivo selecionado.
+            </div>
+
+        {% elif not (modo_execucao and campo_anexo and campo_anexo.valor) %}
+
+            <p class="imp-help">
+                Nenhum arquivo anexado.
+            </p>
+
+        {% endif %}
+        </div>
+
+</div>
+
+{% endmacro %}
+
+<section class="imp-form-section">
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Identificação da checagem
+            </h3>
+
+            <p class="imp-card__subtitle">
+                Primeiro, precisamos entender onde a checagem será realizada.
+            </p>
+
+        </div>
+    </div>
+
+    <div
+        class="imp-choice-grid imp-choice-grid--two"
+        role="radiogroup"
+        aria-label="Tipo de checagem"
+    >
+
+        <label class="imp-choice">
+
+            <input
+                type="radio"
+                name="tp_checagem"
+                value="DECORADO"
+                {% if tp_checagem_editavel %}required{% endif %}
+                {% if modo_execucao and f_tp_checagem and f_tp_checagem.valor == 'DECORADO' %}checked{% endif %}
+                {% if not tp_checagem_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+            <span class="imp-choice__content">
+                <span class="imp-choice__dot"></span>
+                <span class="imp-choice__text">Decorado</span>
+            </span>
+
+        </label>
+
+        <label class="imp-choice">
+
+            <input
+                type="radio"
+                name="tp_checagem"
+                value="STAND"
+
+                {% if modo_execucao and f_tp_checagem and f_tp_checagem.valor == 'STAND' %}checked{% endif %}
+                {% if not tp_checagem_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+            <span class="imp-choice__content">
+                <span class="imp-choice__dot"></span>
+                <span class="imp-choice__text">Stand</span>
+            </span>
+
+        </label>
+
+    </div>
+
+
+    <div
+        class="imp-field"
+        data-field-wrap="empreendimento"
+    >
+
+        <label
+            class="imp-label"
+            for="empreendimento"
+        >
+            Empreendimento
+            <span class="imp-label__required">*</span>
+        </label>
+
+        <select
+            id="empreendimento"
+            name="empreendimento"
+            class="form-select"
+            autocomplete="organization"
+            {% if empreendimento_editavel %}required{% endif %}
+            {% if not empreendimento_editavel %}disabled data-impper-locked="true"{% endif %}
+        >
+
+            <option value="">
+                Selecione um empreendimento
+            </option>
+
+            <option
+                value="CONNECT"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CONNECT' %}selected{% endif %}
+            >
+                Connect Impper
+            </option>
+
+            <option
+                value="LEGACY"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'LEGACY' %}selected{% endif %}
+            >
+                Legacy Impper
+            </option>
+
+            <option
+                value="PRIME"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'PRIME' %}selected{% endif %}
+            >
+                Prime Impper
+            </option>
+
+            <option
+                value="LINE"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'LINE' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO"
+            >
+                Line Impper
+            </option>
+
+            <option
+                value="RAIZES"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'RAIZES' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO"
+            >
+                Raízes Impperial
+            </option>
+
+            <option
+                value="PRIME_LINE"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'PRIME_LINE' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:STAND"
+            >
+                Prime/Line Impper
+            </option>
+
+            <option
+                value="RESERVA"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'RESERVA' %}selected{% endif %}
+            >
+                Reserva Impperial
+            </option>
+
+            <option
+                value="VISTA"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'VISTA' %}selected{% endif %}
+            >
+                Vista Impper
+            </option>
+
+            <option
+                value="VILLAS_DAMHA"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'VILLAS_DAMHA' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:STAND"
+            >
+                Villas Damha Impper
+            </option>
+
+            <option
+                value="CENTRAL_DE_VENDAS"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CENTRAL_DE_VENDAS' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:STAND"
+            >
+                Central de Vendas
+            </option>
+
+        </select>
+
+        <p class="imp-help">
+            Escolha o empreendimento relacionado ao checklist.
+        </p>
+
+    </div>
+</section>
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+        <h3 class="imp-card__title">
+            Facilities
+        </h3>
+
+    </div>
+
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="piso"
+        >
+            {{ campo_inspecao('piso', 'Piso limpo e sem resíduos?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="mesa_limpa"
+        >
+            {{ campo_inspecao('mesa_limpa', 'Mesas e bancadas limpas?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="vidros_janelas"
+        >
+            {{ campo_inspecao('vidros_janelas', 'Vidros e janelas sem marcas?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="banheiros"
+        >
+            {{ campo_inspecao('banheiros', 'Banheiros Limpos?') }}
+        </div>
+        
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="lixeiras"
+        >
+            {{ campo_inspecao('lixeiras', 'Lixeiras limpas e com sacos plásticos?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="ar_condicionado"
+        >
+            {{ campo_inspecao('ar_condicionado', 'Ar-condicionado funcionando?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="iluminacao"
+        >
+            {{ campo_inspecao('iluminacao', 'Iluminação sem lâmpadas queimadas?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="jardim"
+        >
+            {{ campo_inspecao('jardim', 'Jardim em bom estado?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="tvs_monitores"
+        >
+            {{ campo_inspecao('tvs_monitores', 'TVs/monitores funcionando?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="tomadas"
+        >
+            {{ campo_inspecao('tomadas', 'Tomadas operando?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="outros_fac"
+        >
+
+            <label
+                class="imp-label"
+                for="outros_fac"
+            >
+                Outros - Facilities
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <textarea
+                id="outros_fac"
+                name="outros_fac"
+                class="form-control"
+                maxlength="800"
+                data-impper-counter
+                {% if outros_fac_editavel %}required{% endif %}
+                {% if not outros_fac_editavel %}disabled data-impper-locked="true"{% endif %}
+            >{{ f_outros_fac.valor if modo_execucao and f_outros_fac and f_outros_fac.valor is not none else '' }}</textarea>
+
+            <div class="imp-form-meta">
+
+                <p class="imp-help">
+                    Informe outros aspectos relacionados a facilities que não estejam listados acima.
+                </p>
+
+                <span
+                    class="imp-form-counter"
+                    data-impper-counter-output
+                >
+                    0/800
+                </span>
+
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+        <h3 class="imp-card__title">
+            Assistência
+        </h3>
+
+    </div>
+
+    <div class="imp-form-grid">
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="infiltracao"
+        >
+            {{ campo_inspecao('infiltracao', 'Paredes e teto sem infiltrações ou manchas?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="janelas_portas"
+        >
+            {{ campo_inspecao('janelas_portas', 'Janelas e portas em bom estado?') }}
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="torneiras"
+        >
+            {{ campo_inspecao('torneiras', 'Torneiras/descargas funcionando?') }}
+        </div>
+
+        <div
+                class="imp-field imp-field--full"
+                data-field-wrap="outros_fac"
+            >
+
+                <label
+                    class="imp-label"
+                    for="outros_fac"
+                >
+                    Outros - Facilities
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <textarea
+                    id="outros_fac"
+                    name="outros_fac"
+                    class="form-control"
+                    maxlength="800"
+                    data-impper-counter
+                    {% if outros_fac_editavel %}required{% endif %}
+                    {% if not outros_fac_editavel %}disabled data-impper-locked="true"{% endif %}
+                >{{ f_outros_fac.valor if modo_execucao and f_outros_fac and f_outros_fac.valor is not none else '' }}</textarea>
+
+                <div class="imp-form-meta">
+
+                    <p class="imp-help">
+                        Informe outros aspectos relacionados a assistência que não estejam listados acima.
+                    </p>
+
+                    <span
+                        class="imp-form-counter"
+                        data-impper-counter-output
+                    >
+                        0/800
+                    </span>
+
+                </div>
+
+            </div>
+        </div>
+
+</section>
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+        <h3 class="imp-card__title">
+            Assistência
+        </h3>
+
+    </div>
+
+    <div class="imp-form-grid">
+        
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="marketing"
+        >
+            {{ campo_inspecao('marketing', 'Materiais de comunicação visual (folders, banner, painéis) em bom estado?') }}
+        </div>
+    </div>
+</section>
