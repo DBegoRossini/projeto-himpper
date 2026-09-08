@@ -363,7 +363,8 @@
 
                                         data-href="{{ url_for(
                                             'exec_tarefas',
-                                            id_chamada=solicitacao.id
+                                            id_chamada=solicitacao.id,
+                                            id_etapa=solicitacao.id_etapa
                                         ) }}"
 
                                         data-request-row
@@ -558,7 +559,8 @@
                                         class="btn btn-outline-primary w-100"
                                         href="{{ url_for(
                                             'exec_tarefas',
-                                            id_chamada=solicitacao.id
+                                            id_chamada=solicitacao.id,
+                                            id_etapa=solicitacao.id_etapa
                                         ) }}"
                                     >
                                         Abrir solicitação
