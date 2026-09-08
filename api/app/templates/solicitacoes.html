@@ -5,190 +5,641 @@
 {% endblock %}
 
 {% block topBar %}
-    <h1 class="imp-heading">Solicitações</h1>
+
+    <h1 class="imp-heading">
+        Solicitações
+    </h1>
+
     <p class="imp-subtitle imp-topbar__subtitle">
-        Acompanhe as solicitações abertas por você e consulte o estágio atual de cada fluxo.
+        Acompanhe as solicitações abertas por você e consulte
+        o estágio atual de cada fluxo.
     </p>
+
 {% endblock %}
 
 {% block main %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"
+    >
 
     <section class="imp-stack imp-gap-6 imp-request-page">
+
         <div>
-            <span class="imp-kicker">Minhas solicitações</span>
-            <h2 class="imp-title">Solicitações abertas pelo usuário logado</h2>
+
+            <span class="imp-kicker">
+                Minhas solicitações
+            </span>
+
+            <h2 class="imp-title">
+                Solicitações abertas pelo usuário logado
+            </h2>
+
             <p class="imp-subtitle">
-                Filtre por texto ou status para localizar rapidamente cada processo aberto em seu nome.
+                Filtre por texto ou status e clique nos cabeçalhos
+                da tabela para ordenar os resultados.
             </p>
+
         </div>
 
-        <div class="imp-request-summary" data-request-summary>
-            <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">▤</div>
-                <div>
-                    <span class="imp-stat__label">Total de solicitações</span>
-                    <strong class="imp-stat__value" data-summary-total>{{ solicitacoes|length }}</strong>
-                </div>
-            </article>
+
+        <div
+            class="imp-request-summary"
+            data-request-summary
+        >
 
             <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">◷</div>
-                <div>
-                    <span class="imp-stat__label">Em andamento</span>
-                    <strong class="imp-stat__value" data-summary-open>{{ abertas_count }}</strong>
+
+                <div class="imp-stat__icon">
+                    ▤
                 </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Total de solicitações
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-total
+                    >
+                        {{ solicitacoes|length }}
+                    </strong>
+
+                </div>
+
             </article>
 
+
             <article class="imp-stat imp-request-stat">
-                <div class="imp-stat__icon">⌕</div>
-                <div>
-                    <span class="imp-stat__label">Resultado atual</span>
-                    <strong class="imp-stat__value" data-summary-visible>{{ solicitacoes|length }}</strong>
+
+                <div class="imp-stat__icon">
+                    ◷
                 </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Em andamento
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-open
+                    >
+                        {{ abertas_count|default(0) }}
+                    </strong>
+
+                </div>
+
             </article>
+
+
+            <article class="imp-stat imp-request-stat">
+
+                <div class="imp-stat__icon">
+                    ⌕
+                </div>
+
+                <div>
+
+                    <span class="imp-stat__label">
+                        Resultado atual
+                    </span>
+
+                    <strong
+                        class="imp-stat__value"
+                        data-summary-visible
+                    >
+                        {{ solicitacoes|length }}
+                    </strong>
+
+                </div>
+
+            </article>
+
         </div>
 
-        <article class="card imp-card imp-card--accent-orange imp-request-panel">
-            <header class="card-header imp-card__header imp-request-panel__header">
+
+        <article
+            class="card imp-card imp-card--accent-orange imp-request-panel"
+        >
+
+            <header
+                class="card-header imp-card__header imp-request-panel__header"
+            >
+
                 <div>
-                    <h3 class="imp-card__title">Acompanhamento</h3>
+
+                    <h3 class="imp-card__title">
+                        Acompanhamento
+                    </h3>
+
                     <p class="imp-card__subtitle">
-                        Consulte protocolo, tipo de fluxo, etapa atual e status da solicitação.
+                        Consulte protocolo, tipo de fluxo, abertura e status.
+                        Clique no cabeçalho de uma coluna para ordenar.
                     </p>
+
                 </div>
 
             </header>
 
-            <div class="card-body imp-card__body imp-stack imp-gap-5">
+
+            <div
+                class="card-body imp-card__body imp-stack imp-gap-5"
+            >
+
                 <div class="imp-request-toolbar">
-                    <label class="imp-field imp-request-toolbar__search" for="requestSearch">
-                        <span class="imp-label">Buscar solicitação</span>
+
+                    <label
+                        class="imp-field imp-request-toolbar__search"
+                        for="requestSearch"
+                    >
+
+                        <span class="imp-label">
+                            Buscar solicitação
+                        </span>
+
                         <input
                             id="requestSearch"
                             type="search"
                             class="form-control"
-                            placeholder="Pesquise por protocolo, tipo, área ou etapa"
+                            placeholder="Pesquise por protocolo, tipo ou status"
                             data-request-search
                         >
+
                     </label>
 
-                    <label class="imp-field imp-request-toolbar__filter" for="requestStatusFilter">
-                        <span class="imp-label">Status</span>
-                        <select id="requestStatusFilter" class="form-select" data-request-status-filter>
-                            <option value="">Todos</option>
-                            <option value="Em andamento">Em andamento</option>
-                            <option value="Finalizada">Finalizada</option>
-                            <option value="Cancelada">Cancelada</option>
-                            <option value="Pendente">Pendente</option>
+
+                    <label
+                        class="imp-field imp-request-toolbar__filter"
+                        for="requestStatusFilter"
+                    >
+
+                        <span class="imp-label">
+                            Status
+                        </span>
+
+                        <select
+                            id="requestStatusFilter"
+                            class="form-select"
+                            data-request-status-filter
+                        >
+
+                            <option value="">
+                                Todos
+                            </option>
+
+                            <option value="Em andamento">
+                                Em andamento
+                            </option>
+
+                            <option value="Finalizada">
+                                Finalizada
+                            </option>
+
+                            <option value="Finalizado">
+                                Finalizado
+                            </option>
+
+                            <option value="Cancelada">
+                                Cancelada
+                            </option>
+
+                            <option value="Cancelado">
+                                Cancelado
+                            </option>
+
+                            <option value="Pendente">
+                                Pendente
+                            </option>
+
+                            <option value="Reprovado">
+                                Reprovado
+                            </option>
+
+                            <option value="Pausado">
+                                Pausado
+                            </option>
+
                         </select>
+
                     </label>
+
                 </div>
 
+
                 {% if solicitacoes %}
-                    <div class="table-responsive imp-table-wrap imp-request-table-wrap">
-                        <table class="table imp-table imp-request-table align-middle mb-0" data-request-table>
+
+                    <div
+                        class="table-responsive imp-table-wrap imp-request-table-wrap"
+                    >
+
+                        <table
+                            class="table imp-table imp-request-table align-middle mb-0"
+                            data-request-table
+                        >
+
                             <thead>
+
                                 <tr>
-                                    <th>Protocolo</th>
-                                    <th>Tipo</th>
-                                    <th>Abertura</th>
-                                    <th>Status</th>
+
+                                    <th
+                                        scope="col"
+                                        data-sort-header="protocolo"
+                                        aria-sort="none"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="btn p-0 border-0 bg-transparent text-reset fw-semibold"
+                                            data-request-sort-key="protocolo"
+                                        >
+                                            Protocolo
+
+                                            <span
+                                                data-sort-indicator
+                                                aria-hidden="true"
+                                            >
+                                                ↕
+                                            </span>
+                                        </button>
+
+                                    </th>
+
+
+                                    <th
+                                        scope="col"
+                                        data-sort-header="tipo"
+                                        aria-sort="none"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="btn p-0 border-0 bg-transparent text-reset fw-semibold"
+                                            data-request-sort-key="tipo"
+                                        >
+                                            Tipo
+
+                                            <span
+                                                data-sort-indicator
+                                                aria-hidden="true"
+                                            >
+                                                ↕
+                                            </span>
+                                        </button>
+
+                                    </th>
+
+
+                                    <th
+                                        scope="col"
+                                        data-sort-header="abertura"
+                                        aria-sort="none"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="btn p-0 border-0 bg-transparent text-reset fw-semibold"
+                                            data-request-sort-key="abertura"
+                                        >
+                                            Abertura
+
+                                            <span
+                                                data-sort-indicator
+                                                aria-hidden="true"
+                                            >
+                                                ↕
+                                            </span>
+                                        </button>
+
+                                    </th>
+
+
+                                    <th
+                                        scope="col"
+                                        data-sort-header="status"
+                                        aria-sort="none"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="btn p-0 border-0 bg-transparent text-reset fw-semibold"
+                                            data-request-sort-key="status"
+                                        >
+                                            Status
+
+                                            <span
+                                                data-sort-indicator
+                                                aria-hidden="true"
+                                            >
+                                                ↕
+                                            </span>
+                                        </button>
+
+                                    </th>
+
                                 </tr>
+
                             </thead>
+
+
                             <tbody>
+
                                 {% for solicitacao in solicitacoes %}
-                                    {% set abertura_label = solicitacao.abertura_label.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura_label else '-' %}
+
+                                    {% set abertura_label =
+                                        solicitacao.abertura_label.strftime(
+                                            '%d/%m/%Y %H:%M'
+                                        )
+                                        if solicitacao.abertura_label
+                                        else '-'
+                                    %}
+
                                     <tr
                                         class="imp-request-row js-clickable-row"
-                                        data-href="{{ url_for('exec_tarefas', id_chamada=solicitacao.id) }}"
+
+                                        data-href="{{ url_for(
+                                            'exec_tarefas',
+                                            id_chamada=solicitacao.id
+                                        ) }}"
+
                                         data-request-row
+
                                         data-request-id="{{ solicitacao.id }}"
+
                                         data-status="{{ solicitacao.status_label }}"
-                                        data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
+
+                                        data-original-order="{{ loop.index0 }}"
+
+
+                                        data-sort-protocolo="{{ solicitacao.id }}"
+
+                                        data-sort-tipo="{{ solicitacao.tipo }}"
+
+                                        data-sort-abertura="{{
+                                            solicitacao.abertura_label.isoformat()
+                                            if solicitacao.abertura_label
+                                            else ''
+                                        }}"
+
+                                        data-sort-status="{{ solicitacao.status_label }}"
+
+
+                                        data-search="{{
+                                            (
+                                                solicitacao.id ~ ' ' ~
+                                                solicitacao.tipo ~ ' ' ~
+                                                solicitacao.status_label
+                                            )|lower
+                                        }}"
                                     >
+
                                         <td data-label="Protocolo">
-                                            <span class="imp-request-row__primary">{{ solicitacao.id }}</span>
+
+                                            <span
+                                                class="imp-request-row__primary"
+                                            >
+                                                {{ solicitacao.id }}
+                                            </span>
+
                                         </td>
-                                        <td data-label="Tipo">{{ solicitacao.tipo }}</td>
-                                        <td data-label="Abertura">{{ abertura_label }}</td>
+
+
+                                        <td data-label="Tipo">
+                                            {{ solicitacao.tipo }}
+                                        </td>
+
+
+                                        <td data-label="Abertura">
+                                            {{ abertura_label }}
+                                        </td>
+
+
                                         <td data-label="Status">
-                                            <span class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}">
+
+                                            <span
+                                                class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}"
+                                            >
                                                 {{ solicitacao.status_label }}
                                             </span>
+
                                         </td>
+
                                     </tr>
+
                                 {% endfor %}
+
                             </tbody>
+
                         </table>
+
                     </div>
 
-                    <div class="imp-request-mobile-list" data-request-mobile-list>
+
+                    <!-- MOBILE -->
+                    <div
+                        class="imp-request-mobile-list"
+                        data-request-mobile-list
+                    >
+
                         {% for solicitacao in solicitacoes %}
-                            {% set abertura_label = solicitacao.abertura.strftime('%d/%m/%Y %H:%M') if solicitacao.abertura else '-' %}
+
+                            {% set abertura_label =
+                                solicitacao.abertura_label.strftime(
+                                    '%d/%m/%Y %H:%M'
+                                )
+                                if solicitacao.abertura_label
+                                else '-'
+                            %}
+
+
                             <article
                                 class="card imp-card imp-request-mobile-card"
+
                                 data-request-row
+
                                 data-request-id="{{ solicitacao.id }}"
+
                                 data-status="{{ solicitacao.status_label }}"
-                                data-search="{{ (solicitacao.protocolo ~ ' ' ~ solicitacao.tipo ~ ' ' ~ solicitacao.area ~ ' ' ~ solicitacao.etapa ~ ' ' ~ solicitacao.status_label)|lower }}"
+
+                                data-original-order="{{ loop.index0 }}"
+
+
+                                data-sort-protocolo="{{ solicitacao.id }}"
+
+                                data-sort-tipo="{{ solicitacao.tipo }}"
+
+                                data-sort-abertura="{{
+                                    solicitacao.abertura_label.isoformat()
+                                    if solicitacao.abertura_label
+                                    else ''
+                                }}"
+
+                                data-sort-status="{{ solicitacao.status_label }}"
+
+
+                                data-search="{{
+                                    (
+                                        solicitacao.id ~ ' ' ~
+                                        solicitacao.tipo ~ ' ' ~
+                                        solicitacao.status_label
+                                    )|lower
+                                }}"
                             >
-                                <div class="card-body imp-card__body imp-stack imp-gap-4">
-                                    <div class="imp-request-mobile-card__top">
+
+                                <div
+                                    class="card-body imp-card__body imp-stack imp-gap-4"
+                                >
+
+                                    <div
+                                        class="imp-request-mobile-card__top"
+                                    >
+
                                         <div>
-                                            <p class="imp-kicker imp-request-mobile-card__kicker">{{ solicitacao.protocolo }}</p>
-                                            <h3 class="imp-card__title">{{ solicitacao.tipo }}</h3>
+
+                                            <p
+                                                class="imp-kicker imp-request-mobile-card__kicker"
+                                            >
+                                                {{ solicitacao.id }}
+                                            </p>
+
+                                            <h3 class="imp-card__title">
+                                                {{ solicitacao.tipo }}
+                                            </h3>
+
                                         </div>
-                                        <span class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}">
+
+
+                                        <span
+                                            class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}"
+                                        >
                                             {{ solicitacao.status_label }}
                                         </span>
+
                                     </div>
 
-                                    <dl class="imp-request-mobile-card__meta">
+
+                                    <dl
+                                        class="imp-request-mobile-card__meta"
+                                    >
+
                                         <div>
-                                            <dt>Área</dt>
-                                            <dd>{{ solicitacao.area }}</dd>
+
+                                            <dt>
+                                                Abertura
+                                            </dt>
+
+                                            <dd>
+                                                {{ abertura_label }}
+                                            </dd>
+
                                         </div>
+
+
                                         <div>
-                                            <dt>Abertura</dt>
-                                            <dd>{{ abertura_label }}</dd>
+
+                                            <dt>
+                                                Status
+                                            </dt>
+
+                                            <dd>
+                                                {{ solicitacao.status_label }}
+                                            </dd>
+
                                         </div>
-                                        <div>
-                                            <dt>Etapa atual</dt>
-                                            <dd>{{ solicitacao.etapa }}</dd>
-                                        </div>
+
                                     </dl>
+
+
+                                    <a
+                                        class="btn btn-outline-primary w-100"
+                                        href="{{ url_for(
+                                            'exec_tarefas',
+                                            id_chamada=solicitacao.id
+                                        ) }}"
+                                    >
+                                        Abrir solicitação
+                                    </a>
+
                                 </div>
+
                             </article>
+
                         {% endfor %}
+
                     </div>
 
-                    <div class="imp-request-empty imp-hidden" data-request-empty>
-                        <p class="imp-title imp-mb-4">Nenhum resultado para os filtros aplicados</p>
-                        <p class="imp-subtitle imp-m-0">
-                            Ajuste a busca ou limpe o filtro de status para visualizar outras solicitações.
+
+                    <div
+                        class="imp-request-empty imp-hidden"
+                        data-request-empty
+                    >
+
+                        <p class="imp-title imp-mb-4">
+                            Nenhum resultado para os filtros aplicados
                         </p>
+
+                        <p class="imp-subtitle imp-m-0">
+                            Ajuste a busca ou limpe o filtro de status
+                            para visualizar outras solicitações.
+                        </p>
+
                     </div>
+
+
                 {% else %}
+
                     <div class="imp-request-empty">
-                        <p class="imp-title imp-mb-4">Nenhuma solicitação encontrada</p>
-                        <p class="imp-subtitle imp-m-0">
-                            Quando você abrir uma nova solicitação, ela aparecerá aqui automaticamente.
+
+                        <p class="imp-title imp-mb-4">
+                            Nenhuma solicitação encontrada
                         </p>
+
+                        <p class="imp-subtitle imp-m-0">
+                            Quando você abrir uma nova solicitação,
+                            ela aparecerá aqui automaticamente.
+                        </p>
+
                     </div>
+
                 {% endif %}
+
             </div>
 
+
             <footer class="card-footer imp-card__footer">
-                <a class="btn btn-neutral" href="{{ url_for('index') }}">
+
+                <a
+                    class="btn btn-neutral"
+                    href="{{ url_for('index') }}"
+                >
                     Voltar ao início
                 </a>
-                <a class="btn btn-primary" href="{{ url_for('novasolicitacao') }}">
+
+
+                <a
+                    class="btn btn-primary"
+                    href="{{ url_for('novasolicitacao') }}"
+                >
                     Abrir nova solicitação
                 </a>
+
             </footer>
+
         </article>
+
     </section>
 
-    <script defer src="{{ url_for('static', filename='js/solicitacoes.js') }}"></script>
+
+    <script
+        defer
+        src="{{ url_for(
+            'static',
+            filename='js/solicitacoes.js'
+        ) }}"
+    ></script>
+
 {% endblock %}

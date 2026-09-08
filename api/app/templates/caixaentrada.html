@@ -243,7 +243,7 @@
 
                 <!-- TABELA DESKTOP -->
                 <div
-                    class="table-responsive imp-table-wrap imp-request-table-wrap imp-request-table-wrap--inbox"
+                    class="table-responsive imp-table-wrap imp-request-table-wrap"
                 >
 
                     <table
@@ -266,10 +266,10 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="protocolo"
                                     >
-                                        Protocolo
+                                        ID
 
                                         <span
                                             aria-hidden="true"
@@ -291,7 +291,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="solicitante"
                                     >
                                         Solicitante
@@ -316,7 +316,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="tipo"
                                     >
                                         Tipo
@@ -341,7 +341,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="recebida"
                                     >
                                         Recebida em
@@ -356,7 +356,6 @@
 
                                 </th>
 
-
                                 <!-- ETAPA -->
                                 <th
                                     scope="col"
@@ -366,7 +365,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="etapa"
                                     >
                                         Etapa atual
@@ -391,7 +390,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="status"
                                     >
                                         Status
@@ -416,7 +415,7 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-link p-0 text-decoration-none"
+                                        class="btn p-0 text-decoration-none"
                                         data-request-sort-key="prazo"
                                     >
                                         Prazo
@@ -460,7 +459,6 @@
                                     'Não assumido'
                                     if not pendencia.executor
                                     else (
-                                        'Assumido por ' ~
                                         (
                                             pendencia.exec_name
                                             if pendencia.exec_name
@@ -475,7 +473,8 @@
 
                                     data-href="{{ url_for(
                                         'exec_tarefas',
-                                        id_chamada=pendencia.protocolo
+                                        id_chamada=pendencia.protocolo,
+                                        id_etapa=pendencia.id_etapa
                                     ) }}"
 
                                     data-request-row
@@ -530,7 +529,8 @@
                                             class="imp-request-row__primary"
                                             href="{{ url_for(
                                                 'exec_tarefas',
-                                                id_chamada=pendencia.protocolo
+                                                id_chamada=pendencia.protocolo,
+                                                id_etapa=pendencia.id_etapa
                                             ) }}"
                                         >
                                             {{ pendencia.protocolo }}
@@ -582,12 +582,7 @@
                                             <span
                                                 class="badge rounded-pill imp-badge imp-badge--success"
                                             >
-                                                Assumido por:
-                                                {{
-                                                    pendencia.exec_name
-                                                    if pendencia.exec_name
-                                                    else "Não informado"
-                                                }}
+                                                Assumido 
                                             </span>
 
                                         {% endif %}
@@ -660,8 +655,6 @@
 
                 </div>
 
-
-                <!-- LISTA MOBILE -->
                 <div
                     class="imp-request-mobile-list"
                     data-request-mobile-list
@@ -873,7 +866,8 @@
                                     class="btn btn-outline-primary w-100"
                                     href="{{ url_for(
                                         'exec_tarefas',
-                                        id_chamada=pendencia.protocolo
+                                        id_chamada=pendencia.protocolo,
+                                        id_etapa=pendencia.id_etapa
                                     ) }}"
                                 >
                                     Abrir solicitação

@@ -315,6 +315,7 @@ def caixaentrada(context):
         Execucao.executor,
         Chamada.status,
         Etapas.sla,
+        Etapas.id.label("id_etapa"),
         Chamada.solicitante
     ).order_by(Chamada.id.asc()).all()
     pendencias = []
@@ -333,6 +334,7 @@ def caixaentrada(context):
                 "tipo":        row.fluxo_nome,
                 "recebida_em": row.data_solicitacao,
                 "etapa": row.etapa_nome,
+                "id_etapa": row.id_etapa,
                 "status_label": row.status,
                 "executor": row.executor,
                 "exec_name": executor.json().get("displayName", "Desconhecido") if row.executor else None,
@@ -486,10 +488,10 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
     return redirect(url_for("caixaentrada"))
 
 
-@app.route("/execucao/<int:id_chamada>")
+@app.route("/execucao/<int:id_chamada>/<id_etapa>")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def exec_tarefas(id_chamada, context):
+def exec_tarefas(id_chamada, id_etapa, context):
     user_oid = context['user'].get("oid") or context['user'].get("id")
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
@@ -508,9 +510,10 @@ def exec_tarefas(id_chamada, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, finalizada_em=None).first() 
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first() 
+    print(id_chamada)
     if exec_raw is None:
-        exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
+        exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).order_by(Execucao.id.desc()).first()
     execucao = []
     if exec_raw:
         if exec_raw.executor:
