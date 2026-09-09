@@ -557,8 +557,12 @@ def exec_tarefas(id_chamada, id_etapa, context):
     grupos_conditions = [grupo in etapas_split for grupo in groups]
     if True in grupos_conditions:
         us_atuante = True
+    elif user_oid in etapas_split:
+        us_atuante = True
     else:
         us_atuante = False
+    print(user_oid)
+    print(execucao[0]["executor_id"])
 
     return render_template(
         "execTarefas.html",
@@ -571,7 +575,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
         etapa_id = etapa.id,
         formularios=formularios,
         formularios_map=formularios_map,
-        pode_editar=us_atuante,
+        executor=us_atuante,
+        user_id=user_oid,
     )
 
 def detect_mime(file_bytes: bytes) -> str:

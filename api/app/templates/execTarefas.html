@@ -305,7 +305,7 @@
 
         </section>
 
-        {% if execucao and not execucao[0].get("executor")  and user_id and atuante == True %}
+        {% if execucao and not execucao[0].get("executor") and executor == True %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -325,12 +325,12 @@
                     class="btn btn-neutral"
                     href="{{ url_for('assumir_tarefa', id_chamada=id_chamada) }}"
                 >
-                    Voltar para a caixa de entrada
+                    Assumir tarefa
                 </a>
 
             </section>
 
-        {% elif execucao and execucao[0].get("executor") and not pode_editar %}
+        {% elif execucao and execucao[0].get("executor") and execucao[0].get("executor_id") != user_id %}
 
             <section class="imp-execution-notice imp-execution-notice--info">
 
@@ -344,6 +344,19 @@
                         Os dados permanecem disponíveis para consulta,
                         mas todos os campos estão bloqueados.
                     </p>
+
+                </div>
+
+            </section>
+        {% elif execucao and execucao[0].get("executor_id") == user_id %}
+
+            <section class="imp-execution-notice imp-execution-notice--info">
+
+                <div>
+
+                    <strong>
+                        Esta tarefa está sendo executada por você.
+                    </strong>
 
                 </div>
 
