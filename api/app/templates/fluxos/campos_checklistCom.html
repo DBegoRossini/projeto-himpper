@@ -576,7 +576,7 @@
     'marketing_anexo': marketing_anexo_editavel
 } %}
 
-{% macro campo_inspecao(id_campo, label, label_required=true, ajuda_desc='Descreva local, estado ou qualquer outra informação relevante.', ajuda_anexo='Selecione a imagem.') %}
+{% macro campo_inspecao(id_campo, label, label_required=true, ajuda_desc='Descreva local, estado ou qualquer outra informação relevante.', ajuda_anexo='Selecione a imagem.', hide_when_open_match='empreendimento,tp_checagem') %}
 
 {% set campo = checklist_formularios.get(id_campo) %}
 {% set campo_editavel = checklist_editaveis.get(id_campo, false) %}
@@ -585,7 +585,12 @@
 {% set campo_anexo = checklist_formularios.get(id_campo ~ '_anexo') %}
 {% set campo_anexo_editavel = checklist_editaveis.get(id_campo ~ '_anexo', false) %}
 
-<div class="imp-form-grid">
+<div
+    class="imp-form-grid"
+    {% if not modo_execucao and hide_when_open_match %}
+    data-impper-hide-when-open="{{ id_campo }}:{{ hide_when_open_match }}"
+    {% endif %}
+>
 
     <div
         class="imp-field imp-field--full"
@@ -803,6 +808,7 @@
                 {% if tp_checagem_editavel %}required{% endif %}
                 {% if modo_execucao and f_tp_checagem and f_tp_checagem.valor == 'DECORADO' %}checked{% endif %}
                 {% if not tp_checagem_editavel %}disabled data-impper-locked="true"{% endif %}
+                onchange="filtrarForm(document)"
             >
 
             <span class="imp-choice__content">
@@ -821,6 +827,7 @@
 
                 {% if modo_execucao and f_tp_checagem and f_tp_checagem.valor == 'STAND' %}checked{% endif %}
                 {% if not tp_checagem_editavel %}disabled data-impper-locked="true"{% endif %}
+                onchange="filtrarForm(document)"
             >
 
             <span class="imp-choice__content">
@@ -853,6 +860,7 @@
             autocomplete="organization"
             {% if empreendimento_editavel %}required{% endif %}
             {% if not empreendimento_editavel %}disabled data-impper-locked="true"{% endif %}
+            onchange="filtrarForm(document)"
         >
 
             <option value="">
@@ -942,8 +950,10 @@
 
     </div>
 </section>
-
-<section class="imp-form-section">
+<p id="teste" hidden>{{ form_abertos | tojson }}</p>
+<p id="resultado" nome="resultado"></p>
+<section class="imp-form-section"
+>
 
     <div class="imp-form-section__head">
         <h3 class="imp-card__title">
@@ -956,6 +966,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="piso"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('piso')"
         >
             {{ campo_inspecao('piso', 'Piso limpo e sem resíduos?') }}
         </div>
@@ -963,6 +974,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="mesa_limpa"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('mesa_limpa')"
         >
             {{ campo_inspecao('mesa_limpa', 'Mesas e bancadas limpas?') }}
         </div>
@@ -970,6 +982,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="vidros_janelas"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('vidros_janelas')"
         >
             {{ campo_inspecao('vidros_janelas', 'Vidros e janelas sem marcas?') }}
         </div>
@@ -977,6 +990,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="banheiros"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('banheiros')"
         >
             {{ campo_inspecao('banheiros', 'Banheiros Limpos?') }}
         </div>
@@ -984,6 +998,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="lixeiras"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('lixeiras')"
         >
             {{ campo_inspecao('lixeiras', 'Lixeiras limpas e com sacos plásticos?') }}
         </div>
@@ -991,6 +1006,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="ar_condicionado"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('ar_condicionado')"
         >
             {{ campo_inspecao('ar_condicionado', 'Ar-condicionado funcionando?') }}
         </div>
@@ -998,6 +1014,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="iluminacao"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('iluminacao')"
         >
             {{ campo_inspecao('iluminacao', 'Iluminação sem lâmpadas queimadas?') }}
         </div>
@@ -1005,6 +1022,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="jardim"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('jardim')"
         >
             {{ campo_inspecao('jardim', 'Jardim em bom estado?') }}
         </div>
@@ -1012,6 +1030,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="tvs_monitores"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('tvs_monitores')"
         >
             {{ campo_inspecao('tvs_monitores', 'TVs/monitores funcionando?') }}
         </div>
@@ -1019,6 +1038,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="tomadas"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('tomadas')"
         >
             {{ campo_inspecao('tomadas', 'Tomadas operando?') }}
         </div>
@@ -1080,6 +1100,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="infiltracao"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('infiltracao')"
         >
             {{ campo_inspecao('infiltracao', 'Paredes e teto sem infiltrações ou manchas?') }}
         </div>
@@ -1087,6 +1108,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="janelas_portas"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('janelas_portas')"
         >
             {{ campo_inspecao('janelas_portas', 'Janelas e portas em bom estado?') }}
         </div>
@@ -1094,6 +1116,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="torneiras"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('torneiras')"
         >
             {{ campo_inspecao('torneiras', 'Torneiras/descargas funcionando?') }}
         </div>
@@ -1155,6 +1178,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="marketing"
+            data-impper-show-when="tp_checagem null || empreendimento null || !resultado.includes('marketing')"
         >
             {{ campo_inspecao('marketing', 'Materiais de comunicação visual (folders, banner, painéis) em bom estado?') }}
         </div>

@@ -82,16 +82,38 @@
 
     if (!form) return;
 
-    const { fieldName, values } = splitRule(
-      section.dataset.impperShowWhen
-    );
+    const rule = section.dataset.impperShowWhen;
+    const visible = rule
+      .split(/\s*\|\|\s*/)
+      .some(condition => {
+        const emptyField = condition.match(
+          /^([\w-]+)\s+null$/
+        );
 
-    if (!fieldName || !values.length) return;
+        if (emptyField) {
+          return getFieldValues(form, emptyField[1])
+            .every(value => !value.trim());
+        }
 
-    const selectedValues = getFieldValues(form, fieldName);
-    const visible = selectedValues.some(value =>
-      values.includes(value)
-    );
+        const missingResult = condition.match(
+          /^!resultado\.includes\(['"]([^'"]+)['"]\)$/
+        );
+
+        if (missingResult) {
+          const resultado = document.getElementById("resultado");
+          return !resultado?.textContent.includes(
+            missingResult[1]
+          );
+        }
+
+        const { fieldName, values } = splitRule(condition);
+
+        if (!fieldName || !values.length) return false;
+
+        return getFieldValues(form, fieldName).some(value =>
+          values.includes(value)
+        );
+      });
 
     section.hidden = !visible;
     section.setAttribute("aria-hidden", String(!visible));
@@ -116,6 +138,14 @@
       sections.forEach(section => {
         evaluateConditionalSection(section);
       });
+    });
+  };
+
+  const refreshConditionalSections = scope => {
+    const root = scope || document;
+
+    root.querySelectorAll(conditionalSelector).forEach(section => {
+      evaluateConditionalSection(section);
     });
   };
 
@@ -211,6 +241,7 @@
       initConditionalSections(scope);
       initFileInputs(scope);
     },
+    refreshConditionalSections,
     bindDependentSelect,
     setMessage
   };
@@ -279,3 +310,54 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
   return formData;
 };
+
+async function filtrarForm(document){
+  const checagem = document.querySelector(
+    '[name="tp_checagem"]:checked'
+  )?.value;
+  console.log('checagem:', checagem);
+  const empreendimento = document.getElementsByName('empreendimento')[0]?.value;
+  console.log('empreendimento:', empreendimento);
+  const form_abertos = JSON.parse(
+    document.getElementById('teste').textContent
+);
+  let lista_final = []
+  let resultado = document.getElementById('resultado');
+  resultado.textContent = '[]';
+  const empCheck = new Map();
+  if (checagem && empreendimento){
+    for (const form of form_abertos){
+      const registro = empCheck.get(form.id_chamada) || {
+        criterios: new Set(),
+        camposNao: []
+      };
+
+      if (form.campo === 'tp_checagem' && form.valor === checagem){
+        registro.criterios.add('Checagem');
+      }
+      if (form.campo === 'empreendimento' && form.valor === empreendimento){
+        registro.criterios.add('Empreendimento');
+      }
+      if (form.valor === 'NAO'){
+        registro.criterios.add('NAO');
+        registro.camposNao.push(form.campo);
+      }
+
+      empCheck.set(form.id_chamada, registro);
+    }
+
+    for (const registro of empCheck.values()){
+      const temTodosOsCriterios =
+        registro.criterios.has('Checagem') &&
+        registro.criterios.has('Empreendimento') &&
+        registro.criterios.has('NAO');
+
+      if (temTodosOsCriterios){
+        lista_final.push(...registro.camposNao);
+      }
+    }
+  }
+  resultado.textContent = JSON.stringify(lista_final);
+  window.ImpperForms?.refreshConditionalSections(document);
+  return lista_final;
+}

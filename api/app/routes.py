@@ -20,7 +20,7 @@ def carregar_notificacoes_usuario(user_id):
         {
             "id": n.id,
             "mensagem": n.mensagem,
-            "enviada_em": n.data_criacao.isoformat() if n.data_criacao else None
+            "enviada_em": n.data_criacao if n.data_criacao else None
         }
         for n in notificacoes
     ]
@@ -391,11 +391,37 @@ def ini_flow(id_fluxo, context):
     print(id_fluxo)
     fluxo = flows.query.get(id_fluxo)
     carregar_info_form()
+
+    execucao_aberta = (
+        Execucao.query
+        .join(Chamada, Chamada.id == Execucao.id_chamada)
+        .filter(Chamada.id_fluxo == id_fluxo, Execucao.finalizada_em.is_(None))
+        .all()
+    )
+
+    ids_chamada_aberta = [e.id_chamada for e in execucao_aberta]
+    forms = (
+        Formularios.query
+        .filter(Formularios.id_chamada.in_(ids_chamada_aberta))
+        .all()
+        if ids_chamada_aberta
+        else []
+    )
+    formularios = []
+    for form in forms:
+        formularios.append({
+            "id": form.id,
+            "id_chamada": form.id_chamada,
+            "campo": form.campo,
+            "valor": form.valor
+        })
+
     name = fluxo.nome
-    print(name)
-    return render_template(f'fluxos/{name}.html', 
+    return render_template(
+        f'fluxos/{name}.html',
         user=context['user'],
-        context=context
+        context=context,
+        form_abertos=formularios,
     )
 
 
