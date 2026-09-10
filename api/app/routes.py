@@ -598,11 +598,12 @@ def exec_tarefas(id_chamada, id_etapa, context):
         fluxo=fluxo,
         execucao=execucao,
         etapa=etapa,
-        etapa_id = etapa.id,
+        etapa_id = id_etapa,
         formularios=formularios,
         formularios_map=formularios_map,
         executor=us_atuante,
         user_id=user_oid,
+        form_abertos = [],
     )
 
 def detect_mime(file_bytes: bytes) -> str:

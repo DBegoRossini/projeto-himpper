@@ -951,9 +951,11 @@
     </div>
 </section>
 <p id="teste" hidden>{{ form_abertos | tojson }}</p>
-<p id="resultado" nome="resultado"></p>
-<section class="imp-form-section"
->
+<p id="resultado" nome="resultado" hidden></p>
+<p nome="etapa_id" hidden>{{etapa_id}}</p>
+
+{% if etapa_id == "CK-01" or etapa_id == "0" or executor == False or form_abertos %}
+<section class="imp-form-section">
 
     <div class="imp-form-section__head">
         <h3 class="imp-card__title">
@@ -1085,7 +1087,9 @@
     </div>
 
 </section>
+{% endif %}
 
+{% if etapa_id == "CK-02" or etapa_id == "0" or executor == False or form_abertos %}
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -1163,7 +1167,9 @@
         </div>
 
 </section>
+{% endif %}
 
+{% if etapa_id == "CK-03" or etapa_id == "0" or executor == False or form_abertos %}
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -1184,3 +1190,4 @@
         </div>
     </div>
 </section>
+{% endif %}
