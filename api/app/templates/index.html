@@ -96,24 +96,30 @@
     <div class="imp-page">
       <header class="imp-topbar">
         <div class="imp-topbar__left">
+                    <button
+                        type="button"
+                        class="btn btn-primary imp-mobile-menu-toggle"
+                        data-impper-toggle-sidebar
+                        aria-label="Abrir menu"
+                    >
+                        <span aria-hidden="true">☰</span>
+                    </button>
                     <div class="imp-topbar__headline">
             {% block topBar %}
             {% endblock %}
           </div>
         </div>
                 <div class="imp-topbar__right">
-                    <section class="imp-topbar-user dropdown">
+                    <section class="imp-topbar-user imp-topbar-notification dropdown">
                         <button
                             type="button"
-                            class="imp-topbar-user__trigger dropdown-toggle"
+                            class="imp-topbar-user__trigger imp-topbar-notification__trigger"
                             data-bs-toggle="dropdown"
                             data-bs-auto-close="outside"
                             aria-expanded="false"
+                            aria-label="Abrir notificações"
                         >
-                            <div class="imp-topbar-user__content">
-                                <strong class="imp-topbar-user__name">🕭</strong>
-                                <div class="imp-topbar-user__meta"></div>
-                            </div>
+                            <span aria-hidden="true">🕭</span>
                         </button>
 
                         <div class="dropdown-menu dropdown-menu-end imp-topbar-user__menu p-0">
@@ -135,8 +141,6 @@
                             {% endif %}
                         </div>
                     </section>
-                </div>
-                <div class="imp-topbar__right">
                     <section class="imp-topbar-user dropdown">
                         <button
                             type="button"
