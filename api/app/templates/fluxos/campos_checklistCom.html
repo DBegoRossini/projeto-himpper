@@ -954,7 +954,7 @@
 <p id="resultado" nome="resultado" hidden></p>
 <p nome="etapa_id" hidden>{{etapa_id}}</p>
 
-{% if etapa_id == "CK-01" or etapa_id == "0" or executor == False or form_abertos %}
+{% if etapa_id == "CK-01" or etapa_id == "0" or executor == False or solicitacao %}
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -1089,7 +1089,7 @@
 </section>
 {% endif %}
 
-{% if etapa_id == "CK-02" or etapa_id == "0" or executor == False or form_abertos %}
+{% if etapa_id == "CK-02" or etapa_id == "0" or executor == False or solicitacao %}
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -1169,7 +1169,7 @@
 </section>
 {% endif %}
 
-{% if etapa_id == "CK-03" or etapa_id == "0" or executor == False or form_abertos %}
+{% if etapa_id == "CK-03" or etapa_id == "0" or executor == False or solicitacao %}
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -1190,4 +1190,49 @@
         </div>
     </div>
 </section>
+{% endif %}
+
+{% set aprovado = 'Finalizado' %}
+{% set reprovado = 'Cancelado' %}
+                    
+{% if pode_editar %}
+
+    <div class="imp-execution-actions">
+
+        <div class="imp-execution-actions__copy">
+
+            <strong>
+                Revise a solicitação antes de prosseguir.
+            </strong>
+
+            <span>
+                Escolha a ação que deseja realizar nesta etapa.
+            </span>
+
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', '{{ aprovado }}')"
+            >
+                Concluir
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelationModal"
+            >
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
 {% endif %}
