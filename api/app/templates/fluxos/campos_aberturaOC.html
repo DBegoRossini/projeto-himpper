@@ -376,8 +376,26 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="numero_oc"
-            data-impper-show-when="oc_emitida:SIM"
-            hidden
+
+            {% if not modo_execucao %}
+
+                data-impper-show-when="oc_emitida:SIM"
+                hidden
+
+            {% elif not numero_oc_editavel
+                and not (
+                    f_numero_oc
+                    and f_numero_oc.valor
+                )
+                and not (
+                    f_oc_emitida
+                    and f_oc_emitida.valor == 'SIM'
+                )
+            %}
+
+                hidden
+
+            {% endif %}
         >
 
             <label
@@ -397,11 +415,14 @@
                 placeholder="Informe o número da Ordem de Compra"
                 value="{{ f_numero_oc.valor if modo_execucao and f_numero_oc and f_numero_oc.valor is not none else '' }}"
                 {% if numero_oc_editavel %}required{% endif %}
-                {% if not numero_oc_editavel %}disabled data-impper-locked="true"{% endif %}
+                {% if not numero_oc_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
             >
 
             <p class="imp-help">
-                Informe o número da OC que já foi emitida para esta despesa.
+                Informe o número da Ordem de Compra emitida para esta despesa.
             </p>
 
         </div>
@@ -1821,27 +1842,27 @@
     {% set aprovado = 'OC-02' %}
     {% set reprovado = 'Cancelado' %}
 {% endif %}
-                    
+                   
 {% if pode_editar %}
-
+ 
     <div class="imp-execution-actions">
-
+ 
         <div class="imp-execution-actions__copy">
-
+ 
             <strong>
                 Revise a solicitação antes de prosseguir.
             </strong>
-
+ 
             <span>
                 Escolha a ação que deseja realizar nesta etapa.
             </span>
-
+ 
         </div>
-
+ 
         <div class="d-flex flex-column flex-sm-row gap-2">
-
+ 
             {% if controle.tem_editaveis %}
-
+ 
                 <button
                     type="button"
                     class="btn btn-neutral"
@@ -1849,10 +1870,10 @@
                 >
                     Salvar alterações
                 </button>
-
+ 
             {% endif %}
-
-
+ 
+ 
             <button
                 type="button"
                 class="btn btn-outline-primary"
@@ -1861,7 +1882,7 @@
             >
                 Pedir correção
             </button>
-
+ 
             <button
                 type="button"
                 class="btn btn-primary"
@@ -1869,7 +1890,7 @@
             >
                 Concluir
             </button>
-
+ 
             <button
                 type="button"
                 class="btn btn-outline-primary"
@@ -1878,9 +1899,9 @@
             >
                 Cancelar
             </button>
-
+ 
         </div>
-
+ 
     </div>
-
+ 
 {% endif %}
