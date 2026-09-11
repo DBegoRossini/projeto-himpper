@@ -722,6 +722,7 @@
                             </div>
 
                         </div>
+                        <p>Reprovado: {{ reprovado }}</p>
 
                     </div>
                     
@@ -739,7 +740,7 @@
                             type="button"
                             class="btn btn-primary"
                             data-correction-submit
-                            onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', '{{ reprovado }}')"
+                            onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'Cancelado')"
                         >
                             Cancelar
                         </button>
