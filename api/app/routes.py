@@ -191,6 +191,7 @@ def index(*, context):
         Etapas.sla,
         Chamada.status,
         Etapas.nome.label("etapa_nome"),
+        Etapas.id.label("id_etapa"),
         flows.alias.label("fluxo_nome"),
         Execucao.iniciada_em,
         Execucao.id_chamada,
@@ -204,6 +205,7 @@ def index(*, context):
             "sla":        row.sla,
             "status":     row.status,
             "etapa_nome": row.etapa_nome,
+            "id_etapa":   row.id_etapa,
             "fluxo_nome": row.fluxo_nome,
             "id_chamada": row.id_chamada,
             "id_flow": row.id_flow,
@@ -347,17 +349,21 @@ def caixaentrada(context):
         user_id = user_oid
     )
 
-@app.route("/Assumir/<int:id_chamada>")
+@app.route("/Assumir/<int:id_chamada>/<id_etapa>", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def assumir_tarefa(context, id_chamada):
-    user = context["user"]
-    user_oid = user.get("oid") or user.get("id")
-    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=None).first()
-    if execucao:
-        execucao.executor = user_oid
-        execucao.assumida_em = datetime.utcnow()
-        database.session.commit()
+def assumir_tarefa(context, id_chamada, id_etapa):
+    if flask_request.method == "POST":
+        print('COMEÇANDO ASSUMIR TAREFA')
+        user = context["user"]
+        user_oid = user.get("oid") or user.get("id")
+        execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
+        print('EXECUÇÃO ENCONTRADA:', execucao)
+        print(id_chamada)
+        if execucao:
+            execucao.executor = user_oid
+            execucao.assumida_em = datetime.utcnow()
+            database.session.commit()
     return redirect(url_for("caixaentrada"))
 
 @app.route("/abandonar/<int:id_chamada>")
@@ -377,7 +383,10 @@ def abandonar_tarefa(context, id_chamada):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def novasolicitacao(context):
-    fluxos = flows.query.all()
+    groups   = g.info_user.get("groups", [])
+    grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
+    fluxos = flows.query.filter(or_(*grupos_conditions)).all()
+    print(fluxos)
     return render_template(
         'novasolicitacao.html',
         user=context['user'],
@@ -385,7 +394,7 @@ def novasolicitacao(context):
     )
 
 @app.route("/flow/<id_fluxo>")
-@auth.login_required(scopes=["User.Read"]) 
+@auth.login_required(scopes=["User.Read"])
 @with_info_user
 def ini_flow(id_fluxo, context):
     print(id_fluxo)

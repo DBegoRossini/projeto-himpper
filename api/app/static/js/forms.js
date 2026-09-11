@@ -272,8 +272,6 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
   if (id_etapa === 'Correcao'){
     const etapaSelect = document.getElementById('correctionTarget');
     id_etapa = etapaSelect.value
-  } else if (id_proxet === 'Cancelado'){
-    id_proxet = 'Cancelado'
   }
    const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
       method: 'POST',
@@ -364,4 +362,9 @@ async function filtrarForm(document){
   resultado.textContent = JSON.stringify(lista_final);
   window.ImpperForms?.refreshConditionalSections(document);
   return lista_final;
+};
+
+async function assumir(idChamada, id_etapa) {
+  await fetch(`/Assumir/${idChamada}/${id_etapa}`, { method: "POST" });
+  location.reload(); 
 }

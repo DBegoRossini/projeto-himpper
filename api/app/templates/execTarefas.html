@@ -321,12 +321,13 @@
 
                 </div>
 
-                <a
-                    class="btn btn-neutral"
-                    href="{{ url_for('assumir_tarefa', id_chamada=id_chamada) }}"
-                >
-                    Assumir tarefa
-                </a>
+                <button onclick="assumir({{ id_chamada }}, '{{ etapa_id }}')" class="btn btn-neutral">
+                    <a
+                        class="btn btn-neutral"
+                    >
+                        Assumir tarefa
+                    </a>
+                </button>
 
             </section>
 
