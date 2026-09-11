@@ -75,12 +75,14 @@
             <span class="imp-nav__label">Relatórios</span>
             </a>
         </li>
+        {% if '4e8bb331-8ceb-4a07-a905-e6d84f440e71' in info_user.groups %}
         <li>
             <a class="imp-nav__link{% if current_endpoint == 'permissoes' %} is-active{% endif %}" href="{{ url_for('permissoes') }}">
             <span class="imp-nav__icon" aria-hidden="true">🗝</span>
             <span class="imp-nav__label">Permissões</span>
             </a>
         </li>
+        {% endif %}
         </ul>
     </nav>
 
