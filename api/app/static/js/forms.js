@@ -1,6 +1,486 @@
 (() => {
   "use strict";
 
+  const normalizeText = value =>
+    String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+  // Agora aceita "description" explicitamente, em vez de deduzir via
+  // parsing de "valor - descrição" no label. Isso evita perder
+  // informação quando o label não segue esse padrão à risca.
+  const createOption = ({ value, label, description }) => {
+    const optionValue = String(value ?? "").trim();
+    const optionLabel = String(label ?? value ?? "").trim();
+    const optionDescription = String(description ?? "").trim();
+
+    return {
+      value: optionValue,
+      label: optionLabel,
+      description: optionDescription,
+      search: normalizeText(
+        `${optionValue} ${optionLabel} ${optionDescription}`
+      )
+    };
+  };
+
+  const readOptionsFromSelect = source => {
+    if (!source) return [];
+
+    return Array.from(source.options)
+      .filter(option => option.value)
+      .map(option =>
+        createOption({
+          value: option.value,
+          label: option.dataset.label || option.textContent.trim(),
+          description: option.dataset.description || ""
+        })
+      )
+      .filter(option => option.value && option.label);
+  };
+
+  const filterItems = (items, term) => {
+    const normalizedTerm = normalizeText(term);
+
+    if (!normalizedTerm) return items;
+
+    return items.filter(item => item.search.includes(normalizedTerm));
+  };
+
+  // Descrição agora vem direto do dado da option, sem tentar
+  // "descascar" o prefixo "valor - " do label. Se não houver
+  // description explícita, cai de volta pro label (comportamento antigo).
+  const getDescription = option => option.description || option.label;
+
+  const getDisplayValue = option => {
+    if (!option) return "";
+
+    return `${option.value} - ${getDescription(option)}`;
+  };
+
+  const closeMenu = (input, menu) => {
+    if (!menu) return;
+
+    menu.classList.remove("show");
+
+    if (input) {
+      input.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  const openMenu = (input, menu) => {
+    if (!input || !menu || input.disabled) return;
+
+    menu.classList.add("show");
+    input.setAttribute("aria-expanded", "true");
+  };
+
+  const renderMenu = ({ input, menu, options, emptyLabel, onSelect }) => {
+    if (!menu) return;
+
+    menu.innerHTML = "";
+
+    if (!options.length) {
+      const empty = document.createElement("div");
+
+      empty.className = "imp-search-select__empty";
+      empty.textContent = emptyLabel;
+
+      menu.appendChild(empty);
+      openMenu(input, menu);
+
+      return;
+    }
+
+    options.forEach(option => {
+      const button = document.createElement("button");
+      const code = document.createElement("span");
+      const description = document.createElement("span");
+
+      button.type = "button";
+      button.className = "dropdown-item imp-search-select__option";
+      button.setAttribute("role", "option");
+
+      code.className = "imp-search-select__code";
+      code.textContent = option.value;
+
+      description.className = "imp-search-select__description";
+      description.textContent = getDescription(option);
+
+      button.append(code, description);
+
+      button.addEventListener("mousedown", event => {
+        event.preventDefault();
+      });
+
+      button.addEventListener("click", () => {
+        onSelect(option);
+      });
+
+      menu.appendChild(button);
+    });
+
+    openMenu(input, menu);
+  };
+
+  const splitStoredValues = value => {
+    return String(value ?? "")
+      .split(/[;,]/)
+      .map(item => item.trim())
+      .filter(Boolean);
+  };
+
+  const initMultiSearchList = ({
+    listSelector,
+    rowSelector,
+    searchSelector,
+    selectedSelector,
+    dropdownSelector,
+    addSelector,
+    removeSelector,
+    hiddenSelector,
+    options,
+    emptyLabel,
+    requiredMessage
+  }) => {
+    const list = document.querySelector(listSelector);
+    const hidden = document.querySelector(hiddenSelector);
+    const addButton = document.querySelector(addSelector);
+
+    if (!list || !hidden) return null;
+
+    const boundRows = new WeakSet();
+
+    const findOption = value => {
+      const normalizedValue = String(value ?? "").trim();
+
+      return options.find(option => option.value === normalizedValue);
+    };
+
+    const getRows = () => {
+      return Array.from(list.querySelectorAll(rowSelector));
+    };
+
+    const getSelectedValues = () => {
+      return getRows()
+        .map(row => {
+          const selected = row.querySelector(selectedSelector);
+
+          return selected?.value?.trim();
+        })
+        .filter(Boolean);
+    };
+
+    const syncHidden = () => {
+      hidden.value = getSelectedValues().join(";");
+    };
+
+    const closeRowMenu = row => {
+      const input = row.querySelector(searchSelector);
+      const menu = row.querySelector(dropdownSelector);
+
+      closeMenu(input, menu);
+    };
+
+    const closeAllMenus = () => {
+      getRows().forEach(closeRowMenu);
+    };
+
+    const updateRemoveButtons = () => {
+      const rows = getRows();
+
+      rows.forEach(row => {
+        const button = row.querySelector(removeSelector);
+
+        if (!button) return;
+
+        button.hidden = rows.length === 1;
+      });
+    };
+
+    const updateValidity = () => {
+      const rows = getRows();
+      const selectedValues = getSelectedValues();
+
+      const enabledRows = rows.filter(row => {
+        const search = row.querySelector(searchSelector);
+
+        return search && !search.disabled;
+      });
+
+      rows.forEach(row => {
+        const search = row.querySelector(searchSelector);
+        const selected = row.querySelector(selectedSelector);
+
+        if (!search || search.disabled) {
+          search?.setCustomValidity("");
+
+          return;
+        }
+
+        const hasTypedValue = Boolean(search.value.trim());
+        const hasSelectedValue = Boolean(selected?.value?.trim());
+
+        if (hasTypedValue && !hasSelectedValue) {
+          search.setCustomValidity("Selecione uma opção da lista.");
+        } else {
+          search.setCustomValidity("");
+        }
+      });
+
+      if (enabledRows.length && !selectedValues.length) {
+        const firstSearch = enabledRows[0].querySelector(searchSelector);
+
+        firstSearch?.setCustomValidity(requiredMessage);
+      }
+    };
+
+    const renderRowMenu = row => {
+      const search = row.querySelector(searchSelector);
+      const selected = row.querySelector(selectedSelector);
+      const menu = row.querySelector(dropdownSelector);
+
+      if (!search || !selected || !menu || search.disabled) return;
+
+      const selectedValues = getSelectedValues();
+      const currentValue = selected.value.trim();
+
+      const availableOptions = options.filter(option => {
+        const alreadySelected = selectedValues.includes(option.value);
+
+        return !alreadySelected || option.value === currentValue;
+      });
+
+      const filtered = filterItems(availableOptions, search.value);
+
+      renderMenu({
+        input: search,
+        menu,
+        options: filtered,
+        emptyLabel,
+
+        onSelect(option) {
+          search.value = getDisplayValue(option);
+          selected.value = option.value;
+
+          search.setCustomValidity("");
+
+          syncHidden();
+          updateValidity();
+          closeMenu(search, menu);
+        }
+      });
+    };
+
+    const bindRow = (row, initialValue = "") => {
+      if (!row || boundRows.has(row)) return;
+
+      boundRows.add(row);
+
+      const search = row.querySelector(searchSelector);
+      const selected = row.querySelector(selectedSelector);
+      const menu = row.querySelector(dropdownSelector);
+      const remove = row.querySelector(removeSelector);
+
+      if (!search || !selected || !menu) return;
+
+      const cleanInitialValue = String(initialValue ?? "").trim();
+
+      selected.value = cleanInitialValue;
+
+      if (cleanInitialValue) {
+        const option = findOption(cleanInitialValue);
+
+        search.value = option
+          ? getDisplayValue(option)
+          : cleanInitialValue;
+      } else {
+        search.value = "";
+      }
+
+      search.setAttribute("aria-expanded", "false");
+
+      search.addEventListener("focus", () => {
+        closeAllMenus();
+        renderRowMenu(row);
+      });
+
+      search.addEventListener("click", () => {
+        closeAllMenus();
+        renderRowMenu(row);
+      });
+
+      search.addEventListener("input", () => {
+        selected.value = "";
+
+        syncHidden();
+        updateValidity();
+        renderRowMenu(row);
+      });
+
+      search.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          closeMenu(search, menu);
+
+          return;
+        }
+
+        if (event.key === "Enter" && menu.classList.contains("show")) {
+          event.preventDefault();
+
+          const firstOption = menu.querySelector(
+            ".imp-search-select__option"
+          );
+
+          firstOption?.click();
+        }
+      });
+
+      remove?.addEventListener("click", () => {
+        row.remove();
+
+        syncHidden();
+        updateRemoveButtons();
+        updateValidity();
+      });
+    };
+
+    const createRow = (initialValue = "", focus = false) => {
+      const firstRow = list.querySelector(rowSelector);
+
+      if (!firstRow) return null;
+
+      const clone = firstRow.cloneNode(true);
+
+      const search = clone.querySelector(searchSelector);
+      const selected = clone.querySelector(selectedSelector);
+      const menu = clone.querySelector(dropdownSelector);
+
+      if (search) {
+        search.value = "";
+        search.setCustomValidity("");
+        search.removeAttribute("id");
+        search.setAttribute("aria-expanded", "false");
+      }
+
+      if (selected) {
+        selected.value = "";
+      }
+
+      if (menu) {
+        menu.innerHTML = "";
+        menu.classList.remove("show");
+        menu.removeAttribute("id");
+      }
+
+      list.appendChild(clone);
+
+      bindRow(clone, initialValue);
+
+      updateRemoveButtons();
+      syncHidden();
+      updateValidity();
+
+      if (focus && search && !search.disabled) {
+        search.focus();
+      }
+
+      return clone;
+    };
+
+    const initialValues = splitStoredValues(hidden.value);
+    const firstRow = list.querySelector(rowSelector);
+
+    if (firstRow) {
+      bindRow(firstRow, initialValues[0] || "");
+
+      initialValues.slice(1).forEach(value => {
+        createRow(value, false);
+      });
+    }
+
+    addButton?.addEventListener("click", () => {
+      createRow("", true);
+    });
+
+    syncHidden();
+    updateRemoveButtons();
+    updateValidity();
+
+    return {
+      syncHidden,
+      updateValidity,
+
+      validate() {
+        syncHidden();
+        updateValidity();
+
+        const rows = getRows();
+
+        const invalidSearch = rows
+          .map(row => row.querySelector(searchSelector))
+          .find(
+            search => search && !search.disabled && !search.checkValidity()
+          );
+
+        if (invalidSearch) {
+          invalidSearch.reportValidity();
+
+          return false;
+        }
+
+        return true;
+      }
+    };
+  };
+
+  const initSearchField = (scope, fieldName) => {
+    const root = scope || document;
+
+    const source = root.querySelector(`[data-${fieldName}-source]`);
+    const options = readOptionsFromSelect(source);
+
+    return initMultiSearchList({
+      listSelector: `[data-${fieldName}-list]`,
+      rowSelector: `[data-${fieldName}-row]`,
+      searchSelector: `[data-${fieldName}-search]`,
+      selectedSelector: `[data-${fieldName}-selected-value]`,
+      dropdownSelector: `[data-${fieldName}-dropdown]`,
+      addSelector: `[data-add-${fieldName}]`,
+      removeSelector: `[data-remove-${fieldName}]`,
+      hiddenSelector: `[data-${fieldName}-value]`,
+      options,
+      emptyLabel: "Nenhuma opção encontrada.",
+      requiredMessage: "Selecione pelo menos uma opção da lista."
+    });
+  };
+
+  const initSearchFields = scope => {
+    const root = scope || document;
+
+    root.querySelectorAll("[data-search-field]").forEach(element => {
+      initSearchField(root, element.dataset.searchField);
+    });
+  };
+
+  window.ImpperSearchSelect = {
+    normalizeText,
+    createOption,
+    readOptionsFromSelect,
+    filterItems,
+    getDescription,
+    getDisplayValue,
+    closeMenu,
+    openMenu,
+    renderMenu,
+    splitStoredValues,
+    initMultiSearchList,
+    initSearchField,
+    initSearchFields
+  };
+
   const conditionalSelector = "[data-impper-show-when]";
 
   const splitRule = rule => {
@@ -37,45 +517,45 @@
   };
 
   const toggleSectionControls = (section, visible) => {
-  section
-    .querySelectorAll("input, select, textarea, button")
-    .forEach(control => {
-      if (!control.dataset.impperRequiredCached) {
-        control.dataset.impperRequiredCached = String(
-          control.required
-        );
-      }
-
-      const locked =
-        control.dataset.impperLocked === "true";
-
-      if (visible) {
-        control.disabled = locked;
-
-        control.required =
-          !locked &&
-          control.dataset.impperRequiredCached === "true";
-
-        return;
-      }
-
-      if (!locked) {
-        if (
-          control.type === "radio" ||
-          control.type === "checkbox"
-        ) {
-          control.checked = false;
-        } else if (control.type === "file") {
-          control.value = "";
-        } else if (control.tagName === "SELECT") {
-          control.selectedIndex = 0;
+    section
+      .querySelectorAll("input, select, textarea, button")
+      .forEach(control => {
+        if (!control.dataset.impperRequiredCached) {
+          control.dataset.impperRequiredCached = String(
+            control.required
+          );
         }
-      }
 
-      control.required = false;
-      control.disabled = true;
-    });
-};
+        const locked =
+          control.dataset.impperLocked === "true";
+
+        if (visible) {
+          control.disabled = locked;
+
+          control.required =
+            !locked &&
+            control.dataset.impperRequiredCached === "true";
+
+          return;
+        }
+
+        if (!locked) {
+          if (
+            control.type === "radio" ||
+            control.type === "checkbox"
+          ) {
+            control.checked = false;
+          } else if (control.type === "file") {
+            control.value = "";
+          } else if (control.tagName === "SELECT") {
+            control.selectedIndex = 0;
+          }
+        }
+
+        control.required = false;
+        control.disabled = true;
+      });
+  };
 
   const evaluateConditionalSection = section => {
     const form = section.closest("form");
@@ -240,6 +720,7 @@
     init(scope) {
       initConditionalSections(scope);
       initFileInputs(scope);
+      initSearchFields(scope);
     },
     refreshConditionalSections,
     bindDependentSelect,
@@ -272,8 +753,6 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
   if (id_etapa === 'Correcao'){
     const etapaSelect = document.getElementById('correctionTarget');
     id_etapa = etapaSelect.value
-  } else if (id_proxet === 'Cancelado'){
-    id_proxet = 'Cancelado'
   }
    const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
       method: 'POST',
@@ -315,53 +794,12 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   return formData;
 };
 
-async function filtrarForm(document){
-  const checagem = document.querySelector(
-    '[name="tp_checagem"]:checked'
-  )?.value;
-  console.log('checagem:', checagem);
-  const empreendimento = document.getElementsByName('empreendimento')[0]?.value;
-  console.log('empreendimento:', empreendimento);
-  const form_abertos = JSON.parse(
-    document.getElementById('teste').textContent
-);
-  let lista_final = []
-  let resultado = document.getElementById('resultado');
-  resultado.textContent = '[]';
-  const empCheck = new Map();
-  if (checagem && empreendimento){
-    for (const form of form_abertos){
-      const registro = empCheck.get(form.id_chamada) || {
-        criterios: new Set(),
-        camposNao: []
-      };
+async function assumir(idChamada, id_etapa) {
+  await fetch(`/Assumir/${idChamada}/${id_etapa}`, { method: "POST" });
+  location.reload(); 
+};
 
-      if (form.campo === 'tp_checagem' && form.valor === checagem){
-        registro.criterios.add('Checagem');
-      }
-      if (form.campo === 'empreendimento' && form.valor === empreendimento){
-        registro.criterios.add('Empreendimento');
-      }
-      if (form.valor === 'NAO'){
-        registro.criterios.add('NAO');
-        registro.camposNao.push(form.campo);
-      }
-
-      empCheck.set(form.id_chamada, registro);
-    }
-
-    for (const registro of empCheck.values()){
-      const temTodosOsCriterios =
-        registro.criterios.has('Checagem') &&
-        registro.criterios.has('Empreendimento') &&
-        registro.criterios.has('NAO');
-
-      if (temTodosOsCriterios){
-        lista_final.push(...registro.camposNao);
-      }
-    }
-  }
-  resultado.textContent = JSON.stringify(lista_final);
-  window.ImpperForms?.refreshConditionalSections(document);
-  return lista_final;
+// Mantida para compatibilidade; os campos agora se auto-inicializam via [data-search-field].
+function campoPesquisa(document, campo) {
+  return window.ImpperSearchSelect.initSearchField(document, campo);
 }
