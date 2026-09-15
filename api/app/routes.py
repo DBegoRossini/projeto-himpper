@@ -106,6 +106,10 @@ def carregar_info_form():
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
+    g.infoContrat = requests.get(
+        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.1/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
+    )
     coligadas = {}
     movimentos = {}
     ccusto = {}
