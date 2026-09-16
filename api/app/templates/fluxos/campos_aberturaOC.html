@@ -1,1726 +1,99 @@
 {% set modo_execucao = modo_execucao|default(false) %}
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
-{% set f_nota = formularios_map.get('nota_fiscal_recibo_emitidos') if modo_execucao else none %}
-{% set f_oc_emitida = formularios_map.get('oc_emitida') if modo_execucao else none %}
-{% set f_numero_oc = formularios_map.get('numero_oc') if modo_execucao else none %}
-{% set f_tratamento = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
-{% set f_tipo_movimento = formularios_map.get('tipo_movimento') if modo_execucao else none %}
+{% set etapa_atual = etapa_id|default('') %}
 
-{% set f_coligada = formularios_map.get('codcoligada') if modo_execucao else none %}
-{% set f_centro_custo = formularios_map.get('centro_custo') if modo_execucao else none %}
-{% set f_natureza = formularios_map.get('natureza_orcamentaria') if modo_execucao else none %}
-{% set f_motivo = formularios_map.get('motivo_aquisicao') if modo_execucao else none %}
-
-{% set f_razao_social = formularios_map.get('razao_social_fornecedor') if modo_execucao else none %}
-{% set f_cnpj = formularios_map.get('cnpj_fornecedor') if modo_execucao else none %}
-
-{% set f_orcamento = formularios_map.get('anexo_orcamento') if modo_execucao else none %}
-{% set f_documento_fiscal = formularios_map.get('documento_fiscal') if modo_execucao else none %}
-{% set f_reembolso = formularios_map.get('anexo_formulario_reembolso') if modo_execucao else none %}
-
-{% set f_condicao = formularios_map.get('condicao_pagamento') if modo_execucao else none %}
-{% set f_descricao_prazo = formularios_map.get('descricao_prazo') if modo_execucao else none %}
-{% set f_forma_pagamento = formularios_map.get('forma_pagamento') if modo_execucao else none %}
-{% set f_dados_bancarios = formularios_map.get('dados_bancarios') if modo_execucao else none %}
-{% set f_boleto_emitido = formularios_map.get('boleto_emitido') if modo_execucao else none %}
-{% set f_arquivo_boleto = formularios_map.get('arquivo_boleto') if modo_execucao else none %}
-
-
-{% set nota_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_nota
-        and (f_nota.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set oc_emitida_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_oc_emitida
-        and (f_oc_emitida.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set numero_oc_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_numero_oc
-        and (f_numero_oc.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set tratamento_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_tratamento
-        and (f_tratamento.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set tipo_movimento_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_tipo_movimento
-        and (f_tipo_movimento.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set coligada_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_coligada
-        and (f_coligada.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set centro_custo_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_centro_custo
-        and (f_centro_custo.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set natureza_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_natureza
-        and (f_natureza.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set motivo_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_motivo
-        and (f_motivo.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set razao_social_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_razao_social
-        and (f_razao_social.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set cnpj_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_cnpj
-        and (f_cnpj.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set orcamento_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_orcamento
-        and (f_orcamento.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set documento_fiscal_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_documento_fiscal
-        and (f_documento_fiscal.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set reembolso_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_reembolso
-        and (f_reembolso.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set condicao_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_condicao
-        and (f_condicao.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set descricao_prazo_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_descricao_prazo
-        and (f_descricao_prazo.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set forma_pagamento_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_forma_pagamento
-        and (f_forma_pagamento.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set dados_bancarios_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_dados_bancarios
-        and (f_dados_bancarios.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set boleto_emitido_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_boleto_emitido
-        and (f_boleto_emitido.editavel|string|lower|trim) in ['1', 'true']
-    )
-%}
-
-{% set arquivo_boleto_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_arquivo_boleto
-        and (f_arquivo_boleto.editavel|string|lower|trim) in ['1', 'true']
-    )
+{% set etapa_financeiro =
+    modo_execucao
+    and etapa_atual in [
+        'OC-04',
+        'OC-05-A',
+        'OC-05-B'
+    ]
 %}
 
 
-<input
-    type="hidden"
-    name="tipo_solicitacao"
-    value="OC_COM_DOCUMENTO_FISCAL"
->
+{# =========================================================
+   ABERTURA DA SOLICITAÇÃO
+   ========================================================= #}
 
+{% if not modo_execucao %}
 
-<section class="imp-form-section">
+    <section class="imp-form-section">
 
-    <div class="imp-form-section__head">
+        <div class="imp-form-section__head">
 
-        <div class="imp-form-section__copy">
+            <div class="imp-form-section__copy">
 
-            <h3 class="imp-card__title">
-                Identificação da solicitação
-            </h3>
+                <h3 class="imp-card__title">
+                    Como deseja iniciar a solicitação?
+                </h3>
 
-            <p class="imp-card__subtitle">
-                Primeiro, precisamos entender em qual situação esta despesa se encontra.
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="imp-form-grid">
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="nota_fiscal_recibo_emitidos"
-        >
-
-            <span class="imp-label">
-                Você já possui a nota fiscal ou o recibo desta despesa?
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--two"
-                role="radiogroup"
-                aria-label="Nota fiscal ou recibo"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="nota_fiscal_recibo_emitidos"
-                        value="SIM"
-                        {% if nota_editavel %}required{% endif %}
-                        {% if modo_execucao and f_nota and f_nota.valor == 'SIM' %}checked{% endif %}
-                        {% if not nota_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Sim, já tenho o documento
-                        </span>
-
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="nota_fiscal_recibo_emitidos"
-                        value="NAO"
-                        {% if modo_execucao and f_nota and f_nota.valor == 'NAO' %}checked{% endif %}
-                        {% if not nota_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Não, ainda não tenho
-                        </span>
-
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="oc_emitida"
-            data-impper-show-when="nota_fiscal_recibo_emitidos:SIM"
-            hidden
-        >
-
-            <p class="imp-help">
-                Como o documento fiscal já existe, precisamos saber se a Ordem de Compra também já foi gerada.
-            </p>
-
-            <span class="imp-label">
-                A Ordem de Compra (OC) já foi emitida?
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--two"
-                role="radiogroup"
-                aria-label="OC emitida"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="oc_emitida"
-                        value="SIM"
-                        {% if oc_emitida_editavel %}required{% endif %}
-                        {% if modo_execucao and f_oc_emitida and f_oc_emitida.valor == 'SIM' %}checked{% endif %}
-                        {% if not oc_emitida_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Sim, a OC já foi emitida
-                        </span>
-
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="oc_emitida"
-                        value="NAO"
-                        {% if modo_execucao and f_oc_emitida and f_oc_emitida.valor == 'NAO' %}checked{% endif %}
-                        {% if not oc_emitida_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Não, ainda preciso da emissão
-                        </span>
-
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="numero_oc"
-
-            {% if not modo_execucao %}
-
-                data-impper-show-when="oc_emitida:SIM"
-                hidden
-
-            {% elif not numero_oc_editavel
-                and not (
-                    f_numero_oc
-                    and f_numero_oc.valor
-                )
-                and not (
-                    f_oc_emitida
-                    and f_oc_emitida.valor == 'SIM'
-                )
-            %}
-
-                hidden
-
-            {% endif %}
-        >
-
-            <label
-                class="imp-label"
-                for="numero_oc"
-            >
-                Número da OC
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <input
-                id="numero_oc"
-                name="numero_oc"
-                type="text"
-                class="form-control"
-                autocomplete="off"
-                placeholder="Informe o número da Ordem de Compra"
-                value="{{ f_numero_oc.valor if modo_execucao and f_numero_oc and f_numero_oc.valor is not none else '' }}"
-                {% if numero_oc_editavel %}required{% endif %}
-                {% if not numero_oc_editavel %}
-                    disabled
-                    data-impper-locked="true"
-                {% endif %}
-            >
-
-            <p class="imp-help">
-                Informe o número da Ordem de Compra emitida para esta despesa.
-            </p>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="tratamento_despesa"
-            data-impper-show-when="nota_fiscal_recibo_emitidos:NAO"
-            hidden
-        >
-
-            <p class="imp-help">
-                Como ainda não existe nota fiscal ou recibo, informe como esta despesa será tratada.
-            </p>
-
-            <span class="imp-label">
-                Como esta despesa será tratada?
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--two"
-                role="radiogroup"
-                aria-label="Tratamento da despesa"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="tratamento_despesa"
-                        value="ADIANTAMENTO"
-                        {% if tratamento_editavel %}required{% endif %}
-                        {% if modo_execucao and f_tratamento and f_tratamento.valor == 'ADIANTAMENTO' %}checked{% endif %}
-                        {% if not tratamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Adiantamento de despesa
-                        </span>
-
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="tratamento_despesa"
-                        value="REEMBOLSO"
-                        {% if modo_execucao and f_tratamento and f_tratamento.valor == 'REEMBOLSO' %}checked{% endif %}
-                        {% if not tratamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-
-                        <span class="imp-choice__dot"></span>
-
-                        <span class="imp-choice__text">
-                            Reembolso de despesa
-                        </span>
-
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="tipo_movimento"
-        >
-
-            <span class="imp-label">
-                Tipo de movimento
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <p class="imp-help">
-                Selecione o tipo de movimento correspondente à solicitação.
-            </p>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--three"
-                role="radiogroup"
-                aria-label="Tipo de movimento"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="tipo_movimento"
-                        value="PRODUTO"
-                        {% if tipo_movimento_editavel %}required{% endif %}
-                        {% if modo_execucao and f_tipo_movimento and f_tipo_movimento.valor == 'PRODUTO' %}checked{% endif %}
-                        {% if not tipo_movimento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Produto</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="tipo_movimento"
-                        value="SERVICO"
-                        {% if modo_execucao and f_tipo_movimento and f_tipo_movimento.valor == 'SERVICO' %}checked{% endif %}
-                        {% if not tipo_movimento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Serviço</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="tipo_movimento"
-                        value="MOVIMENTO_FINANCEIRO"
-                        {% if modo_execucao and f_tipo_movimento and f_tipo_movimento.valor == 'MOVIMENTO_FINANCEIRO' %}checked{% endif %}
-                        {% if not tipo_movimento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Movimento financeiro</span>
-                    </span>
-
-                </label>
-
-                <label
-                    class="imp-choice"
-                    data-impper-show-when="tratamento_despesa:ADIANTAMENTO"
-                    hidden
-                >
-
-                    <input
-                        type="radio"
-                        name="tipo_movimento"
-                        value="ADIANTAMENTO"
-                        {% if modo_execucao and f_tipo_movimento and f_tipo_movimento.valor == 'ADIANTAMENTO' %}checked{% endif %}
-                        {% if not tipo_movimento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Adiantamento</span>
-                    </span>
-
-                </label>
-
-                <label
-                    class="imp-choice"
-                    data-impper-show-when="tratamento_despesa:REEMBOLSO"
-                    hidden
-                >
-
-                    <input
-                        type="radio"
-                        name="tipo_movimento"
-                        value="REEMBOLSO"
-                        {% if modo_execucao and f_tipo_movimento and f_tipo_movimento.valor == 'REEMBOLSO' %}checked{% endif %}
-                        {% if not tipo_movimento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Reembolso</span>
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="imp-form-section">
-
-    <div class="imp-form-section__head">
-
-        <div class="imp-form-section__copy">
-
-            <h3 class="imp-card__title">
-                Classificação
-            </h3>
-
-            <p class="imp-card__subtitle">
-                Informe a empresa, o centro de custo e a natureza orçamentária relacionados à solicitação.
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="imp-form-grid">
-
-        <div
-            class="imp-field"
-            data-field-wrap="codcoligada"
-        >
-
-            <label
-                class="imp-label"
-                for="codcoligada"
-            >
-                Coligada
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <select
-                id="codcoligada"
-                name="codcoligada"
-                class="form-select"
-                autocomplete="organization"
-                {% if coligada_editavel %}required{% endif %}
-                {% if not coligada_editavel %}disabled data-impper-locked="true"{% endif %}
-            >
-
-                <option value="">
-                    Selecione uma coligada
-                </option>
-
-                {% if g.coligadasUnic is defined %}
-
-                    {% for key, label in g.coligadasUnic %}
-
-                        <option
-                            value="{{ key }}"
-                            {% if modo_execucao and f_coligada and (f_coligada.valor|string) == (key|string) %}selected{% endif %}
-                        >
-                            {{ label }}
-                        </option>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            </select>
-
-            <p class="imp-help">
-                Escolha a empresa responsável pela compra.
-            </p>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="centro_custo"
-        >
-
-            <div
-                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
-            >
-
-                <div>
-
-                    <span class="imp-label">
-                        Centro de custo
-                        <span class="imp-label__required">*</span>
-                    </span>
-
-                    <p class="imp-help mb-0">
-                        Selecione pelo menos um centro de custo. Você pode adicionar outros quando necessário.
-                    </p>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="btn btn-neutral btn-sm align-self-start"
-                    id="addCentroCustoButton"
-                    data-add-centro-custo
-                    {% if not centro_custo_editavel %}
-                        disabled
-                        data-impper-locked="true"
-                    {% endif %}
-                >
-                    + Adicionar centro de custo
-                </button>
-
-            </div>
-
-
-            <input
-                type="hidden"
-                id="centro_custo"
-                name="centro_custo"
-                value="{{ f_centro_custo.valor if modo_execucao and f_centro_custo and f_centro_custo.valor is not none else '' }}"
-                data-centro-custo-value
-            >
-
-
-            <select
-                data-centro-custo-source
-                hidden
-                disabled
-            >
-
-                {% if g.ccustoUnic is defined %}
-
-                    {% for key, label in g.ccustoUnic %}
-
-                        <option
-                            value="{{ key }}"
-                            data-label="{{ label }}"
-                        >
-                            {{ key }} - {{ label }}
-                        </option>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            </select>
-
-
-            <div
-                class="imp-nature-list"
-                id="centroCustoList"
-                data-centro-custo-list
-            >
-
-                <div
-                    class="imp-nature-row"
-                    data-centro-custo-row
-                >
-
-                    <div
-                        class="imp-search-select position-relative flex-grow-1"
-                        data-centro-custo-combobox
-                    >
-
-                        <input
-                            type="search"
-                            class="form-control"
-                            placeholder="Pesquise por código ou descrição"
-                            autocomplete="off"
-                            role="combobox"
-                            aria-autocomplete="list"
-                            aria-expanded="false"
-                            data-centro-custo-search
-                            {% if not centro_custo_editavel %}
-                                disabled
-                                data-impper-locked="true"
-                            {% endif %}
-                        >
-
-                        <input
-                            type="hidden"
-                            value=""
-                            data-centro-custo-selected-value
-                        >
-
-                        <div
-                            class="dropdown-menu w-100 imp-search-select__menu"
-                            role="listbox"
-                            data-centro-custo-dropdown
-                        ></div>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary btn-sm imp-nature-remove"
-                        data-remove-centro-custo
-                        aria-label="Remover centro de custo"
-                        hidden
-                        {% if not centro_custo_editavel %}
-                            disabled
-                            data-impper-locked="true"
-                        {% endif %}
-                    >
-                        Remover
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="natureza_orcamentaria"
-        >
-
-            <div
-                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
-            >
-
-                <div>
-
-                    <span class="imp-label">
-                        Natureza Orçamentária
-                        <span class="imp-label__required">*</span>
-                    </span>
-
-                    <p class="imp-help mb-0">
-                        Selecione pelo menos uma natureza. Você pode adicionar outras quando necessário.
-                    </p>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="btn btn-neutral btn-sm align-self-start"
-                    id="addNaturezaButton"
-                    data-add-natureza
-                    {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
-                >
-                    + Adicionar natureza
-                </button>
-
-            </div>
-
-            <input
-                type="hidden"
-                id="natureza_orcamentaria"
-                name="natureza_orcamentaria"
-                value="{{ f_natureza.valor if modo_execucao and f_natureza and f_natureza.valor is not none else '' }}"
-                data-natureza-value
-            >
-
-            <div
-                class="imp-nature-list"
-                id="naturezaList"
-                data-natureza-list
-            >
-
-                <div
-                    class="imp-nature-row"
-                    data-natureza-row
-                >
-
-                    <div
-                        class="imp-search-select position-relative flex-grow-1"
-                        data-natureza-combobox
-                    >
-
-                        <input
-                            type="search"
-                            class="form-control"
-                            placeholder="Pesquise por código ou descrição"
-                            autocomplete="off"
-                            role="combobox"
-                            aria-autocomplete="list"
-                            aria-expanded="false"
-                            value="{{ f_natureza.valor if modo_execucao and f_natureza and f_natureza.valor is not none else '' }}"
-                            data-natureza-search
-                            {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
-                        >
-
-                        <input
-                            type="hidden"
-                            value="{{ f_natureza.valor if modo_execucao and f_natureza and f_natureza.valor is not none else '' }}"
-                            data-natureza-selected-value
-                        >
-
-                        <div
-                            class="dropdown-menu w-100 imp-search-select__menu"
-                            role="listbox"
-                            data-natureza-dropdown
-                        ></div>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary btn-sm imp-nature-remove"
-                        data-remove-natureza
-                        aria-label="Remover Natureza Orçamentária"
-                        hidden
-                        {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-                        Remover
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="motivo_aquisicao"
-        >
-
-            <label
-                class="imp-label"
-                for="motivo_aquisicao"
-            >
-                Motivo da aquisição
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <textarea
-                id="motivo_aquisicao"
-                name="motivo_aquisicao"
-                class="form-control"
-                maxlength="1500"
-                placeholder="Explique o que está sendo adquirido, para qual finalidade e por que a aquisição é necessária."
-                data-impper-counter
-                {% if motivo_editavel %}required{% endif %}
-                {% if not motivo_editavel %}disabled data-impper-locked="true"{% endif %}
-            >{{ f_motivo.valor if modo_execucao and f_motivo and f_motivo.valor is not none else '' }}</textarea>
-
-            <div class="imp-form-meta">
-
-                <p class="imp-help">
-                    Descreva a necessidade da compra de forma objetiva.
+                <p class="imp-card__subtitle">
+                    Informe se a solicitação deve passar pela
+                    Central de Notas ou se a despesa já está pronta
+                    para recebimento pelo Financeiro.
                 </p>
 
-                <span
-                    class="imp-form-counter"
-                    data-impper-counter-output
-                >
-                    0/1500
-                </span>
-
             </div>
 
         </div>
 
-    </div>
-
-</section>
-
-
-<section class="imp-form-section">
-
-    <div class="imp-form-section__head">
-
-        <div class="imp-form-section__copy">
-
-            <h3 class="imp-card__title">
-                Fornecedor
-            </h3>
-
-            <p class="imp-card__subtitle">
-                Informe os dados do fornecedor relacionado à despesa.
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="imp-form-grid">
-
-        <div
-            class="imp-field"
-            data-field-wrap="razao_social_fornecedor"
-        >
-
-            <label
-                class="imp-label"
-                for="razao_social_fornecedor"
-            >
-                Razão social do fornecedor
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <input
-                id="razao_social_fornecedor"
-                name="razao_social_fornecedor"
-                type="text"
-                class="form-control"
-                maxlength="180"
-                autocomplete="organization"
-                placeholder="Informe a razão social"
-                value="{{ f_razao_social.valor if modo_execucao and f_razao_social and f_razao_social.valor is not none else '' }}"
-                {% if razao_social_editavel %}required{% endif %}
-                {% if not razao_social_editavel %}disabled data-impper-locked="true"{% endif %}
-            >
-
-        </div>
-
-
-        <div
-            class="imp-field"
-            data-field-wrap="cnpj_fornecedor"
-        >
-
-            <label
-                class="imp-label"
-                for="cnpj_fornecedor"
-            >
-                CNPJ do fornecedor
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <input
-                id="cnpj_fornecedor"
-                name="cnpj_fornecedor"
-                type="text"
-                class="form-control"
-                inputmode="numeric"
-                maxlength="18"
-                autocomplete="off"
-                placeholder="00.000.000/0000-00"
-                value="{{ f_cnpj.valor if modo_execucao and f_cnpj and f_cnpj.valor is not none else '' }}"
-                data-impper-mask="cnpj"
-                {% if cnpj_editavel %}required{% endif %}
-                {% if not cnpj_editavel %}disabled data-impper-locked="true"{% endif %}
-            >
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="imp-form-section">
-
-    <div class="imp-form-section__head">
-
-        <div class="imp-form-section__copy">
-
-            <h3 class="imp-card__title">
-                Documentos
-            </h3>
-
-            <p class="imp-card__subtitle">
-                Anexe os documentos necessários para análise e aprovação da solicitação.
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="imp-form-grid">
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="anexo_orcamento"
-            data-impper-show-when="tratamento_despesa:ADIANTAMENTO"
-            hidden
-        >
-
-            <span class="imp-label">
-                Anexo Orçamento
-                <span class="imp-label__required">*</span>
-            </span>
-
-            {% if modo_execucao and f_orcamento and f_orcamento.valor %}
-
-                <div class="imp-execution-current-file">
-
-                    <div>
-
-                        <strong>
-                            Arquivo atual
-                        </strong>
-
-                        <span>
-                            Orçamento registrado nesta solicitação.
-                        </span>
-
-                    </div>
-
-                    <a
-                        class="btn btn-outline-primary btn-sm"
-                        href="{{ url_for('download_arquivo', id_arquivo=f_orcamento.id) }}"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        Visualizar arquivo
-                    </a>
-
-                </div>
-
-            {% endif %}
-
-            {% if orcamento_editavel %}
-
-                <div class="imp-upload">
-
-                    <input
-                        id="anexo_orcamento"
-                        name="anexo_orcamento"
-                        type="file"
-                        class="imp-upload__input"
-                        accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                        data-impper-file-output="#anexoOrcamentoName"
-                        {% if not modo_execucao or not (f_orcamento and f_orcamento.valor) %}required{% endif %}
-                    >
-
-                    <label
-                        class="imp-upload__label"
-                        for="anexo_orcamento"
-                    >
-
-                        <span class="imp-upload__copy">
-
-                            <strong>
-                                {% if modo_execucao and f_orcamento and f_orcamento.valor %}
-                                    Substituir orçamento
-                                {% else %}
-                                    Anexe o orçamento
-                                {% endif %}
-                            </strong>
-
-                            <span>
-                                Selecione o arquivo do orçamento.
-                            </span>
-
-                        </span>
-
-                        <span class="imp-upload__action">
-                            Selecionar arquivo
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div
-                    id="anexoOrcamentoName"
-                    class="imp-file-name"
-                >
-                    Nenhum novo arquivo selecionado.
-                </div>
-
-            {% elif not (modo_execucao and f_orcamento and f_orcamento.valor) %}
-
-                <p class="imp-help">
-                    Nenhum arquivo anexado.
-                </p>
-
-            {% endif %}
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="documento_fiscal"
-            data-impper-show-when="nota_fiscal_recibo_emitidos:SIM"
-            hidden
-        >
-
-            <span class="imp-label">
-                Nota fiscal ou recibo
-                <span class="imp-label__required">*</span>
-            </span>
-
-            {% if modo_execucao and f_documento_fiscal and f_documento_fiscal.valor %}
-
-                <div class="imp-execution-current-file">
-
-                    <div>
-
-                        <strong>
-                            Arquivo atual
-                        </strong>
-
-                        <span>
-                            Documento fiscal registrado nesta solicitação.
-                        </span>
-
-                    </div>
-
-                    <a
-                        class="btn btn-outline-primary btn-sm"
-                        href="{{ url_for('download_arquivo', id_arquivo=f_documento_fiscal.id) }}"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        Visualizar arquivo
-                    </a>
-
-                </div>
-
-            {% endif %}
-
-            {% if documento_fiscal_editavel %}
-
-                <div class="imp-upload">
-
-                    <input
-                        id="documento_fiscal"
-                        name="documento_fiscal"
-                        type="file"
-                        class="imp-upload__input"
-                        accept=".pdf,.xml,.jpg,.jpeg,.png,application/pdf,application/xml,text/xml,image/jpeg,image/png"
-                        data-impper-file-output="#documentoFiscalName"
-                        {% if not modo_execucao or not (f_documento_fiscal and f_documento_fiscal.valor) %}required{% endif %}
-                    >
-
-                    <label
-                        class="imp-upload__label"
-                        for="documento_fiscal"
-                    >
-
-                        <span class="imp-upload__copy">
-
-                            <strong>
-                                {% if modo_execucao and f_documento_fiscal and f_documento_fiscal.valor %}
-                                    Substituir nota fiscal ou recibo
-                                {% else %}
-                                    Anexe a nota fiscal ou o recibo
-                                {% endif %}
-                            </strong>
-
-                            <span>
-                                PDF, XML, JPG ou PNG.
-                            </span>
-
-                        </span>
-
-                        <span class="imp-upload__action">
-                            Selecionar arquivo
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div
-                    id="documentoFiscalName"
-                    class="imp-file-name"
-                >
-                    Nenhum novo arquivo selecionado.
-                </div>
-
-            {% elif not (modo_execucao and f_documento_fiscal and f_documento_fiscal.valor) %}
-
-                <p class="imp-help">
-                    Nenhum arquivo anexado.
-                </p>
-
-            {% endif %}
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="anexo_formulario_reembolso"
-            data-impper-show-when="tratamento_despesa:REEMBOLSO"
-            hidden
-        >
-
-            <span class="imp-label">
-                Anexo Formulário de reembolso
-                <span class="imp-label__required">*</span>
-            </span>
-
-            {% if modo_execucao and f_reembolso and f_reembolso.valor %}
-
-                <div class="imp-execution-current-file">
-
-                    <div>
-
-                        <strong>
-                            Arquivo atual
-                        </strong>
-
-                        <span>
-                            Formulário de reembolso registrado.
-                        </span>
-
-                    </div>
-
-                    <a
-                        class="btn btn-outline-primary btn-sm"
-                        href="{{ url_for('download_arquivo', id_arquivo=f_reembolso.id) }}"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        Visualizar arquivo
-                    </a>
-
-                </div>
-
-            {% endif %}
-
-            {% if reembolso_editavel %}
-
-                <div class="imp-upload">
-
-                    <input
-                        id="anexo_formulario_reembolso"
-                        name="anexo_formulario_reembolso"
-                        type="file"
-                        class="imp-upload__input"
-                        accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                        data-impper-file-output="#anexoFormularioReembolsoName"
-                        {% if not modo_execucao or not (f_reembolso and f_reembolso.valor) %}required{% endif %}
-                    >
-
-                    <label
-                        class="imp-upload__label"
-                        for="anexo_formulario_reembolso"
-                    >
-
-                        <span class="imp-upload__copy">
-
-                            <strong>
-                                {% if modo_execucao and f_reembolso and f_reembolso.valor %}
-                                    Substituir formulário
-                                {% else %}
-                                    Anexe o formulário de reembolso
-                                {% endif %}
-                            </strong>
-
-                            <span>
-                                Selecione o documento de reembolso.
-                            </span>
-
-                        </span>
-
-                        <span class="imp-upload__action">
-                            Selecionar arquivo
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div
-                    id="anexoFormularioReembolsoName"
-                    class="imp-file-name"
-                >
-                    Nenhum novo arquivo selecionado.
-                </div>
-
-            {% elif not (modo_execucao and f_reembolso and f_reembolso.valor) %}
-
-                <p class="imp-help">
-                    Nenhum arquivo anexado.
-                </p>
-
-            {% endif %}
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="imp-form-section">
-
-    <div class="imp-form-section__head">
-
-        <div class="imp-form-section__copy">
-
-            <h3 class="imp-card__title">
-                Pagamento
-            </h3>
-
-            <p class="imp-card__subtitle">
-                Informe a condição, o prazo ou vencimento e a forma de pagamento.
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="imp-form-grid">
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="condicao_pagamento"
-        >
-
-            <span class="imp-label">
-                Condição de pagamento
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--two"
-                role="radiogroup"
-                aria-label="Condição de pagamento"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="condicao_pagamento"
-                        value="A_VISTA"
-                        {% if condicao_editavel %}required{% endif %}
-                        {% if modo_execucao and f_condicao and f_condicao.valor == 'A_VISTA' %}checked{% endif %}
-                        {% if not condicao_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">À vista</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="condicao_pagamento"
-                        value="A_PRAZO"
-                        {% if modo_execucao and f_condicao and f_condicao.valor == 'A_PRAZO' %}checked{% endif %}
-                        {% if not condicao_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">A prazo</span>
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="descricao_prazo"
-        >
-
-            <label
-                class="imp-label"
-                for="descricao_prazo"
-            >
-                Descrição do prazo ou vencimento
-                <span class="imp-label__required">*</span>
-            </label>
-
-            <textarea
-                id="descricao_prazo"
-                name="descricao_prazo"
-                class="form-control"
-                maxlength="800"
-                placeholder="Ex.: à vista, vencimento em 31/08/2026; 30 dias após a emissão; 30/60 dias."
-                data-impper-counter
-                {% if descricao_prazo_editavel %}required{% endif %}
-                {% if not descricao_prazo_editavel %}disabled data-impper-locked="true"{% endif %}
-            >{{ f_descricao_prazo.valor if modo_execucao and f_descricao_prazo and f_descricao_prazo.valor is not none else '' }}</textarea>
-
-            <div class="imp-form-meta">
-
-                <p class="imp-help">
-                    Informe o vencimento ou a condição acordada com o fornecedor.
-                </p>
-
-                <span
-                    class="imp-form-counter"
-                    data-impper-counter-output
-                >
-                    0/800
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="forma_pagamento"
-        >
-
-            <span class="imp-label">
-                Forma de pagamento
-                <span class="imp-label__required">*</span>
-            </span>
-
-            <div
-                class="imp-choice-grid imp-choice-grid--four"
-                role="radiogroup"
-                aria-label="Forma de pagamento"
-            >
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="forma_pagamento"
-                        value="CARTAO"
-                        {% if forma_pagamento_editavel %}required{% endif %}
-                        {% if modo_execucao and f_forma_pagamento and f_forma_pagamento.valor == 'CARTAO' %}checked{% endif %}
-                        {% if not forma_pagamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Cartão</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="forma_pagamento"
-                        value="BOLETO"
-                        {% if modo_execucao and f_forma_pagamento and f_forma_pagamento.valor == 'BOLETO' %}checked{% endif %}
-                        {% if not forma_pagamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Boleto</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="forma_pagamento"
-                        value="DOC_TED"
-                        {% if modo_execucao and f_forma_pagamento and f_forma_pagamento.valor == 'DOC_TED' %}checked{% endif %}
-                        {% if not forma_pagamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">DOC/TED</span>
-                    </span>
-
-                </label>
-
-                <label class="imp-choice">
-
-                    <input
-                        type="radio"
-                        name="forma_pagamento"
-                        value="DEBITO_AUTOMATICO"
-                        {% if modo_execucao and f_forma_pagamento and f_forma_pagamento.valor == 'DEBITO_AUTOMATICO' %}checked{% endif %}
-                        {% if not forma_pagamento_editavel %}disabled data-impper-locked="true"{% endif %}
-                    >
-
-                    <span class="imp-choice__content">
-                        <span class="imp-choice__dot"></span>
-                        <span class="imp-choice__text">Débito automático</span>
-                    </span>
-
-                </label>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <section
-        id="bankSection"
-        class="imp-form-panel"
-        data-impper-show-when="forma_pagamento:DOC_TED"
-        hidden
-    >
-
-        <h3 class="imp-card__title">
-            Dados bancários
-        </h3>
-
-        <p class="imp-card__subtitle">
-            Informe os dados necessários para o pagamento por DOC/TED.
-        </p>
 
         <div class="imp-form-grid">
 
-            <div
-                class="imp-field imp-field--full"
-                data-field-wrap="dados_bancarios"
-            >
-
-                <label
-                    class="imp-label"
-                    for="dados_bancarios"
-                >
-                    Dados bancários
-                    <span class="imp-label__required">*</span>
-                </label>
-
-                <textarea
-                    id="dados_bancarios"
-                    name="dados_bancarios"
-                    class="form-control"
-                    rows="6"
-                    maxlength="1000"
-                    minlength="10"
-                    placeholder="Informe banco, agência, conta, favorecido e CPF ou CNPJ."
-                    {% if dados_bancarios_editavel %}required{% endif %}
-                    {% if not dados_bancarios_editavel %}disabled data-impper-locked="true"{% endif %}
-                >{{ f_dados_bancarios.valor if modo_execucao and f_dados_bancarios and f_dados_bancarios.valor is not none else '' }}</textarea>
-
-                <p class="imp-help">
-                    Informe banco, agência, conta, tipo de conta, favorecido e CPF ou CNPJ.
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <section
-        id="boletoSection"
-        class="imp-form-panel"
-        data-impper-show-when="forma_pagamento:BOLETO"
-        hidden
-    >
-
-        <h3 class="imp-card__title">
-            Boleto bancário
-        </h3>
-
-        <p class="imp-card__subtitle">
-            Caso o boleto já tenha sido recebido, anexe-o à solicitação.
-        </p>
-
-        <div class="imp-form-grid">
-
-            <div
-                class="imp-field imp-field--full"
-                data-field-wrap="boleto_emitido"
-            >
+            <div class="imp-field imp-field--full">
 
                 <span class="imp-label">
-                    O boleto já foi emitido?
+                    Tipo de abertura
                     <span class="imp-label__required">*</span>
                 </span>
+
 
                 <div
                     class="imp-choice-grid imp-choice-grid--two"
                     role="radiogroup"
-                    aria-label="Boleto emitido"
+                    aria-label="Tipo de abertura"
                 >
 
                     <label class="imp-choice">
 
                         <input
                             type="radio"
-                            name="boleto_emitido"
-                            value="SIM"
-                            {% if boleto_emitido_editavel %}required{% endif %}
-                            {% if modo_execucao and f_boleto_emitido and f_boleto_emitido.valor == 'SIM' %}checked{% endif %}
-                            {% if not boleto_emitido_editavel %}disabled data-impper-locked="true"{% endif %}
+                            name="tipo_abertura_oc"
+                            value="CENTRAL_NOTAS"
+                            required
                         >
 
                         <span class="imp-choice__content">
+
                             <span class="imp-choice__dot"></span>
-                            <span class="imp-choice__text">Sim</span>
+
+                            <span class="imp-choice__text">
+                                Central de Notas
+                            </span>
+
                         </span>
 
                     </label>
+
 
                     <label class="imp-choice">
 
                         <input
                             type="radio"
-                            name="boleto_emitido"
-                            value="NAO"
-                            {% if modo_execucao and f_boleto_emitido and f_boleto_emitido.valor == 'NAO' %}checked{% endif %}
-                            {% if not boleto_emitido_editavel %}disabled data-impper-locked="true"{% endif %}
+                            name="tipo_abertura_oc"
+                            value="FINANCEIRO"
                         >
 
                         <span class="imp-choice__content">
+
                             <span class="imp-choice__dot"></span>
-                            <span class="imp-choice__text">Não</span>
+
+                            <span class="imp-choice__text">
+                                Recebimento direto pelo Financeiro
+                            </span>
+
                         </span>
 
                     </label>
@@ -1729,122 +102,65 @@
 
             </div>
 
-
-            <div
-                id="boletoUploadWrap"
-                class="imp-field imp-field--full"
-                data-field-wrap="arquivo_boleto"
-                data-impper-show-when="boleto_emitido:SIM"
-                hidden
-            >
-
-                <span class="imp-label">
-                    Arquivo do boleto
-                    <span class="imp-label__required">*</span>
-                </span>
-
-                {% if modo_execucao and f_arquivo_boleto and f_arquivo_boleto.valor %}
-
-                    <div class="imp-execution-current-file">
-
-                        <div>
-
-                            <strong>
-                                Arquivo atual
-                            </strong>
-
-                            <span>
-                                Boleto registrado nesta solicitação.
-                            </span>
-
-                        </div>
-
-                        <a
-                            class="btn btn-outline-primary btn-sm"
-                            href="{{ url_for('download_arquivo', id_arquivo=f_arquivo_boleto.id) }}"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            Visualizar arquivo
-                        </a>
-
-                    </div>
-
-                {% endif %}
-
-                {% if arquivo_boleto_editavel %}
-
-                    <div class="imp-upload">
-
-                        <input
-                            id="arquivo_boleto"
-                            name="arquivo_boleto"
-                            type="file"
-                            class="imp-upload__input"
-                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                            data-impper-file-output="#boletoFileName"
-                            {% if not modo_execucao or not (f_arquivo_boleto and f_arquivo_boleto.valor) %}required{% endif %}
-                        >
-
-                        <label
-                            class="imp-upload__label"
-                            for="arquivo_boleto"
-                        >
-
-                            <span class="imp-upload__copy">
-
-                                <strong>
-                                    {% if modo_execucao and f_arquivo_boleto and f_arquivo_boleto.valor %}
-                                        Substituir boleto
-                                    {% else %}
-                                        Anexe o boleto
-                                    {% endif %}
-                                </strong>
-
-                                <span>
-                                    PDF, JPG ou PNG.
-                                </span>
-
-                            </span>
-
-                            <span class="imp-upload__action">
-                                Selecionar arquivo
-                            </span>
-
-                        </label>
-
-                    </div>
-
-                    <div
-                        id="boletoFileName"
-                        class="imp-file-name"
-                    >
-                        Nenhum novo arquivo selecionado.
-                    </div>
-
-                {% elif not (modo_execucao and f_arquivo_boleto and f_arquivo_boleto.valor) %}
-
-                    <p class="imp-help">
-                        Nenhum arquivo anexado.
-                    </p>
-
-                {% endif %}
-
-            </div>
-
         </div>
 
     </section>
 
-</section>
-
-{% if etapa_id == 'OC-01' %}
-    {% set aprovado = 'OC-02' %}
-    {% set reprovado = 'Cancelado' %}
 {% endif %}
-                   
-{% if pode_editar %}
- 
+
+
+
+{# =========================================================
+   CENTRAL DE NOTAS
+   ========================================================= #}
+
+{% if not modo_execucao %}
+
+    <div
+        data-impper-show-when="tipo_abertura_oc:CENTRAL_NOTAS"
+        hidden
+    >
+
+        {% include "fluxos/campos_central_notas.html" %}
+
+    </div>
+
+{% elif not etapa_financeiro %}
+
+    {% include "fluxos/campos_central_notas.html" %}
+
+{% endif %}
+
+
+
+{# =========================================================
+   FINANCEIRO
+   ========================================================= #}
+
+{% if etapa_financeiro %}
+
+    {% include "fluxos/campos_financeiroOC.html" %}
+
+{% elif not modo_execucao %}
+
+    <div
+        data-impper-show-when="tipo_abertura_oc:FINANCEIRO"
+        hidden
+    >
+
+        {% include "fluxos/campos_financeiroOC.html" %}
+
+    </div>
+
+{% endif %}
+
+
+{# =========================================================
+   AÇÕES DE EXECUÇÃO
+   ========================================================= #}
+
+{% if modo_execucao and pode_editar %}
+
     <div class="imp-execution-actions">
  
         <div class="imp-execution-actions__copy">
@@ -1858,9 +174,14 @@
             </span>
  
         </div>
- 
+
+
         <div class="d-flex flex-column flex-sm-row gap-2">
- 
+
+            {# =================================================
+               SALVAR ALTERAÇÕES
+               ================================================= #}
+
             {% if controle.tem_editaveis %}
  
                 <button
@@ -1872,34 +193,64 @@
                 </button>
  
             {% endif %}
- 
- 
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#correctionModal"
-            >
-                Pedir correção
-            </button>
- 
+
+
+            {# =================================================
+               PEDIR CORREÇÃO
+               Não aparece em OC-C-03
+               ================================================= #}
+
+            {% if etapa_atual != 'OC-C-03' %}
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#correctionModal"
+                >
+                    Pedir correção
+                </button>
+
+            {% endif %}
+
+
+            {# =================================================
+               CONCLUIR
+               Aparece em todas as etapas
+               ================================================= #}
+
             <button
                 type="button"
                 class="btn btn-primary"
-                onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', '{{ aprovado }}')"
+                onclick="enviarEtapa(
+                    document,
+                    '{{ id_chamada }}',
+                    '{{ etapa_id }}',
+                    'Aprovado'
+                )"
             >
                 Concluir
             </button>
- 
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#cancelationModal"
-            >
-                Cancelar
-            </button>
- 
+
+
+            {# =================================================
+               CANCELAR
+               Não aparece em OC-C-03
+               ================================================= #}
+
+            {% if etapa_atual != 'OC-C-03' %}
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#cancelationModal"
+                >
+                    Cancelar
+                </button>
+
+            {% endif %}
+
         </div>
  
     </div>

@@ -497,7 +497,7 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         print("ID PROXET:", id_proxet)
         responsavel = None
-        if id_proxet not in [None, "Cancelado", "Finalizado", "Reprovado", "Pausado"]:
+        if id_proxet not in [None, "Cancelado", "Finalizado", "Reprovado", "Pausado", "Aprovado"]:
             responsavel = Etapas.query.get(id_proxet).responsaveis
             print("RESPONSAVEL:", responsavel)
         if responsavel == "Solicitante":
