@@ -1823,6 +1823,12 @@
 
 </section>
 
+{% if modo_execucao %}
+
+    {% include "fluxos/campos_dados_extraidos.html" %}
+
+{% endif %}
+
 {% if etapa_id == 'OC-01' %}
     {% set aprovado = 'OC-02' %}
     {% set reprovado = 'Cancelado' %}

@@ -607,6 +607,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         executor=us_atuante,
         user_id=user_oid,
         form_abertos = [],
+        modo_execucao= us_atuante,
     )
 
 def detect_mime(file_bytes: bytes) -> str:

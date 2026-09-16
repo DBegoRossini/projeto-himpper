@@ -1,0 +1,262 @@
+{# =========================================================
+   DADOS EXTRAÍDOS DOS DOCUMENTOS
+   Exibido somente em execução
+   ========================================================= #}
+
+{% if modo_execucao %}
+
+
+    {# =====================================================
+       MACRO - CAMPO EXTRAÍDO
+       ===================================================== #}
+
+    {% macro campo_extraido(nome, label, full=false) %}
+
+        {% set registro = formularios_map.get(nome) %}
+
+        {% set editavel =
+            permitir_edicao
+            and registro
+            and (registro.editavel|string|lower|trim)
+                in ['1', 'true']
+        %}
+
+        {% set tem_valor =
+            registro
+            and registro.valor is not none
+            and (registro.valor|string|trim) != ''
+        %}
+
+
+        {#
+            REGRA:
+
+            - se tiver valor -> mostra
+            - se estiver editável -> mostra
+            - se não existir no banco -> não mostra
+            - se existir vazio e não editável -> não mostra
+        #}
+
+        {% if registro and (tem_valor or editavel) %}
+
+            <div
+                class="imp-field{% if full %} imp-field--full{% endif %}"
+                data-field-wrap="{{ nome }}"
+            >
+
+                <label
+                    class="imp-label"
+                    for="{{ nome }}"
+                >
+                    {{ label }}
+
+                    {% if editavel %}
+                        <span class="imp-label__required">*</span>
+                    {% endif %}
+                </label>
+
+
+                <input
+                    id="{{ nome }}"
+                    name="{{ nome }}"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    value="{{ registro.valor if registro.valor is not none else '' }}"
+
+                    {% if editavel %}
+                        required
+                    {% else %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                >
+
+            </div>
+
+        {% endif %}
+
+    {% endmacro %}
+
+
+
+    {# =====================================================
+       NOTA FISCAL
+       ===================================================== #}
+
+    {% set nf_encontrado =
+        formularios_map.get('NF_encontrado')
+    %}
+
+    {% if nf_encontrado %}
+
+        <section class="imp-form-section">
+
+            <div class="imp-form-section__head">
+
+                <div class="imp-form-section__copy">
+
+                    <h3 class="imp-card__title">
+                        Dados extraídos da Nota Fiscal
+                    </h3>
+
+                    <p class="imp-card__subtitle">
+                        Informações identificadas automaticamente
+                        no documento fiscal.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="imp-form-grid">
+
+                {{ campo_extraido(
+                    'NF_encontrado',
+                    'Nota Fiscal encontrada'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_paginas',
+                    'Páginas identificadas'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_num',
+                    'Número da Nota Fiscal'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_data_de_emissao',
+                    'Data de emissão'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_razao_social_emissor',
+                    'Razão social do emissor',
+                    true
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_cnpj_emissor',
+                    'CNPJ do emissor'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_razao_social_destinatario',
+                    'Razão social do destinatário',
+                    true
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_cnpj_destinatario',
+                    'CNPJ do destinatário'
+                ) }}
+
+                {{ campo_extraido(
+                    'NF_valor_total_a_pagar',
+                    'Valor total a pagar'
+                ) }}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+
+    {# =====================================================
+       BOLETO
+       ===================================================== #}
+
+    {% set boleto_encontrado =
+        formularios_map.get('Boleto_encontrado')
+    %}
+
+    {% if boleto_encontrado %}
+
+        <section class="imp-form-section">
+
+            <div class="imp-form-section__head">
+
+                <div class="imp-form-section__copy">
+
+                    <h3 class="imp-card__title">
+                        Dados extraídos do boleto
+                    </h3>
+
+                    <p class="imp-card__subtitle">
+                        Informações identificadas automaticamente
+                        no boleto bancário.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="imp-form-grid">
+
+                {{ campo_extraido(
+                    'Boleto_encontrado',
+                    'Boleto encontrado'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_paginas',
+                    'Páginas identificadas'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_beneficiario',
+                    'Beneficiário',
+                    true
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_cnpj_beneficiario',
+                    'CNPJ do beneficiário'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_pagador',
+                    'Pagador',
+                    true
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_cnpj_cpf_pagador',
+                    'CPF / CNPJ do pagador'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_valor',
+                    'Valor do boleto'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_vencimento',
+                    'Vencimento'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_nosso_numero',
+                    'Nosso número'
+                ) }}
+
+                {{ campo_extraido(
+                    'Boleto_linha_digitavel',
+                    'Linha digitável',
+                    true
+                ) }}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+{% endif %}
