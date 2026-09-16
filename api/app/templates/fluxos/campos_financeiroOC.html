@@ -796,6 +796,14 @@
 
 
 
+        {# Fallback: garante a chave no payload quando nenhum radio estiver marcado #}
+        <input
+            type="hidden"
+            name="tipo_direta_adiantamento"
+            value=""
+        >
+
+
         {# =====================================================
            CLASSIFICAÇÃO - DESPESA DIRETA
            ===================================================== #}
@@ -1209,6 +1217,14 @@
 
         </div>
 
+
+
+        {# Fallback: garante a chave no payload quando nenhum radio estiver marcado #}
+        <input
+            type="hidden"
+            name="adiantamento_cartao"
+            value=""
+        >
 
 
         {# =====================================================
@@ -2345,6 +2361,14 @@
         </div>
 
 
+        {# Fallback: garante a chave no payload quando nenhum radio estiver marcado #}
+        <input
+            type="hidden"
+            name="tipo_permuta_unidade"
+            value=""
+        >
+
+
         {# =====================================================
            MESMO CNPJ
            ===================================================== #}
@@ -2439,6 +2463,14 @@
     </div>
 
 
+    {# Fallback: garante a chave no payload quando nenhum radio estiver marcado #}
+    <input
+        type="hidden"
+        name="mesmo_cnpj_permuta"
+        value=""
+    >
+
+
     {# =====================================================
        CNPJ DIFERENTE
        ===================================================== #}
@@ -2521,6 +2553,178 @@
 </section>
 
 {# =========================================================
+   EMISSÃO DE CARTÃO DE CRÉDITO
+   ========================================================= #}
+
+<section
+    class="imp-form-section"
+    data-impper-show-when="tipo_despesa:Emissão de cartão de credito - até 2 dias úteis para emissão"
+    hidden
+>
+
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Emissão de cartão de crédito
+            </h3>
+
+            <p class="imp-card__subtitle">
+                Informe o e-mail para envio do cartão
+                e a condição de pagamento.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="imp-form-grid">
+
+
+        {# =====================================================
+           E-MAIL
+           ===================================================== #}
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="email_cartao_credito"
+        >
+
+            <label
+                class="imp-label"
+                for="email_cartao_credito"
+            >
+                E-mail para envio do cartão
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="email_cartao_credito"
+                name="email_cartao_credito"
+                type="email"
+                class="form-control"
+                autocomplete="email"
+                placeholder="nome@empresa.com.br"
+                value="{{ f_email_cartao_credito.valor if modo_execucao and f_email_cartao_credito and f_email_cartao_credito.valor is not none else '' }}"
+                {% if email_cartao_credito_editavel %}
+                    required
+                {% endif %}
+                {% if not email_cartao_credito_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+        </div>
+
+
+        {# =====================================================
+           CONDIÇÃO DE PAGAMENTO
+           ===================================================== #}
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="condicao_pagamento_cartao_emissao"
+        >
+
+            <span class="imp-label">
+                Condição de pagamento
+                <span class="imp-label__required">*</span>
+            </span>
+
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Condição de pagamento"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="condicao_pagamento_cartao_emissao"
+                        value="A_VISTA"
+                        {% if condicao_pagamento_cartao_emissao_editavel %}
+                            required
+                        {% endif %}
+                        {% if
+                            modo_execucao
+                            and f_condicao_pagamento_cartao_emissao
+                            and f_condicao_pagamento_cartao_emissao.valor == 'A_VISTA'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not condicao_pagamento_cartao_emissao_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            À vista
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="condicao_pagamento_cartao_emissao"
+                        value="PARCELADO"
+                        {% if
+                            modo_execucao
+                            and f_condicao_pagamento_cartao_emissao
+                            and f_condicao_pagamento_cartao_emissao.valor == 'PARCELADO'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not condicao_pagamento_cartao_emissao_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Parcelado
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+            {# Fallback: garante a chave no payload quando nenhum radio estiver marcado #}
+            <input
+                type="hidden"
+                name="condicao_pagamento_cartao_emissao"
+                value=""
+            >
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+{# =========================================================
    DOCUMENTOS
    ========================================================= #}
 
@@ -2593,6 +2797,20 @@
             {% endif %}
 
 
+            {#
+               Fallback do arquivo:
+               - sem arquivo selecionado: envia documentos_financeiro = ""
+               - ao selecionar um arquivo, o onchange remove o name deste hidden
+                 e somente o arquivo é enviado.
+            #}
+            <input
+                type="hidden"
+                id="documentosFinanceiroFallback"
+                name="documentos_financeiro"
+                value=""
+            >
+
+
             {% if documentos_financeiro_editavel %}
 
                 <div class="imp-upload">
@@ -2603,8 +2821,8 @@
                         type="file"
                         class="imp-upload__input"
                         accept=".pdf,application/pdf"
-                        multiple
                         data-impper-file-output="#documentosFinanceiroName"
+                        onchange="const fallback = document.getElementById('documentosFinanceiroFallback'); if (fallback) { fallback.name = this.files && this.files.length ? '' : 'documentos_financeiro'; }"
                         {% if
                             not modo_execucao
                             or not (
@@ -2625,18 +2843,18 @@
                         <span class="imp-upload__copy">
 
                             <strong>
-                                Selecione os documentos
+                                Selecione o documento
                             </strong>
 
                             <span>
-                                Você pode selecionar vários arquivos PDF.
+                                Selecione um arquivo PDF.
                             </span>
 
                         </span>
 
 
                         <span class="imp-upload__action">
-                            Selecionar arquivos
+                            Selecionar arquivo
                         </span>
 
                     </label>

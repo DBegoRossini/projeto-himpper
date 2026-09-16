@@ -77,7 +77,6 @@
       };
     }
 
-
     if (type === "number") {
       const numericValue =
         Number(raw);
@@ -91,7 +90,6 @@
           : numericValue
       };
     }
-
 
     if (type === "date") {
       const timestamp =
@@ -108,13 +106,11 @@
       };
     }
 
-
     return {
       empty: false,
       value: normalize(raw)
     };
   };
-
 
   const compareRows = (
     rowA,

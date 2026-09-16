@@ -178,6 +178,10 @@
 
         <div class="d-flex flex-column flex-sm-row gap-2">
 
+            {# =================================================
+               SALVAR ALTERAÇÕES
+               ================================================= #}
+
             {% if controle.tem_editaveis %}
 
                 <button
@@ -191,42 +195,61 @@
             {% endif %}
 
 
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#correctionModal"
-            >
-                Pedir correção
-            </button>
+            {# =================================================
+               PEDIR CORREÇÃO
+               Não aparece em OC-C-03
+               ================================================= #}
 
-
-            {% if aprovado is defined %}
+            {% if etapa_atual != 'OC-C-03' %}
 
                 <button
                     type="button"
-                    class="btn btn-primary"
-                    onclick="enviarEtapa(
-                        document,
-                        '{{ id_chamada }}',
-                        '{{ etapa_id }}',
-                        '{{ aprovado }}'
-                    )"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#correctionModal"
                 >
-                    Concluir
+                    Pedir correção
                 </button>
 
             {% endif %}
 
 
+            {# =================================================
+               CONCLUIR
+               Aparece em todas as etapas
+               ================================================= #}
+
             <button
                 type="button"
-                class="btn btn-outline-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#cancelationModal"
+                class="btn btn-primary"
+                onclick="enviarEtapa(
+                    document,
+                    '{{ id_chamada }}',
+                    '{{ etapa_id }}',
+                    'Aprovado'
+                )"
             >
-                Cancelar
+                Concluir
             </button>
+
+
+            {# =================================================
+               CANCELAR
+               Não aparece em OC-C-03
+               ================================================= #}
+
+            {% if etapa_atual != 'OC-C-03' %}
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#cancelationModal"
+                >
+                    Cancelar
+                </button>
+
+            {% endif %}
 
         </div>
 
