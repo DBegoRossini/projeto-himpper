@@ -268,6 +268,7 @@
           search.setCustomValidity("");
 
           syncHidden();
+          hidden.dispatchEvent(new Event("change", { bubbles: true }));
           updateValidity();
           closeMenu(search, menu);
         }

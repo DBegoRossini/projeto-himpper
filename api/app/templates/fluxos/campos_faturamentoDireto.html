@@ -219,33 +219,45 @@
 
 <section class="imp-form-section" data-impper-show-when="tipo_solicitacao:PAGAMENTO" hidden>
 
-    <div class="imp-form-grid">
 
         <div
             class="imp-field"
-            data-field-wrap="codcoligada"
+            data-field-wrap="obra_colig"
         >
 
             <label
                 class="imp-label"
-                for="codcoligada"
+                for="obra_colig"
             >
                 Coligada Empreendimento Contratante
                 <span class="imp-label__required">*</span>
             </label>
+            
+            {% set contratos_json = [] %}
+            {% if g.infoContrat is defined and g.infoContrat %}
+                {% set resposta_contratos = g.infoContrat.json() %}
+                {% if resposta_contratos is mapping %}
+                    {% set contratos_json = resposta_contratos.get('value') or resposta_contratos.get('items') or resposta_contratos.get('data') or [] %}
+                {% elif resposta_contratos is sequence %}
+                    {% set contratos_json = resposta_contratos %}
+                {% endif %}
+            {% endif %}
 
+            <script>
+                var contratosData = {{ contratos_json|tojson }};
+            </script>
 
             <select
-                id="codcoligada"
-                name="codcoligada"
+                id="obra_colig"
+                name="obra_colig"
                 class="form-select"
                 autocomplete="organization"
-                {% if codcoligada_editavel %}required{% endif %}
-                {% if not codcoligada_editavel %}
+                {% if obra_colig_editavel %}required{% endif %}
+                {% if not obra_colig_editavel %}
                     disabled
                     data-impper-locked="true"
                 {% endif %}
-                onchange="filtrarContrato()"
+                onchange="filtrarContrato(contratosData)"
             >
 
                 <option value="">
@@ -332,18 +344,6 @@
                 disabled
             >
 
-
-            {% for key, label in g.contratosUnic %}
-
-                <option
-                    value="{{ key }}"
-                >
-                    {{ label }}
-                </option>
-
-            {% endfor %}
-
-
             </select>
 
 
@@ -397,13 +397,100 @@
 
             </div>
 
+            <div
+                class="imp-field"
+                data-field-wrap="fornecedor"
+            >
+
+                <label
+                    class="imp-label"
+                    for="fornecedor"
+                >
+                    Fornecedor
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="fornecedor"
+                    name="fornecedor"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value="{{ f_fornecedor.fornecedor if modo_execucao and f_fornecedor and f_fornecedor.fornecedor is not none else '' }}"
+                    {% if fornecedor_editavel %}required{% endif %}
+                    disabled
+                >
+
+            </div>
+
+            <div
+                class="imp-field"
+                data-field-wrap="valor"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor"
+                >
+                    Valor
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor"
+                    name="valor"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value="{{ f_valor.valor if modo_execucao and f_valor and f_valor.valor is not none else '' }}"
+                    {% if valor_editavel %}required{% endif %}
+                    disabled
+                >
+
+            </div>
+
         </div>
-    </div>
+
 </section>
 <script>
-    async function filtrarContrato() {
-        const coligada = document.getElementById('codcoligada').value;
+    async function filtrarContrato(contratos) {
         const contratoSelect = document.querySelector('[data-contrato-source]');
+        const coligada = document.getElementById('obra_colig').value;
 
+        const match = contratos.filter(
+            (contrato) => String(contrato["CODCOLIGADA"]) === String(coligada)
+        );
+
+        contratoSelect.innerHTML = '';
+
+        const fragment = document.createDocumentFragment();
+
+        for (const cont of match) {
+            const option = document.createElement('option');
+            const codigoContrato = cont["CODIGOCONTRATO"];
+
+            option.value = codigoContrato;
+            option.textContent = cont["LABEL"];
+            fragment.appendChild(option);
+        }
+
+        contratoSelect.appendChild(fragment);
+        document.querySelector('[data-contrato-value]').onchange = () => infoContrato(match);
+        window.ImpperSearchSelect.initSearchField(document, 'contrato');
+        return match
+    }
+    async function infoContrato(match) {
+        const selectedContrato = document.querySelector('[data-contrato-value]').value;
+        const contratoInfo = match.find(
+            (contrato) => String(contrato["CODIGOCONTRATO"]) === String(selectedContrato)
+        );
+        if (!contratoInfo) return;
+
+        const valor = document.getElementById('valor');
+        const fornecedor = document.getElementById('fornecedor');
+        valor.value = contratoInfo["VALORCONTRATO"];
+        fornecedor.value = contratoInfo["FORNECEDOR"];
     }
 </script>
