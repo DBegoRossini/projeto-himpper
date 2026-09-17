@@ -251,11 +251,67 @@
   });
 })();
 
+function validarCamposObrigatorios(root) {
+  const controls = Array.from(
+    root.querySelectorAll("input, textarea, select")
+  ).filter(control =>
+    control.required &&
+    !control.disabled
+  );
+
+  for (const control of controls) {
+    if (
+      control.type === "radio" ||
+      control.type === "checkbox"
+    ) {
+      const group = root.querySelectorAll(
+        `[name="${CSS.escape(control.name)}"]`
+      );
+
+      if (!Array.from(group).some(item => item.checked)) {
+        control.setCustomValidity(
+          "Selecione uma opção."
+        );
+      } else {
+        control.setCustomValidity("");
+      }
+
+      continue;
+    }
+
+    const value = control.type === "file"
+      ? control.files?.length
+        ? "arquivo"
+        : ""
+      : String(control.value ?? "").trim();
+
+    control.setCustomValidity(
+      value ? "" : "Preencha este campo obrigatório."
+    );
+  }
+
+  const invalid = controls.find(control =>
+    !control.checkValidity()
+  );
+
+  if (!invalid) {
+    return true;
+  }
+
+  invalid.reportValidity();
+  return false;
+}
+
 async function enviarFormulario(document, id_fluxo, id_etapa) {
   let form = document.querySelector('form');
   if (!form) {
     form = document
   }
+
+  if (!validarCamposObrigatorios(form)) {
+    return;
+  }
+
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
       .filter(f => f.name);
   const formData = new FormData();
@@ -282,8 +338,21 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
 };
 
 async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
-  const form = document
-  const fields = Array.from(form.querySelectorAll('input, textarea, select'))
+  const form = document.querySelector('form[data-execution-form]') || document;
+  const validationRoot = id_proxet === 'Correcao'
+    ? document.getElementById('correctionModal')
+    : id_proxet === 'Cancelado'
+      ? document.getElementById('cancelationModal')
+      : form;
+
+  if (
+    !validationRoot ||
+    !validarCamposObrigatorios(validationRoot)
+  ) {
+    return;
+  }
+
+  const fields = Array.from(document.querySelectorAll('input, textarea, select'))
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
