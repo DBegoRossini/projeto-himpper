@@ -6,7 +6,8 @@
 {% set f_obraColig = formularios_map.get('obraColig') if modo_execucao else none %}
 {% set f_fornecedor = formularios_map.get('fornecedor') if modo_execucao else none %}
 {% set f_valor = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
-{% set f_valor_empreiteiro = formularios_map.get('valor_empreiteiro') if modo_execucao else none %}
+{% set f_valor_contrato_PD = formularios_map.get('valor_contrato_PD') if modo_execucao else none %}
+{% set f_valor_solicitado = formularios_map.get('valor_solicitado') if modo_execucao else none %}
 
 {% set f_valor_previsto = formularios_map.get('valor_previsto') if modo_execucao else none %}
 {% set f_saldo = formularios_map.get('saldo') if modo_execucao else none %}
@@ -19,6 +20,15 @@
 {% set f_anexos = formularios_map.get('anexos') if modo_execucao else none %}
 {% set f_anexos_retorno = formularios_map.get('anexos_retorno') if modo_execucao else none %}
 
+
+{% set saldo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_saldo
+        and (f_saldo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
 
 {% set tipo_solic_editavel =
     not modo_execucao
@@ -56,21 +66,21 @@
     )
 %}
 
-{% set valor_editavel =
+{% set valor_solicitado_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_valor
-        and (f_valor.editavel|string|lower|trim) in ['1', 'true']
+        and f_valor_solicitado
+        and (f_valor_solicitado.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
-{% set valor_empreiteiro_editavel =
+{% set valor_contrato_PD_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_valor_empreiteiro
-        and (f_valor_empreiteiro.editavel|string|lower|trim) in ['1', 'true']
+        and f_valor_contrato_PD
+        and (f_valor_contrato_PD.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -83,7 +93,7 @@
     )
 %}
 
-{% set cond_pag_editavel =
+{% set condPag_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -92,7 +102,7 @@
     )
 %}
 
-{% set e_mail_editavel =
+{% set eMail_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -101,7 +111,7 @@
     )
 %}
 
-{% set local_rb_editavel =
+{% set local_receb_rb_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -110,7 +120,7 @@
     )
 %}
 
-{% set local_editavel =
+{% set local_receb_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -426,28 +436,383 @@
 
             <div
                 class="imp-field"
-                data-field-wrap="valor"
+                data-field-wrap="valor_contrato_PD"
             >
 
                 <label
                     class="imp-label"
-                    for="valor"
+                    for="valor_contrato_PD"
                 >
-                    Valor
+                    Valor Total
                     <span class="imp-label__required">*</span>
                 </label>
 
                 <input
-                    id="valor"
-                    name="valor"
+                    id="valor_contrato_PD"
+                    name="valor_contrato_PD"
                     type="text"
                     class="form-control"
                     autocomplete="off"
                     data-impper-locked="true"
-                    value="{{ f_valor.valor if modo_execucao and f_valor and f_valor.valor is not none else '' }}"
-                    {% if valor_editavel %}required{% endif %}
+                    value="{{ f_valor_contrato_PD.valor if modo_execucao and f_valor_contrato_PD and f_valor_contrato_PD.valor is not none else '' }}"
+                    {% if valor_contrato_PD_editavel %}required{% endif %}
                     disabled
                 >
+
+            </div>
+
+             <div
+                class="imp-field"
+                data-field-wrap="valor_atual"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor_atual"
+                >
+                    Valor atual
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor_atual"
+                    name="valor_atual"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value=""
+                    disabled
+                >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="valor_solicitado"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor_solicitado"
+                >
+                    Valor da solicitação de pagamento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor_solicitado"
+                    name="valor_solicitado"
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="00,00"
+                    value="{{ f_valor_solicitado.valor if modo_execucao and f_valor_solicitado and f_valor_solicitado.valor is not none else '' }}"
+                    {% if valor_solicitado_editavel %}required{% endif %}
+                    {% if not valor_solicitado_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    onchange="valor_solictado()"
+                >
+                <p class="imp-help mb-0">O valor deve ser maior ou igual a 10000</p>
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="saldo"
+            >
+
+                <label
+                    class="imp-label"
+                    for="saldo"
+                >
+                    Saldo do faturamento direto
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="saldo"
+                    name="saldo"
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="00,00"
+                    value="{{ f_saldo.valor if modo_execucao and f_saldo and f_saldo.valor is not none else '' }}"
+                    {% if saldo_editavel %}required{% endif %}
+                    {% if not saldo_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="condPag"
+            >
+
+                <label
+                    class="imp-label"
+                    for="condPag"
+                >
+                    Condição de pagamento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="condPag"
+                    name="condPag"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Condição de pagamento"
+                    value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
+                    {% if condPag_editavel %}required{% endif %}
+                    {% if not condPag_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="eMail"
+            >
+
+                <label
+                    class="imp-label"
+                    for="eMail"
+                >
+                    E-mail
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="eMail"
+                    name="eMail"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="E-mail"
+                    value="{{ f_eMail.valor if modo_execucao and f_eMail and f_eMail.valor is not none else '' }}"
+                    {% if eMail_editavel %}required{% endif %}
+                    {% if not eMail_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Local de Recebimento"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="local_receb_rb"
+                        value="OBRA"
+                        {% if local_receb_editavel %}
+                            required
+                        {% endif %}
+                        {% if
+                            modo_execucao
+                            and f_local_receb_rb
+                            and f_local_receb_rb.valor == 'OBRA'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not local_receb_rb_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Obra
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="local_receb_rb"
+                        value="OUTRO"
+                        {% if
+                            modo_execucao
+                            and f_local_receb_rb
+                            and f_local_receb_rb.valor == 'OUTRO'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not local_receb_rb_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Outro
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="local_receb"
+            data-impper-show-when="local_receb_rb:OUTRO"
+            >
+
+                <label
+                    class="imp-label"
+                    for="local_receb"
+                >
+                    Indique o local de recebimento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="local_receb"
+                    name="local_receb"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Local de recebimento"
+                    value="{{ f_local_receb.valor if modo_execucao and f_local_receb and f_local_receb.valor is not none else '' }}"
+                    {% if local_receb_editavel %}required{% endif %}
+                    {% if not local_receb_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+             <div
+                class="imp-field imp-field--full"
+                data-field-wrap="anexos"
+            >
+
+                <div
+                    class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+                >
+
+                    <div>
+
+                        <span class="imp-label">
+                            Anexos
+                            <span class="imp-label__required">*</span>
+                        </span>
+
+                        <p class="imp-help mb-0">
+                            Selecione pelo menos um anexo. Você pode adicionar outros quando necessário.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-neutral btn-sm align-self-start"
+                        id="addAnexoButton"
+                        data-add-anexo
+                        {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                        + Adicionar anexo
+                    </button>
+
+                </div>
+
+                {% if modo_execucao and f_anexos and f_anexos.valor %}
+
+                    <div class="imp-execution-current-file">
+
+                        <div>
+
+                            <strong>
+                                Arquivo atual
+                            </strong>
+
+                            <span>
+                                Documento anexado registrado na solicitação.
+                            </span>
+
+                        </div>
+
+                        <a
+                            class="btn btn-outline-primary btn-sm"
+                            href="{{ url_for('download_arquivo', id_arquivo=f_anexos.id) }}"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            Visualizar arquivo
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+                <div
+                    class="imp-nature-list"
+                    id="anexosList"
+                    data-anexos-list
+                >
+
+                    <div
+                        class="imp-anexo-row"
+                        data-anexo-row
+                    >
+
+                        <input
+                            type="file"
+                            name="anexos"
+                            class="form-control flex-grow-1"
+                            data-anexo-input
+                            {% if anexos_editavel %}required{% endif %}
+                            {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary btn-sm imp-anexo-remove"
+                            data-remove-anexo
+                            aria-label="Remover Anexo"
+                            hidden
+                            {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+                            Remover
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -488,9 +853,57 @@
         );
         if (!contratoInfo) return;
 
-        const valor = document.getElementById('valor');
+        const valor = document.getElementById('valor_contrato_PD');
         const fornecedor = document.getElementById('fornecedor');
+        const valor_atual = document.getElementById('valor_atual');
         valor.value = contratoInfo["VALORCONTRATO"];
         fornecedor.value = contratoInfo["FORNECEDOR"];
+        valor_atual.value = parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
     }
+
+    async function valor_solictado(){
+        const valorSolicitado = document.getElementById('valor_solicitado').value;
+        const botao = document.getElementById('submitButton');
+        if (parseFloat(valorSolicitado) < 10000) {
+            alert("O valor solicitado deve ser maior ou igual a 10000");
+            botao.disabled = true;
+            return false;
+        } else {
+            botao.disabled = false;
+        }
+    }
+
+    function updateAnexoRemoveButtons() {
+        const rows = document.querySelectorAll('#anexosList [data-anexo-row]');
+        rows.forEach((row) => {
+            const button = row.querySelector('[data-remove-anexo]');
+            if (button) button.hidden = rows.length === 1;
+        });
+    }
+
+    document.getElementById('addAnexoButton')?.addEventListener('click', () => {
+        const list = document.getElementById('anexosList');
+        const firstRow = list?.querySelector('[data-anexo-row]');
+        if (!firstRow) return;
+
+        const clone = firstRow.cloneNode(true);
+        const input = clone.querySelector('[data-anexo-input]');
+        if (input) {
+            input.value = '';
+            input.required = false;
+        }
+
+        list.appendChild(clone);
+        updateAnexoRemoveButtons();
+    });
+
+    document.getElementById('anexosList')?.addEventListener('click', (event) => {
+        const removeButton = event.target.closest('[data-remove-anexo]');
+        if (!removeButton) return;
+
+        removeButton.closest('[data-anexo-row]')?.remove();
+        updateAnexoRemoveButtons();
+    });
+
+    updateAnexoRemoveButtons();
 </script>

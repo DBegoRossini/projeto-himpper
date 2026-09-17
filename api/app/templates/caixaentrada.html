@@ -611,7 +611,8 @@
                                                 class="btn btn-neutral btn-sm"
                                                 href="{{ url_for(
                                                     'assumir_tarefa',
-                                                    id_chamada=pendencia.protocolo
+                                                    id_chamada=pendencia.protocolo,
+                                                    id_etapa=pendencia.id_etapa
                                                 ) }}"
                                             >
                                                 Assumir
@@ -624,7 +625,8 @@
                                                 class="btn btn-outline-primary btn-sm"
                                                 href="{{ url_for(
                                                     'abandonar_tarefa',
-                                                    id_chamada=pendencia.protocolo
+                                                    id_chamada=pendencia.protocolo,
+                                                    id_etapa=pendencia.id_etapa
                                                 ) }}"
                                             >
                                                 Abandonar
@@ -880,7 +882,8 @@
                                         class="btn btn-neutral w-100"
                                         href="{{ url_for(
                                             'assumir_tarefa',
-                                            id_chamada=pendencia.protocolo
+                                            id_chamada=pendencia.protocolo,
+                                            id_etapa=pendencia.id_etapa
                                         ) }}"
                                     >
                                         Assumir
