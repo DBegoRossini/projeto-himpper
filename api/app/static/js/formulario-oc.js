@@ -1372,3 +1372,40 @@ async function enviarFormularioOC(
     id_etapa
   );
 }
+
+function filtrarDestinosCorrecaoOC() {
+  const stageElement = document.getElementById("oc-current-stage");
+  const target = document.getElementById("correctionTarget");
+
+  if (!stageElement || !target) {
+    return;
+  }
+
+  const currentStage = stageElement.dataset.ocCurrentStage;
+  const keepCentralCorrection = currentStage === "OC-01";
+
+  Array.from(target.options).forEach(option => {
+    option.hidden = keepCentralCorrection
+      ? option.value !== "OC-C-03"
+      : option.value === "OC-C-03";
+  });
+
+  const visibleOptions = Array.from(target.options)
+    .filter(option => !option.hidden);
+
+  if (
+    visibleOptions.length &&
+    !visibleOptions.includes(target.selectedOptions[0])
+  ) {
+    target.value = visibleOptions[0].value;
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    filtrarDestinosCorrecaoOC
+  );
+} else {
+  filtrarDestinosCorrecaoOC();
+}

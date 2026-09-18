@@ -539,7 +539,49 @@ def exec_tarefas(id_chamada, id_etapa, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first() 
+    execucoes_historico = (
+        Execucao.query
+        .filter_by(id_chamada=id_chamada)
+        .order_by(Execucao.id.asc())
+        .all()
+    )
+
+    etapas_map = {
+        etapa_registro.id: etapa_registro
+        for etapa_registro in Etapas.query.filter_by(id_flow=fluxo.id).all()
+    } if fluxo else {}
+
+    executor_nomes = {}
+    historico_etapas = []
+    for execucao_registro in execucoes_historico:
+        executor_nome = None
+        if execucao_registro.executor:
+            if execucao_registro.executor not in executor_nomes:
+                resposta_executor = requests.get(
+                    f"https://graph.microsoft.com/v1.0/users/{execucao_registro.executor}?$select=displayName",
+                    headers={"Authorization": f"Bearer {access_token}"}
+                )
+                executor_nomes[execucao_registro.executor] = (
+                    resposta_executor.json().get("displayName", "Desconhecido")
+                    if resposta_executor
+                    else "Desconhecido"
+                )
+            executor_nome = executor_nomes[execucao_registro.executor]
+
+        etapa_registro = etapas_map.get(execucao_registro.id_etapa)
+        historico_etapas.append({
+            "id": execucao_registro.id,
+            "id_etapa": execucao_registro.id_etapa,
+            "nome": etapa_registro.nome if etapa_registro else execucao_registro.id_etapa,
+            "iniciada_em": execucao_registro.iniciada_em,
+            "assumida_em": execucao_registro.assumida_em,
+            "finalizada_em": execucao_registro.finalizada_em,
+            "executor": executor_nome,
+            "comentario": getattr(execucao_registro, "comentario", None),
+            "atual": execucao_registro.id_etapa == id_etapa
+        })
+
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
     print(id_chamada)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
@@ -604,6 +646,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         etapa_id = id_etapa,
         formularios=formularios,
         formularios_map=formularios_map,
+        historico_etapas=historico_etapas,
         executor=us_atuante,
         user_id=user_oid,
         form_abertos = [],

@@ -3,6 +3,12 @@
 
 {% set etapa_atual = etapa_id|default('') %}
 
+<span
+    id="oc-current-stage"
+    data-oc-current-stage="{{ etapa_atual }}"
+    hidden
+></span>
+
 {% set etapas_central_notas = [
     'OC-01',
     'OC-02',
@@ -282,23 +288,6 @@
 
 
         <div class="d-flex flex-column flex-sm-row gap-2">
-
-            {# =================================================
-               SALVAR ALTERAÇÕES
-               ================================================= #}
-
-            {% if controle.tem_editaveis %}
-
-                <button
-                    type="button"
-                    class="btn btn-neutral"
-                    data-execution-save
-                >
-                    Salvar alterações
-                </button>
-
-            {% endif %}
-
 
             {# =================================================
                PEDIR CORREÇÃO

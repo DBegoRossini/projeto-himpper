@@ -2934,6 +2934,13 @@
 
             {% endif %}
 
+            <input
+                type="hidden"
+                id="permissaoForaPrazoFallback"
+                name="permissao_fora_prazo"
+                value=""
+            >
+
             {% if permissao_fora_prazo_editavel %}
 
                 <div class="imp-upload">
@@ -2945,6 +2952,7 @@
                         class="imp-upload__input"
                         accept=".pdf,application/pdf"
                         data-impper-file-output="#permissaoForaPrazoName"
+                        onchange="const fallback = document.getElementById('permissaoForaPrazoFallback'); if (fallback) { fallback.name = this.files && this.files.length ? '' : 'permissao_fora_prazo'; }"
                     >
 
                     <label
