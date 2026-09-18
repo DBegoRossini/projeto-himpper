@@ -538,7 +538,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
-    
+   
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
                     headers={"Authorization": f"Bearer {access_token}"}
@@ -552,7 +552,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first() 
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
     print(id_chamada)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
@@ -577,7 +577,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
                 "etapas_correcao": etapas_correcao
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
-
+ 
     formularios = (
         Formularios.query
         .filter_by(id_chamada=id_chamada)
@@ -585,12 +585,12 @@ def exec_tarefas(id_chamada, id_etapa, context):
         if chamada
         else []
     )
-
+ 
     formularios_map = {
         formulario.campo: formulario
         for formulario in formularios
     }
-
+ 
     if fluxo and fluxo.nome == "fluxo_aberturaOC":
         carregar_info_form()
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
@@ -605,7 +605,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         us_atuante = False
     print(user_oid)
     print(execucao[0]["executor_id"])
-
+ 
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -620,6 +620,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         executor=us_atuante,
         user_id=user_oid,
         form_abertos = [],
+        modo_execucao= us_atuante,
     )
 
 def detect_mime(file_bytes: bytes) -> str:
@@ -775,6 +776,16 @@ def permissoes(context):
         opcoes_permissoes=opcoes_permissoes,
         versoes_unicas=versoes_unicas,
     )
+
+@app.route("/historico", methods=["POST", "GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def historico(context):
+    execucoes = Chamada.query.join(flows, Chamada.fluxo_id == flows.id)\
+    .join(Execucao, Chamada.id == Execucao.id_chamada)\
+    .join(Etapas, Execucao.id_etapa == Etapas.id)\
+    .join(Formularios, Chamada.id == Formularios.id_chamada)\
+    .all()
 
 @app.route("/logout")
 def logout():
