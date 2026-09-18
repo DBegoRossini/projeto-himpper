@@ -32,6 +32,7 @@ class Execucao(database.Model):
     assumida_em = database.Column(database.DateTime, nullable=True)
     finalizada_em = database.Column(database.DateTime, nullable=True)
     executor = database.Column(database.String(500), nullable=True)
+    comentario = database.Column(database.Text, nullable=True)
 
 class Notificacoes(database.Model):
     id = database.Column(database.Integer, primary_key=True)

@@ -3,12 +3,86 @@
 
 {% set etapa_atual = etapa_id|default('') %}
 
+<span
+    id="oc-current-stage"
+    data-oc-current-stage="{{ etapa_atual }}"
+    hidden
+></span>
+
+{% set etapas_central_notas = [
+    'OC-01',
+    'OC-02',
+    'OC-03',
+    'OC-C-03'
+] %}
+
+{% set etapas_com_resumo_central = [
+    'OC-04',
+    'OC-C-06-B'
+] %}
+
+{% set central_notas_preenchida = namespace(valor=false) %}
+
+{% if modo_execucao %}
+    {% for nome_campo in [
+        'nota_fiscal_recibo_emitidos',
+        'oc_emitida',
+        'numero_oc',
+        'tratamento_despesa',
+        'tipo_movimento',
+        'codcoligada',
+        'centro_custo',
+        'natureza_orcamentaria',
+        'motivo_aquisicao',
+        'razao_social_fornecedor',
+        'cnpj_fornecedor',
+        'anexo_orcamento',
+        'documento_fiscal',
+        'anexo_formulario_reembolso',
+        'condicao_pagamento',
+        'descricao_prazo',
+        'forma_pagamento',
+        'dados_bancarios',
+        'boleto_emitido',
+        'arquivo_boleto'
+    ] %}
+        {% set registro = formularios_map.get(nome_campo) %}
+        {% if registro and registro.valor is not none and (registro.valor|string|trim) %}
+            {% set central_notas_preenchida.valor = true %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{% set exibir_central_notas =
+    not modo_execucao
+    or etapa_atual in etapas_central_notas
+    or (
+        etapa_atual in etapas_com_resumo_central
+        and central_notas_preenchida.valor
+    )
+%}
+
+{% set f_titulo = formularios_map.get('titulo') if modo_execucao else none %}
+
+{% set titulo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and (
+            not f_titulo
+            or (f_titulo.editavel|string|lower|trim) in ['1', 'true']
+        )
+    )
+%}
+
 {% set etapa_financeiro =
     modo_execucao
     and etapa_atual in [
         'OC-04',
         'OC-05-A',
-        'OC-05-B'
+        'OC-05-B',
+        'OC-C-06-A',
+        'OC-C-06-B'
     ]
 %}
 
@@ -110,6 +184,43 @@
 
 
 
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+        <h3 class="imp-card__title">Identificação da solicitação</h3>
+    </div>
+
+    <div class="imp-form-grid">
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="titulo"
+        >
+
+            <label class="imp-label" for="titulo">
+                Título
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="titulo"
+                name="titulo"
+                type="text"
+                class="form-control"
+                autocomplete="off"
+                placeholder="Informe o título da solicitação"
+                value="{{ f_titulo.valor if modo_execucao and f_titulo and f_titulo.valor is not none else '' }}"
+                {% if titulo_editavel %}required{% endif %}
+                {% if not titulo_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+        </div>
+
+    </div>
+
+</section>
+
+
 {# =========================================================
    CENTRAL DE NOTAS
    ========================================================= #}
@@ -125,7 +236,7 @@
 
     </div>
 
-{% elif not etapa_financeiro %}
+{% elif exibir_central_notas %}
 
     {% include "fluxos/campos_central_notas.html" %}
 
@@ -179,28 +290,11 @@
         <div class="d-flex flex-column flex-sm-row gap-2">
 
             {# =================================================
-               SALVAR ALTERAÇÕES
-               ================================================= #}
-
-            {% if controle.tem_editaveis %}
- 
-                <button
-                    type="button"
-                    class="btn btn-neutral"
-                    data-execution-save
-                >
-                    Salvar alterações
-                </button>
- 
-            {% endif %}
-
-
-            {# =================================================
                PEDIR CORREÇÃO
                Não aparece em OC-C-03
                ================================================= #}
 
-            {% if etapa_atual != 'OC-C-03' %}
+            {% if etapa_atual != 'OC-C-03' and etapa_atual != 'OC-C-06-A' and etapa_atual != 'OC-C-06-B' %}
 
                 <button
                     type="button"

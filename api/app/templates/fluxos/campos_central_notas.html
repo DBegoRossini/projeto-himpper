@@ -1,5 +1,12 @@
 {% set modo_execucao = modo_execucao|default(false) %}
-{% set permitir_edicao = permitir_edicao|default(true) %}
+{% set permitir_edicao_central = permitir_edicao|default(true) %}
+
+{% set numero_oc_liberado_por_etapa = etapa_id|default('') == 'OC-01' %}
+{% set consulta_central_notas =
+    modo_execucao
+    and etapa_id|default('') in ['OC-04', 'OC-C-06-B']
+%}
+{% set permitir_edicao_central = permitir_edicao_central and not consulta_central_notas %}
 
 {% set f_nota = formularios_map.get('nota_fiscal_recibo_emitidos') if modo_execucao else none %}
 {% set f_oc_emitida = formularios_map.get('oc_emitida') if modo_execucao else none %}
@@ -30,7 +37,7 @@
 {% set nota_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_nota
         and (f_nota.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -39,7 +46,7 @@
 {% set oc_emitida_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_oc_emitida
         and (f_oc_emitida.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -48,7 +55,7 @@
 {% set numero_oc_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_numero_oc
         and (f_numero_oc.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -57,7 +64,7 @@
 {% set tratamento_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_tratamento
         and (f_tratamento.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -66,7 +73,7 @@
 {% set tipo_movimento_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_tipo_movimento
         and (f_tipo_movimento.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -75,7 +82,7 @@
 {% set coligada_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_coligada
         and (f_coligada.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -84,7 +91,7 @@
 {% set centro_custo_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_centro_custo
         and (f_centro_custo.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -93,7 +100,7 @@
 {% set natureza_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_natureza
         and (f_natureza.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -102,7 +109,7 @@
 {% set motivo_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_motivo
         and (f_motivo.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -111,7 +118,7 @@
 {% set razao_social_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_razao_social
         and (f_razao_social.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -120,7 +127,7 @@
 {% set cnpj_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_cnpj
         and (f_cnpj.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -129,7 +136,7 @@
 {% set orcamento_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_orcamento
         and (f_orcamento.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -138,7 +145,7 @@
 {% set documento_fiscal_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_documento_fiscal
         and (f_documento_fiscal.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -147,7 +154,7 @@
 {% set reembolso_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_reembolso
         and (f_reembolso.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -156,7 +163,7 @@
 {% set condicao_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_condicao
         and (f_condicao.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -165,7 +172,7 @@
 {% set descricao_prazo_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_descricao_prazo
         and (f_descricao_prazo.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -174,7 +181,7 @@
 {% set forma_pagamento_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_forma_pagamento
         and (f_forma_pagamento.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -183,7 +190,7 @@
 {% set dados_bancarios_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_dados_bancarios
         and (f_dados_bancarios.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -192,7 +199,7 @@
 {% set boleto_emitido_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_boleto_emitido
         and (f_boleto_emitido.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -201,7 +208,7 @@
 {% set arquivo_boleto_editavel =
     not modo_execucao
     or (
-        permitir_edicao
+        permitir_edicao_central
         and f_arquivo_boleto
         and (f_arquivo_boleto.editavel|string|lower|trim) in ['1', 'true']
     )
@@ -397,6 +404,19 @@
                 type="text"
                 class="form-control"
                 autocomplete="off"
+                inputmode="numeric"
+                maxlength="8"
+                pattern="\d{8}"
+                oninput="
+                    this.value = this.value
+                        .replace(/\D/g, '')
+                        .slice(0, 8);
+                "
+                onblur="
+                    if (this.value) {
+                        this.value = this.value.padStart(8, '0');
+                    }
+                "
                 placeholder="Informe o número da Ordem de Compra"
                 value="{{ f_numero_oc.valor if modo_execucao and f_numero_oc and f_numero_oc.valor is not none else '' }}"
                 {% if numero_oc_editavel %}required{% endif %}
@@ -1823,6 +1843,12 @@
 
 </section>
 
+{% if modo_execucao %}
+
+    {% include "fluxos/campos_dados_extraidos.html" %}
+
+{% endif %}
+
 {% if etapa_id == 'OC-01' %}
     {% set aprovado = 'OC-02' %}
     {% set reprovado = 'Cancelado' %}
@@ -1830,40 +1856,4 @@
 {% elif etapa_id == 'OC-C-04-A' %}
     {% set aprovado = 'OC-01' %}
     {% set reprovado = 'Cancelado' %}
-{% endif %}
-                   
-{% if pode_editar %}
- 
-    <div class="imp-execution-actions">
- 
-        <div class="imp-execution-actions__copy">
- 
-            <strong>
-                Revise a solicitação antes de prosseguir.
-            </strong>
- 
-            <span>
-                Escolha a ação que deseja realizar nesta etapa.
-            </span>
- 
-        </div>
- 
-        <div class="d-flex flex-column flex-sm-row gap-2">
- 
-            {% if controle.tem_editaveis %}
- 
-                <button
-                    type="button"
-                    class="btn btn-neutral"
-                    data-execution-save
-                >
-                    Salvar alterações
-                </button>
- 
-            {% endif %}
- 
-        </div>
- 
-    </div>
- 
 {% endif %}

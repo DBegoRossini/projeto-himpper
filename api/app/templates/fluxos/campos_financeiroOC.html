@@ -51,6 +51,11 @@
     if modo_execucao else none
 %}
 
+{% set f_permissao_fora_prazo =
+    formularios_map.get('permissao_fora_prazo')
+    if modo_execucao else none
+%}
+
 {% set f_subtipo_cartorio_itbi =
     formularios_map.get('subtipo_cartorio_itbi')
     if modo_execucao else none
@@ -266,6 +271,16 @@
         permitir_edicao
         and f_documentos_financeiro
         and (f_documentos_financeiro.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set permissao_fora_prazo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_permissao_fora_prazo
+        and (f_permissao_fora_prazo.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -2873,6 +2888,115 @@
 
         </div>
 
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="permissao_fora_prazo"
+        >
+
+            <span class="imp-label">
+                Permissão para solicitação fora do prazo
+            </span>
+
+            {% if
+                modo_execucao
+                and f_permissao_fora_prazo
+                and f_permissao_fora_prazo.valor
+            %}
+
+                <div class="imp-execution-current-file">
+
+                    <div>
+
+                        <strong>
+                            Arquivo atual
+                        </strong>
+
+                        <span>
+                            Permissão registrada nesta solicitação.
+                        </span>
+
+                    </div>
+
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(
+                            'download_arquivo',
+                            id_arquivo=f_permissao_fora_prazo.id
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+            <input
+                type="hidden"
+                id="permissaoForaPrazoFallback"
+                name="permissao_fora_prazo"
+                value=""
+            >
+
+            {% if permissao_fora_prazo_editavel %}
+
+                <div class="imp-upload">
+
+                    <input
+                        id="permissao_fora_prazo"
+                        name="permissao_fora_prazo"
+                        type="file"
+                        class="imp-upload__input"
+                        accept=".pdf,application/pdf"
+                        data-impper-file-output="#permissaoForaPrazoName"
+                        onchange="const fallback = document.getElementById('permissaoForaPrazoFallback'); if (fallback) { fallback.name = this.files && this.files.length ? '' : 'permissao_fora_prazo'; }"
+                    >
+
+                    <label
+                        class="imp-upload__label"
+                        for="permissao_fora_prazo"
+                    >
+
+                        <span class="imp-upload__copy">
+
+                            <strong>
+                                Anexe a permissão
+                            </strong>
+
+                            <span>
+                                Opcional. Selecione um arquivo PDF quando a solicitação estiver fora do prazo.
+                            </span>
+
+                        </span>
+
+                        <span class="imp-upload__action">
+                            Selecionar arquivo
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div
+                    id="permissaoForaPrazoName"
+                    class="imp-file-name"
+                >
+                    Nenhum arquivo selecionado.
+                </div>
+
+            {% endif %}
+
+        </div>
+
     </div>
 
 </section>
+
+{% if modo_execucao %}
+
+    {% include "fluxos/campos_dados_extraidos.html" %}
+
+{% endif %}
