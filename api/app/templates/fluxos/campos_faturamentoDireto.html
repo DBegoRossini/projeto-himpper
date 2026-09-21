@@ -1,12 +1,14 @@
 {% set modo_execucao = modo_execucao|default(false) %}
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
-{% set f_tp_solic = formularios_map.get('tp_solicitacao') if modo_execucao else none %}
+{% set f_tipo_solicitacao = formularios_map.get('tipo_solicitacao') if modo_execucao else none %}
 {% set f_contrato = formularios_map.get('contrato') if modo_execucao else none %}
-{% set f_obraColig = formularios_map.get('obraColig') if modo_execucao else none %}
+{% set f_obraColig = formularios_map.get('obra_colig') if modo_execucao else none %}
 {% set f_fornecedor = formularios_map.get('fornecedor') if modo_execucao else none %}
 {% set f_valor = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
-{% set f_valor_empreiteiro = formularios_map.get('valor_empreiteiro') if modo_execucao else none %}
+{% set f_valor_contrato_PD = formularios_map.get('valor_contrato_PD') if modo_execucao else none %}
+{% set f_valor_solicitado = formularios_map.get('valor_solicitado') if modo_execucao else none %}
+{% set f_valor_atual = formularios_map.get('valor_atual') if modo_execucao else none %}
 
 {% set f_valor_previsto = formularios_map.get('valor_previsto') if modo_execucao else none %}
 {% set f_saldo = formularios_map.get('saldo') if modo_execucao else none %}
@@ -16,16 +18,39 @@
 {% set f_local_receb_rb = formularios_map.get('local_receb_rb') if modo_execucao else none %}
 {% set f_local_receb = formularios_map.get('local_receb') if modo_execucao else none %}
 
-{% set f_anexos = formularios_map.get('anexos') if modo_execucao else none %}
+{% set keys = formularios_map.keys() %}
+{% set f_anexos = [] %}
+{% for key in keys if 'anexo' in key %}
+    {% set _ = f_anexos.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
 {% set f_anexos_retorno = formularios_map.get('anexos_retorno') if modo_execucao else none %}
 
 
-{% set tipo_solic_editavel =
+{% set saldo_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_tp_solic
-        and (f_tp_solic.editavel|string|lower|trim) in ['1', 'true']
+        and f_saldo
+        and (f_saldo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set valor_atual_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_valor_atual
+        and (f_valor_atual.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set tipo_solicitacao_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tipo_solicitacao
+        and (f_tipo_solicitacao.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -38,7 +63,7 @@
     )
 %}
 
-{% set obra_colig_editavel =
+{% set obraColig_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -56,21 +81,21 @@
     )
 %}
 
-{% set valor_editavel =
+{% set valor_solicitado_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_valor
-        and (f_valor.editavel|string|lower|trim) in ['1', 'true']
+        and f_valor_solicitado
+        and (f_valor_solicitado.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
-{% set valor_empreiteiro_editavel =
+{% set valor_contrato_PD_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_valor_empreiteiro
-        and (f_valor_empreiteiro.editavel|string|lower|trim) in ['1', 'true']
+        and f_valor_contrato_PD
+        and (f_valor_contrato_PD.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -83,7 +108,7 @@
     )
 %}
 
-{% set cond_pag_editavel =
+{% set condPag_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -92,7 +117,7 @@
     )
 %}
 
-{% set e_mail_editavel =
+{% set eMail_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -101,7 +126,7 @@
     )
 %}
 
-{% set local_rb_editavel =
+{% set local_receb_rb_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -110,7 +135,7 @@
     )
 %}
 
-{% set local_editavel =
+{% set local_receb_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -155,7 +180,6 @@
         </div>
 
     </div>
-
     <div
             class="imp-field imp-field--full"
             data-field-wrap="condicao_pagamento"
@@ -178,9 +202,9 @@
                         type="radio"
                         name="tipo_solicitacao"
                         value="NOVO_CONTRATO"
-                        {% if tipo_solic_editavel %}required{% endif %}
-                        {% if modo_execucao and f_tp_solic and f_tp_solic.valor == 'NOVO_CONTRATO' %}checked{% endif %}
-                        {% if not tipo_solic_editavel %}disabled data-impper-locked="true"{% endif %}
+                        {% if tipo_solicitacao_editavel %}required{% endif %}
+                        {% if modo_execucao and f_tipo_solicitacao and f_tipo_solicitacao.valor == 'NOVO_CONTRATO' %}checked{% endif %}
+                        {% if not tipo_solicitacao_editavel %}disabled data-impper-locked="true"{% endif %}
                     >
 
                     <span class="imp-choice__content">
@@ -196,8 +220,8 @@
                         type="radio"
                         name="tipo_solicitacao"
                         value="PAGAMENTO"
-                        {% if tipo_solic_editavel and modo_execucao and f_tp_solic and f_tp_solic.valor == 'PAGAMENTO' %}checked{% endif %}
-                        {% if not tipo_solic_editavel %}disabled data-impper-locked="true"{% endif %}
+                        {% if modo_execucao and f_tipo_solicitacao and f_tipo_solicitacao.valor == 'PAGAMENTO' %}checked{% endif %}
+                        {% if not tipo_solicitacao_editavel %}disabled data-impper-locked="true"{% endif %}
                     >
 
                     <span class="imp-choice__content">
@@ -219,33 +243,45 @@
 
 <section class="imp-form-section" data-impper-show-when="tipo_solicitacao:PAGAMENTO" hidden>
 
-    <div class="imp-form-grid">
 
         <div
             class="imp-field"
-            data-field-wrap="codcoligada"
+            data-field-wrap="obra_colig"
         >
 
             <label
                 class="imp-label"
-                for="codcoligada"
+                for="obra_colig"
             >
                 Coligada Empreendimento Contratante
                 <span class="imp-label__required">*</span>
             </label>
+            
+            {% set contratos_json = [] %}
+            {% if g.infoContrat is defined and g.infoContrat %}
+                {% set resposta_contratos = g.infoContrat.json() %}
+                {% if resposta_contratos is mapping %}
+                    {% set contratos_json = resposta_contratos.get('value') or resposta_contratos.get('items') or resposta_contratos.get('data') or [] %}
+                {% elif resposta_contratos is sequence %}
+                    {% set contratos_json = resposta_contratos %}
+                {% endif %}
+            {% endif %}
 
+            <script>
+                var contratosData = {{ contratos_json|tojson }};
+            </script>
 
             <select
-                id="codcoligada"
-                name="codcoligada"
+                id="obra_colig"
+                name="obra_colig"
                 class="form-select"
                 autocomplete="organization"
-                {% if codcoligada_editavel %}required{% endif %}
-                {% if not codcoligada_editavel %}
+                {% if obraColig_editavel %}required{% endif %}
+                {% if not obraColig_editavel %}
                     disabled
                     data-impper-locked="true"
                 {% endif %}
-                onchange="filtrarContrato()"
+                onchange="filtrarContrato(contratosData)"
             >
 
                 <option value="">
@@ -261,8 +297,8 @@
                             value="{{ key }}"
                             {% if
                                 modo_execucao
-                                and f_codcoligada
-                                and (f_codcoligada.valor|string)
+                                and f_obraColig
+                                and (f_obraColig.valor|string)
                                     == (key|string)
                             %}
                                 selected
@@ -276,15 +312,15 @@
 
                 {% elif
                     modo_execucao
-                    and f_codcoligada
-                    and f_codcoligada.valor
+                    and f_obraColig
+                    and f_obraColig.valor
                 %}
 
                     <option
-                        value="{{ f_codcoligada.valor }}"
+                        value="{{ f_obraColig.valor }}"
                         selected
                     >
-                        {{ f_codcoligada.valor }}
+                        {{ f_obraColig.valor }}
                     </option>
 
                 {% endif %}
@@ -331,18 +367,6 @@
                 hidden
                 disabled
             >
-
-
-            {% for key, label in g.contratosUnic %}
-
-                <option
-                    value="{{ key }}"
-                >
-                    {{ label }}
-                </option>
-
-            {% endfor %}
-
 
             </select>
 
@@ -397,13 +421,504 @@
 
             </div>
 
+            <div
+                class="imp-field"
+                data-field-wrap="fornecedor"
+            >
+
+                <label
+                    class="imp-label"
+                    for="fornecedor"
+                >
+                    Fornecedor
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="fornecedor"
+                    name="fornecedor"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value="{{ f_fornecedor.valor if modo_execucao and f_fornecedor and f_fornecedor.fornecedor is not none else '' }}"
+                    {% if fornecedor_editavel %}required{% endif %}
+                    disabled
+                >
+
+            </div>
+
+            <div
+                class="imp-field"
+                data-field-wrap="valor_contrato_PD"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor_contrato_PD"
+                >
+                    Valor Total
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor_contrato_PD"
+                    name="valor_contrato_PD"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value="{{ f_valor_contrato_PD.valor if modo_execucao and f_valor_contrato_PD and f_valor_contrato_PD.valor is not none else '' }}"
+                    {% if valor_contrato_PD_editavel %}required{% endif %}
+                    disabled
+                >
+
+            </div>
+
+             <div
+                class="imp-field"
+                data-field-wrap="valor_atual"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor_atual"
+                >
+                    Valor atual
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor_atual"
+                    name="valor_atual"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    data-impper-locked="true"
+                    value="{{ f_valor_atual.valor if modo_execucao and f_valor_atual and f_valor_atual.valor is not none else '' }}"
+                    disabled
+                >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="valor_solicitado"
+            >
+
+                <label
+                    class="imp-label"
+                    for="valor_solicitado"
+                >
+                    Valor da solicitação de pagamento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="valor_solicitado"
+                    name="valor_solicitado"
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="00,00"
+                    value="{{ f_valor_solicitado.valor if modo_execucao and f_valor_solicitado and f_valor_solicitado.valor is not none else '' }}"
+                    {% if valor_solicitado_editavel %}required{% endif %}
+                    {% if not valor_solicitado_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    onchange="valor_solictado()"
+                >
+                <p class="imp-help mb-0">O valor deve ser maior ou igual a 10000</p>
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="saldo"
+            >
+
+                <label
+                    class="imp-label"
+                    for="saldo"
+                >
+                    Saldo do faturamento direto
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="saldo"
+                    name="saldo"
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="00,00"
+                    value="{{ f_saldo.valor if modo_execucao and f_saldo and f_saldo.valor is not none else '' }}"
+                    {% if saldo_editavel %}required{% endif %}
+                    {% if not saldo_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="condPag"
+            >
+
+                <label
+                    class="imp-label"
+                    for="condPag"
+                >
+                    Condição de pagamento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="condPag"
+                    name="condPag"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Condição de pagamento"
+                    value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
+                    {% if condPag_editavel %}required{% endif %}
+                    {% if not condPag_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="eMail"
+            >
+
+                <label
+                    class="imp-label"
+                    for="eMail"
+                >
+                    E-mail
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="eMail"
+                    name="eMail"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="E-mail"
+                    value="{{ f_eMail.valor if modo_execucao and f_eMail and f_eMail.valor is not none else '' }}"
+                    {% if eMail_editavel %}required{% endif %}
+                    {% if not eMail_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Local de Recebimento"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="local_receb_rb"
+                        value="OBRA"
+                        {% if local_receb_editavel %}
+                            required
+                        {% endif %}
+                        {% if
+                            modo_execucao
+                            and f_local_receb_rb
+                            and f_local_receb_rb.valor == 'OBRA'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not local_receb_rb_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Obra
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="local_receb_rb"
+                        value="OUTRO"
+                        {% if
+                            modo_execucao
+                            and f_local_receb_rb
+                            and f_local_receb_rb.valor == 'OUTRO'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not local_receb_rb_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Outro
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div
+            class="imp-field"
+            data-field-wrap="local_receb"
+            data-impper-show-when="local_receb_rb:OUTRO"
+            >
+
+                <label
+                    class="imp-label"
+                    for="local_receb"
+                >
+                    Indique o local de recebimento
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="local_receb"
+                    name="local_receb"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Local de recebimento"
+                    value="{{ f_local_receb.valor if modo_execucao and f_local_receb and f_local_receb.valor is not none else '' }}"
+                    {% if local_receb_editavel %}required{% endif %}
+                    {% if not local_receb_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+
+             <div
+                class="imp-field imp-field--full"
+                data-field-wrap="anexos"
+            >
+
+                <div
+                    class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+                >
+
+                    <div>
+
+                        <span class="imp-label">
+                            Anexos
+                            <span class="imp-label__required">*</span>
+                        </span>
+
+                        <p class="imp-help mb-0">
+                            Selecione pelo menos um anexo. Você pode adicionar outros quando necessário.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-neutral btn-sm align-self-start"
+                        id="addAnexoButton"
+                        data-add-anexo
+                        {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                        + Adicionar anexo
+                    </button>
+
+                </div>
+
+                {% if modo_execucao and f_anexos %}
+                    {% for anexo in f_anexos %}
+                        <div class="imp-execution-current-file">
+
+                            <div>
+
+                                <strong>
+                                    Arquivo atual
+                                </strong>
+
+                                <span>
+                                    Documento anexado registrado na solicitação.
+                                </span>
+
+                            </div>
+
+                            <a
+                                class="btn btn-outline-primary btn-sm"
+                                href="{{ url_for('download_arquivo', id_arquivo=anexo.id) }}"
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                Visualizar arquivo
+                            </a>
+
+                        </div>
+
+                    {% endfor %}
+                {% endif %}
+
+                <div
+                    class="imp-nature-list"
+                    id="anexosList"
+                    data-anexos-list
+                >
+
+                    <div
+                        class="imp-anexo-row"
+                        data-anexo-row
+                    >
+
+                        <input
+                            type="file"
+                            name="anexos"
+                            class="form-control flex-grow-1"
+                            data-anexo-input
+                            {% if anexos_editavel %}required{% endif %}
+                            {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary btn-sm imp-anexo-remove"
+                            data-remove-anexo
+                            aria-label="Remover Anexo"
+                            hidden
+                            {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+                            Remover
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
-    </div>
+
 </section>
 <script>
-    async function filtrarContrato() {
-        const coligada = document.getElementById('codcoligada').value;
+    async function filtrarContrato(contratos) {
         const contratoSelect = document.querySelector('[data-contrato-source]');
+        const coligada = document.getElementById('obra_colig').value;
 
+        const match = contratos.filter(
+            (contrato) => String(contrato["CODCOLIGADA"]) === String(coligada)
+        );
+
+        contratoSelect.innerHTML = '';
+
+        const fragment = document.createDocumentFragment();
+
+        for (const cont of match) {
+            const option = document.createElement('option');
+            const codigoContrato = cont["CODIGOCONTRATO"];
+
+            option.value = codigoContrato;
+            option.textContent = cont["LABEL"];
+            fragment.appendChild(option);
+        }
+
+        contratoSelect.appendChild(fragment);
+        document.querySelector('[data-contrato-value]').onchange = () => infoContrato(match);
+        window.ImpperSearchSelect.initSearchField(document, 'contrato');
+        return match
     }
+    async function infoContrato(match) {
+        const selectedContrato = document.querySelector('[data-contrato-value]').value;
+        const contratoInfo = match.find(
+            (contrato) => String(contrato["CODIGOCONTRATO"]) === String(selectedContrato)
+        );
+        if (!contratoInfo) return;
+
+        const valor = document.getElementById('valor_contrato_PD');
+        const fornecedor = document.getElementById('fornecedor');
+        const valor_atual = document.getElementById('valor_atual');
+        valor.value = contratoInfo["VALORCONTRATO"];
+        fornecedor.value = contratoInfo["FORNECEDOR"];
+        valor_atual.value = parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
+    }
+
+    async function valor_solictado(){
+        const valorSolicitado = document.getElementById('valor_solicitado').value;
+        const botao = document.getElementById('submitButton');
+        if (parseFloat(valorSolicitado) < 10000) {
+            alert("O valor solicitado deve ser maior ou igual a 10000");
+            botao.disabled = true;
+            return false;
+        } else {
+            botao.disabled = false;
+        }
+    }
+
+    function updateAnexoRemoveButtons() {
+        const rows = document.querySelectorAll('#anexosList [data-anexo-row]');
+        rows.forEach((row) => {
+            const button = row.querySelector('[data-remove-anexo]');
+            if (button) button.hidden = rows.length === 1;
+        });
+    }
+
+    document.getElementById('addAnexoButton')?.addEventListener('click', () => {
+        const list = document.getElementById('anexosList');
+        const firstRow = list?.querySelector('[data-anexo-row]');
+        if (!firstRow) return;
+
+        const clone = firstRow.cloneNode(true);
+        const input = clone.querySelector('[data-anexo-input]');
+        if (input) {
+            input.value = '';
+            input.required = false;
+        }
+
+        list.appendChild(clone);
+        updateAnexoRemoveButtons();
+    });
+
+    document.getElementById('anexosList')?.addEventListener('click', (event) => {
+        const removeButton = event.target.closest('[data-remove-anexo]');
+        if (!removeButton) return;
+
+        removeButton.closest('[data-anexo-row]')?.remove();
+        updateAnexoRemoveButtons();
+    });
+
+    updateAnexoRemoveButtons();
 </script>

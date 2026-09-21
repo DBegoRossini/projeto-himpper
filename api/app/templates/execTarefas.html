@@ -305,7 +305,7 @@
 
         </section>
 
-        {% if execucao and not execucao[0].get("executor") and executor == True %}
+        {% if execucao and execucao[0].get("executor") == None and executor == True %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -321,9 +321,8 @@
 
                 </div>
 
-                <button onclick="assumir({ id_chamada }, '{{ etapa_id }}')" class="btn btn-neutral">
+                <button onclick="assumir({{ execucao[0].id_chamada }}, '{{ etapa_id }}')" class="btn btn-neutral">
                     <a
-                        class="btn btn-neutral"
                     >
                         Assumir tarefa
                     </a>
@@ -756,6 +755,91 @@
 
     {% endif %}
 
+     <section
+            class="imp-execution-section"
+            aria-labelledby="execution-timeline-title"
+        >
+
+            <div class="imp-execution-section__head">
+                <div>
+                    <span class="imp-execution-overline">Histórico</span>
+                    <h3
+                        class="imp-execution-section__title"
+                        id="execution-timeline-title"
+                    >
+                        Etapas da solicitação
+                    </h3>
+                    <p class="imp-execution-section__subtitle">
+                        Acompanhe o andamento de cada etapa e seus responsáveis.
+                    </p>
+                </div>
+            </div>
+
+            {% if historico_etapas %}
+                <ol class="imp-execution-timeline">
+                    {% for etapa_historico in historico_etapas %}
+                        <li class="imp-execution-timeline__item{% if etapa_historico.atual %} is-current{% endif %}{% if etapa_historico.finalizada_em %} is-complete{% endif %}">
+                            <span class="imp-execution-timeline__marker" aria-hidden="true">
+                                {% if etapa_historico.finalizada_em %}✓{% else %}{{ loop.index }}{% endif %}
+                            </span>
+
+                            <div class="imp-execution-timeline__content">
+                                <div class="imp-execution-timeline__heading">
+                                    <div>
+                                        <span class="imp-execution-timeline__code">
+                                            {{ etapa_historico.id_etapa }}
+                                        </span>
+                                        <h4 class="imp-execution-timeline__title">
+                                            {{ etapa_historico.nome }}
+                                        </h4>
+                                    </div>
+
+                                    {% if etapa_historico.finalizada_em %}
+                                        <span class="imp-execution-timeline__status is-complete">Concluída</span>
+                                    {% elif etapa_historico.atual %}
+                                        <span class="imp-execution-timeline__status is-current">Em andamento</span>
+                                    {% else %}
+                                        <span class="imp-execution-timeline__status">Aberta</span>
+                                    {% endif %}
+                                </div>
+
+                                <dl class="imp-execution-timeline__details">
+                                    <div>
+                                        <dt>Início</dt>
+                                        <dd>
+                                            {{ etapa_historico.iniciada_em.strftime('%d/%m/%Y %H:%M') if etapa_historico.iniciada_em else 'Não informado' }}
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt>Fim</dt>
+                                        <dd>
+                                            {{ etapa_historico.finalizada_em.strftime('%d/%m/%Y %H:%M') if etapa_historico.finalizada_em else 'Em aberto' }}
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt>Executor</dt>
+                                        <dd>{{ etapa_historico.executor or 'Não assumida' }}</dd>
+                                    </div>
+
+                                    {% if etapa_historico.comentario %}
+                                        <div class="imp-execution-timeline__comment">
+                                            <dt>Comentário</dt>
+                                            <dd>{{ etapa_historico.comentario }}</dd>
+                                        </div>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <div class="imp-execution-empty">
+                    <strong>Nenhuma etapa registrada.</strong>
+                    <p>O histórico desta solicitação ainda não possui execuções.</p>
+                </div>
+            {% endif %}
+        </section>
+
 
     <script
         defer
@@ -768,6 +852,10 @@
         <script
             defer
             src="{{ url_for('static', filename='js/formulario-oc.js') }}"
+        ></script>
+        <script
+            defer
+            src="{{ url_for('static', filename='js/formulario-financeiro-oc.js') }}"
         ></script>
 
     {% endif %}

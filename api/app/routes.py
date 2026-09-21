@@ -497,7 +497,7 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
         headers = {"Authorization": f"Basic {base64.b64encode(f'{os.getenv("n8n_user")}:{os.getenv("n8n_senha")}'.encode()).decode()}"}
         print("ID PROXET:", id_proxet)
         responsavel = None
-        if id_proxet not in [None, "Cancelado", "Finalizado", "Reprovado", "Pausado"]:
+        if id_proxet not in [None, "Cancelado", "Finalizado", "Reprovado", "Pausado", "Aprovado"]:
             responsavel = Etapas.query.get(id_proxet).responsaveis
             print("RESPONSAVEL:", responsavel)
         if responsavel == "Solicitante":
@@ -538,7 +538,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
     access_token = context['access_token']
     chamada_raw = Chamada.query.get(id_chamada)
     chamada=[]
-    
+   
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
                     headers={"Authorization": f"Bearer {access_token}"}
@@ -552,7 +552,49 @@ def exec_tarefas(id_chamada, id_etapa, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
-    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first() 
+    execucoes_historico = (
+        Execucao.query
+        .filter_by(id_chamada=id_chamada)
+        .order_by(Execucao.id.asc())
+        .all()
+    )
+
+    etapas_map = {
+        etapa_registro.id: etapa_registro
+        for etapa_registro in Etapas.query.filter_by(id_flow=fluxo.id).all()
+    } if fluxo else {}
+
+    executor_nomes = {}
+    historico_etapas = []
+    for execucao_registro in execucoes_historico:
+        executor_nome = None
+        if execucao_registro.executor:
+            if execucao_registro.executor not in executor_nomes:
+                resposta_executor = requests.get(
+                    f"https://graph.microsoft.com/v1.0/users/{execucao_registro.executor}?$select=displayName",
+                    headers={"Authorization": f"Bearer {access_token}"}
+                )
+                executor_nomes[execucao_registro.executor] = (
+                    resposta_executor.json().get("displayName", "Desconhecido")
+                    if resposta_executor
+                    else "Desconhecido"
+                )
+            executor_nome = executor_nomes[execucao_registro.executor]
+
+        etapa_registro = etapas_map.get(execucao_registro.id_etapa)
+        historico_etapas.append({
+            "id": execucao_registro.id,
+            "id_etapa": execucao_registro.id_etapa,
+            "nome": etapa_registro.nome if etapa_registro else execucao_registro.id_etapa,
+            "iniciada_em": execucao_registro.iniciada_em,
+            "assumida_em": execucao_registro.assumida_em,
+            "finalizada_em": execucao_registro.finalizada_em,
+            "executor": executor_nome,
+            "comentario": getattr(execucao_registro, "comentario", None),
+            "atual": execucao_registro.id_etapa == id_etapa
+        })
+
+    exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
     print(id_chamada)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
@@ -577,7 +619,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
                 "etapas_correcao": etapas_correcao
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
-
+ 
     formularios = (
         Formularios.query
         .filter_by(id_chamada=id_chamada)
@@ -585,17 +627,17 @@ def exec_tarefas(id_chamada, id_etapa, context):
         if chamada
         else []
     )
-
+ 
     formularios_map = {
         formulario.campo: formulario
         for formulario in formularios
     }
-
+ 
     if fluxo and fluxo.nome == "fluxo_aberturaOC":
         carregar_info_form()
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
-    etapas_split = etapa.responsaveis.split(",")
+    etapas_split = etapa.responsaveis.split(";")
     grupos_conditions = [grupo in etapas_split for grupo in groups]
     if True in grupos_conditions:
         us_atuante = True
@@ -603,9 +645,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
         us_atuante = True
     else:
         us_atuante = False
-    print(user_oid)
     print(execucao[0]["executor_id"])
-
+    print(us_atuante)
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -617,9 +658,11 @@ def exec_tarefas(id_chamada, id_etapa, context):
         etapa_id = id_etapa,
         formularios=formularios,
         formularios_map=formularios_map,
+        historico_etapas=historico_etapas,
         executor=us_atuante,
         user_id=user_oid,
         form_abertos = [],
+        modo_execucao= us_atuante,
     )
 
 def detect_mime(file_bytes: bytes) -> str:
@@ -774,6 +817,57 @@ def permissoes(context):
         fluxos=Fluxos,
         opcoes_permissoes=opcoes_permissoes,
         versoes_unicas=versoes_unicas,
+    )
+
+@app.route("/historico", methods=["POST", "GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def historico(context):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    groups = g.info_user.get("groups", [])
+    user_job = g.info_user.get("jobTitle", "")
+    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+
+    solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
+    ids_por_grupo = []
+    for solic in solicitantes:
+        resp = requests.get(
+            f"https://graph.microsoft.com/v1.0/users/{solic.solicitante}/memberOf?$select=id",
+            headers={"Authorization": f"Bearer {context['access_token']}"}
+        )
+        grupos_solicitante = [grp.get("id") for grp in resp.json().get("value", [])]
+        if any(grp in groups for grp in grupos_solicitante):
+            ids_por_grupo.append(solic.id)
+
+    solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(or_(
+            Chamada.solicitante == f"{user_oid}",
+            Chamada.solicitante.in_(g.info_user.get("subordinados", [])),
+            Chamada.id.in_(ids_por_grupo),
+            Etapas.responsaveis == f"{user_oid}",
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            and_(
+                Etapas.responsaveis == "Solicitante",
+                Chamada.solicitante == f"{user_oid}"
+            ),
+            *grupos_conditions
+        ))\
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("tipo"),
+        Chamada.data.label("abertura_label"),
+        Chamada.status.label("status_label"),
+    ).order_by(Chamada.id.desc()).all()
+
+
+    return render_template(
+        'historico.html',
+        user=context['user'],
+        solicitacoes=solicitacoes,
     )
 
 @app.route("/logout")
