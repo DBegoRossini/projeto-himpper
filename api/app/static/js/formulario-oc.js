@@ -1381,13 +1381,37 @@ function filtrarDestinosCorrecaoOC() {
     return;
   }
 
-  const currentStage = stageElement.dataset.ocCurrentStage;
-  const keepCentralCorrection = currentStage === "OC-01";
+  const currentStage = String(
+    stageElement.dataset.ocCurrentStage || ""
+  ).trim();
+  const hasCentralHistory =
+    String(
+      stageElement.dataset.ocHasCentralHistory || ""
+    ).trim().toLowerCase() === "true";
+  const validationStages = [
+    "OC-C-06-C",
+    "OC-05-A",
+    "OC-05-B"
+  ];
+  const centralCorrectionTarget = currentStage === "OC-01"
+    ? ["OC-C-03"]
+    : validationStages.includes(currentStage) && hasCentralHistory
+      ? ["OC-C-06-B"]
+      : [];
+
+  if (currentStage === "OC-05-A") {
+    centralCorrectionTarget.push("OC-C-06-C");
+  }
 
   Array.from(target.options).forEach(option => {
-    option.hidden = keepCentralCorrection
-      ? option.value !== "OC-C-03"
-      : option.value === "OC-C-03";
+    const isCentralCorrection = [
+      "OC-C-03",
+      "OC-C-06-B"
+    ].includes(option.value);
+
+    option.hidden = centralCorrectionTarget.length
+      ? !centralCorrectionTarget.includes(option.value)
+      : isCentralCorrection && option.value !== "OC-C-06-C";
   });
 
   const visibleOptions = Array.from(target.options)
