@@ -3,11 +3,12 @@
 
 {% set f_tipo_solicitacao = formularios_map.get('tipo_solicitacao') if modo_execucao else none %}
 {% set f_contrato = formularios_map.get('contrato') if modo_execucao else none %}
-{% set f_obraColig = formularios_map.get('obraColig') if modo_execucao else none %}
+{% set f_obraColig = formularios_map.get('obra_colig') if modo_execucao else none %}
 {% set f_fornecedor = formularios_map.get('fornecedor') if modo_execucao else none %}
 {% set f_valor = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
 {% set f_valor_contrato_PD = formularios_map.get('valor_contrato_PD') if modo_execucao else none %}
 {% set f_valor_solicitado = formularios_map.get('valor_solicitado') if modo_execucao else none %}
+{% set f_valor_atual = formularios_map.get('valor_atual') if modo_execucao else none %}
 
 {% set f_valor_previsto = formularios_map.get('valor_previsto') if modo_execucao else none %}
 {% set f_saldo = formularios_map.get('saldo') if modo_execucao else none %}
@@ -35,6 +36,15 @@
     )
 %}
 
+{% set valor_atual_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_valor_atual
+        and (f_valor_atual.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
 {% set tipo_solicitacao_editavel =
     not modo_execucao
     or (
@@ -53,7 +63,7 @@
     )
 %}
 
-{% set obra_colig_editavel =
+{% set obraColig_editavel =
     not modo_execucao
     or (
         permitir_edicao
@@ -266,8 +276,8 @@
                 name="obra_colig"
                 class="form-select"
                 autocomplete="organization"
-                {% if obra_colig_editavel %}required{% endif %}
-                {% if not obra_colig_editavel %}
+                {% if obraColig_editavel %}required{% endif %}
+                {% if not obraColig_editavel %}
                     disabled
                     data-impper-locked="true"
                 {% endif %}
@@ -287,8 +297,8 @@
                             value="{{ key }}"
                             {% if
                                 modo_execucao
-                                and f_codcoligada
-                                and (f_codcoligada.valor|string)
+                                and f_obraColig
+                                and (f_obraColig.valor|string)
                                     == (key|string)
                             %}
                                 selected
@@ -302,15 +312,15 @@
 
                 {% elif
                     modo_execucao
-                    and f_codcoligada
-                    and f_codcoligada.valor
+                    and f_obraColig
+                    and f_obraColig.valor
                 %}
 
                     <option
-                        value="{{ f_codcoligada.valor }}"
+                        value="{{ f_obraColig.valor }}"
                         selected
                     >
-                        {{ f_codcoligada.valor }}
+                        {{ f_obraColig.valor }}
                     </option>
 
                 {% endif %}
@@ -485,7 +495,7 @@
                     class="form-control"
                     autocomplete="off"
                     data-impper-locked="true"
-                    value=""
+                    value="{{ f_valor_atual.valor if modo_execucao and f_valor_atual and f_valor_atual.valor is not none else '' }}"
                     disabled
                 >
 

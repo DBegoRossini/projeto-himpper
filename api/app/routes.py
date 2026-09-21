@@ -824,11 +824,52 @@ def permissoes(context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def historico(context):
-    execucoes = Chamada.query.join(flows, Chamada.fluxo_id == flows.id)\
-    .join(Execucao, Chamada.id == Execucao.id_chamada)\
-    .join(Etapas, Execucao.id_etapa == Etapas.id)\
-    .join(Formularios, Chamada.id == Formularios.id_chamada)\
-    .all()
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    groups = g.info_user.get("groups", [])
+    user_job = g.info_user.get("jobTitle", "")
+    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+
+    solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
+    ids_por_grupo = []
+    for solic in solicitantes:
+        resp = requests.get(
+            f"https://graph.microsoft.com/v1.0/users/{solic.solicitante}/memberOf?$select=id",
+            headers={"Authorization": f"Bearer {context['access_token']}"}
+        )
+        grupos_solicitante = [grp.get("id") for grp in resp.json().get("value", [])]
+        if any(grp in groups for grp in grupos_solicitante):
+            ids_por_grupo.append(solic.id)
+
+    solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(or_(
+            Chamada.solicitante == f"{user_oid}",
+            Chamada.solicitante.in_(g.info_user.get("subordinados", [])),
+            Chamada.id.in_(ids_por_grupo),
+            Etapas.responsaveis == f"{user_oid}",
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            and_(
+                Etapas.responsaveis == "Solicitante",
+                Chamada.solicitante == f"{user_oid}"
+            ),
+            *grupos_conditions
+        ))\
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("tipo"),
+        Chamada.data.label("abertura_label"),
+        Chamada.status.label("status_label"),
+    ).order_by(Chamada.id.desc()).all()
+
+
+    return render_template(
+        'historico.html',
+        user=context['user'],
+        solicitacoes=solicitacoes,
+    )
 
 @app.route("/logout")
 def logout():

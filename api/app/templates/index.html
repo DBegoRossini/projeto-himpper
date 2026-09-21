@@ -70,7 +70,7 @@
         </li>
 
         <li>
-            <a class="imp-nav__link" href="#">
+            <a class="imp-nav__link{% if current_endpoint == 'historico' %} is-active{% endif %}" href="{{ url_for('historico') }}">
             <span class="imp-nav__icon" aria-hidden="true">▥</span>
             <span class="imp-nav__label">Relatórios</span>
             </a>
