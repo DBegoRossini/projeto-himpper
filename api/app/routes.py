@@ -637,7 +637,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         carregar_info_form()
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
-    etapas_split = etapa.responsaveis.split(",")
+    etapas_split = etapa.responsaveis.split(";")
     grupos_conditions = [grupo in etapas_split for grupo in groups]
     if True in grupos_conditions:
         us_atuante = True
@@ -645,9 +645,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
         us_atuante = True
     else:
         us_atuante = False
-    print(user_oid)
     print(execucao[0]["executor_id"])
- 
+    print(us_atuante)
     return render_template(
         "execTarefas.html",
         user=context["user"],

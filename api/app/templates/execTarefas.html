@@ -305,7 +305,7 @@
 
         </section>
 
-        {% if execucao and not execucao[0].get("executor") and executor == True %}
+        {% if execucao and execucao[0].get("executor") == None and executor == True %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -321,9 +321,8 @@
 
                 </div>
 
-                <button onclick="assumir({ id_chamada }, '{{ etapa_id }}')" class="btn btn-neutral">
+                <button onclick="assumir({{ execucao[0].id_chamada }}, '{{ etapa_id }}')" class="btn btn-neutral">
                     <a
-                        class="btn btn-neutral"
                     >
                         Assumir tarefa
                     </a>
