@@ -527,3 +527,88 @@
   }
 
 })();
+
+(() => {
+  "use strict";
+
+  const initAnexosRetorno = () => {
+    const list = document.querySelector("[data-anexos-retorno-list]");
+    const addButton = document.querySelector("[data-add-anexo-retorno]");
+
+    if (!list || !addButton || addButton.disabled) {
+      return;
+    }
+
+    const updateRows = () => {
+      const rows = Array.from(
+        list.querySelectorAll("[data-anexo-retorno-row]")
+      );
+
+      rows.forEach((row, index) => {
+        const removeButton = row.querySelector(
+          "[data-remove-anexo-retorno]"
+        );
+
+        if (removeButton) {
+          removeButton.hidden = rows.length === 1;
+        }
+
+        if (index > 0) {
+          const input = row.querySelector("[data-anexo-retorno-input]");
+          if (input) {
+            input.required = false;
+          }
+        }
+      });
+    };
+
+    addButton.addEventListener("click", () => {
+      const template = list.querySelector("[data-anexo-retorno-row]");
+      if (!template) return;
+
+      const row = template.cloneNode(true);
+      const input = row.querySelector("[data-anexo-retorno-input]");
+      const removeButton = row.querySelector(
+        "[data-remove-anexo-retorno]"
+      );
+
+      if (input) {
+        input.value = "";
+        input.required = false;
+      }
+
+      if (removeButton) {
+        removeButton.hidden = false;
+        removeButton.addEventListener("click", () => {
+          row.remove();
+          updateRows();
+        });
+      }
+
+      list.appendChild(row);
+      updateRows();
+    });
+
+    list.addEventListener("click", event => {
+      const removeButton = event.target.closest(
+        "[data-remove-anexo-retorno]"
+      );
+
+      if (!removeButton) return;
+
+      const row = removeButton.closest("[data-anexo-retorno-row]");
+      if (row) {
+        row.remove();
+        updateRows();
+      }
+    });
+
+    updateRows();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAnexosRetorno);
+  } else {
+    initAnexosRetorno();
+  }
+})();
