@@ -794,7 +794,7 @@
     </div>
 
     <div
-        class="imp-choice-grid imp-choice-grid--two"
+        class="imp-choice-grid imp-choice-grid--three"
         role="radiogroup"
         aria-label="Tipo de checagem"
     >
@@ -837,6 +837,25 @@
 
         </label>
 
+        <label class="imp-choice">
+
+            <input
+                type="radio"
+                name="tp_checagem"
+                value="LOUNGE"
+                {% if tp_checagem_editavel %}required{% endif %}
+                {% if modo_execucao and f_tp_checagem and f_tp_checagem.valor == 'LOUNGE' %}checked{% endif %}
+                {% if not tp_checagem_editavel %}disabled data-impper-locked="true"{% endif %}
+                onchange="filtrarForm(document)"
+            >
+
+            <span class="imp-choice__content">
+                <span class="imp-choice__dot"></span>
+                <span class="imp-choice__text">Lounge</span>
+            </span>
+
+        </label>
+
     </div>
 
 
@@ -863,17 +882,27 @@
             onchange="filtrarForm(document)"
         >
 
-            <option value="">
+            <option value=""
+            data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND">
                 Selecione um empreendimento
             </option>
 
-            <option value="CASA_PIETRA">
+            <option value="IMPPER"
+            {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'IMPPER' %}selected{% endif %}
+            data-impper-show-when="tp_checagem:LOUNGE">
+                Grupo Impper
+            </option>
+
+            <option value="CASA_PIETRA"
+            {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CASA_PIETRA' %}selected{% endif %}
+            data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND">
                 Casa Pietra
             </option>
 
             <option
                 value="CONNECT"
                 {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CONNECT' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND"
             >
                 Connect Impper
             </option>
@@ -881,6 +910,7 @@
             <option
                 value="LEGACY"
                 {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'LEGACY' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND"
             >
                 Legacy Impper
             </option>
@@ -888,6 +918,7 @@
             <option
                 value="PRIME"
                 {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'PRIME' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND"
             >
                 Prime Impper
             </option>
@@ -919,6 +950,7 @@
             <option
                 value="RESERVA"
                 {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'RESERVA' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND"
             >
                 Reserva Impperial
             </option>
@@ -926,6 +958,7 @@
             <option
                 value="VISTA"
                 {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'VISTA' %}selected{% endif %}
+                data-impper-show-when="tp_checagem:DECORADO || tp_checagem:STAND"
             >
                 Vista Impper
             </option>
