@@ -97,5 +97,113 @@
         defer
         src="{{ url_for('static', filename='js/formulario-oc.js') }}"
     ></script>
+    <script>
+        async function filtrarContrato(contratos, pagamentos) {
+            const contratoSelect = document.querySelector('[data-contrato-source]');
+            const coligada = document.getElementById('obra_colig').value;
+            const condpag = document.getElementById('condPag').value;
+            const pagSelect = document.querySelector('[data-condPag-source]');
+
+            opcond = pagamentos.filter(
+                (pagamento) => String(pagamento["COLIGADA"]) === String(coligada)
+            )
+
+            const match = contratos.filter(
+                (contrato) => String(contrato["CODCOLIGADA"]) === String(coligada)
+            );
+
+            contratoSelect.innerHTML = '';
+            pagSelect.innerHTML = '';
+
+            const fragment = document.createDocumentFragment();
+
+            for (const cont of match) {
+                const option = document.createElement('option');
+                const codigoContrato = cont["CODIGOCONTRATO"];
+
+                option.value = codigoContrato;
+                option.textContent = cont["LABEL"];
+                fragment.appendChild(option);
+            }
+
+            contratoSelect.appendChild(fragment);
+            document.querySelector('[data-contrato-value]').onchange = () => infoContrato(match);
+            window.ImpperSearchSelect.initSearchField(document, 'contrato');
+
+            for (const pag of opcond) {
+                const option = document.createElement('option');
+                const codigoPag = pag["VALOR"];
+
+                option.value = codigoPag;
+                option.textContent = pag["LABEL"];
+                pagSelect.appendChild(option);
+            }
+
+            pagSelect.appendChild(fragment);
+            window.ImpperSearchSelect.initSearchField(document, 'condPag');
+
+            return match
+        }
+        async function infoContrato(match) {
+            const selectedContrato = document.querySelector('[data-contrato-value]').value;
+            const contratoInfo = match.find(
+                (contrato) => String(contrato["CODIGOCONTRATO"]) === String(selectedContrato)
+            );
+            if (!contratoInfo) return;
+
+            const valor = document.getElementById('valor_contrato_PD');
+            const fornecedor = document.getElementById('fornecedor');
+            const valor_atual = document.getElementById('valor_atual');
+            valor.value = contratoInfo["VALORCONTRATO"];
+            fornecedor.value = contratoInfo["FORNECEDOR"];
+            valor_atual.value = parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
+        }
+
+        async function valor_solictado(){
+            const valorSolicitado = document.getElementById('valor_solicitado').value;
+            const botao = document.getElementById('submitButton');
+            if (parseFloat(valorSolicitado) < 10000) {
+                alert("O valor solicitado deve ser maior ou igual a 10000");
+                botao.disabled = true;
+                return false;
+            } else {
+                botao.disabled = false;
+            }
+        }
+
+        function updateAnexoRemoveButtons() {
+            const rows = document.querySelectorAll('#anexosList [data-anexo-row]');
+            rows.forEach((row) => {
+                const button = row.querySelector('[data-remove-anexo]');
+                if (button) button.hidden = rows.length === 1;
+            });
+        }
+
+        document.getElementById('addAnexoButton')?.addEventListener('click', () => {
+            const list = document.getElementById('anexosList');
+            const firstRow = list?.querySelector('[data-anexo-row]');
+            if (!firstRow) return;
+
+            const clone = firstRow.cloneNode(true);
+            const input = clone.querySelector('[data-anexo-input]');
+            if (input) {
+                input.value = '';
+                input.required = false;
+            }
+
+            list.appendChild(clone);
+            updateAnexoRemoveButtons();
+        });
+
+        document.getElementById('anexosList')?.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-anexo]');
+            if (!removeButton) return;
+
+            removeButton.closest('[data-anexo-row]')?.remove();
+            updateAnexoRemoveButtons();
+        });
+
+        updateAnexoRemoveButtons();
+    </script>
 
 {% endblock %}

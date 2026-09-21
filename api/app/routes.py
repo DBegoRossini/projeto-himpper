@@ -110,6 +110,11 @@ def carregar_info_form():
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
+
+    condpagamento = requests.get(
+        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.2/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
+    )
     coligadas = {}
     movimentos = {}
     ccusto = {}
@@ -147,6 +152,7 @@ def carregar_info_form():
     g.ccustoUnic = ccusto.items()
     g.fornUnic = fornecedores.items()
     g.contratosUnic = contratos.items()
+    g.condpagamentoUnic = condpagamento.json()
 
 
 @app.context_processor

@@ -2,10 +2,18 @@
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
 {% set etapa_atual = etapa_id|default('') %}
+{% set passou_central_notas = namespace(valor=false) %}
+
+{% for etapa_historico in historico_etapas|default([]) %}
+    {% if etapa_historico.id_etapa == 'OC-01' %}
+        {% set passou_central_notas.valor = true %}
+    {% endif %}
+{% endfor %}
 
 <span
     id="oc-current-stage"
     data-oc-current-stage="{{ etapa_atual }}"
+    data-oc-has-central-history="{{ 'true' if passou_central_notas.valor else 'false' }}"
     hidden
 ></span>
 
@@ -81,6 +89,7 @@
         'OC-04',
         'OC-05-A',
         'OC-05-B',
+        'OC-07',
         'OC-C-06-A',
         'OC-C-06-B'
     ]
@@ -313,18 +322,33 @@
                Aparece em todas as etapas
                ================================================= #}
 
-            <button
-                type="button"
-                class="btn btn-primary"
-                onclick="enviarEtapa(
-                    document,
-                    '{{ id_chamada }}',
-                    '{{ etapa_id }}',
-                    'Aprovado'
-                )"
-            >
-                Concluir
-            </button>
+            {% if etapa_atual == 'OC-05-A' %}
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#conclusaoFiscalModal"
+                >
+                    Concluir
+                </button>
+
+            {% else %}
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="enviarEtapa(
+                        document,
+                        '{{ id_chamada }}',
+                        '{{ etapa_id }}',
+                        'Aprovado'
+                    )"
+                >
+                    Concluir
+                </button>
+
+            {% endif %}
 
 
             {# =================================================
@@ -348,5 +372,83 @@
         </div>
  
     </div>
- 
+
+    {% if etapa_atual == 'OC-05-A' %}
+
+        <div
+            class="modal fade"
+            id="conclusaoFiscalModal"
+            tabindex="-1"
+            aria-labelledby="conclusaoFiscalModalLabel"
+            aria-hidden="true"
+        >
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h2
+                            class="modal-title fs-5"
+                            id="conclusaoFiscalModalLabel"
+                        >
+                            Concluir validação fiscal
+                        </h2>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fechar"
+                        ></button>
+                    </div>
+
+                    <div class="modal-body">
+                        Você deseja concluir a solicitação ou devolver para o solicitante realizar um novo anexo?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-neutral"
+                            data-bs-dismiss="modal"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            onclick="enviarEtapa(
+                                document,
+                                '{{ id_chamada }}',
+                                '{{ etapa_id }}',
+                                'OC-07'
+                            )"
+                        >
+                            Devolver ao solicitante
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            onclick="enviarEtapa(
+                                document,
+                                '{{ id_chamada }}',
+                                '{{ etapa_id }}',
+                                'Aprovado'
+                            )"
+                        >
+                            Concluir
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
 {% endif %}

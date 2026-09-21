@@ -18,13 +18,13 @@
 {% set f_local_receb_rb = formularios_map.get('local_receb_rb') if modo_execucao else none %}
 {% set f_local_receb = formularios_map.get('local_receb') if modo_execucao else none %}
 
-{% set keys = formularios_map.keys() %}
+{% set keys = formularios_map.keys() if modo_execucao else [] %}
 {% set f_anexos = [] %}
 {% for key in keys if 'anexo' in key %}
     {% set _ = f_anexos.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
-
 {% set f_anexos_retorno = formularios_map.get('anexos_retorno') if modo_execucao else none %}
+{% set f_oc_criada = formularios_map.get('oc_criada') if modo_execucao else none %}
 
 
 {% set saldo_editavel =
@@ -162,6 +162,15 @@
     )
 %}
 
+{% set oc_criada_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_oc_criada
+        and (f_oc_criada.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
 
 <section class="imp-form-section">
 
@@ -243,6 +252,7 @@
 
 <section class="imp-form-section" data-impper-show-when="tipo_solicitacao:PAGAMENTO" hidden>
 
+    <div class="imp-form-grid">
 
         <div
             class="imp-field"
@@ -266,9 +276,14 @@
                     {% set contratos_json = resposta_contratos %}
                 {% endif %}
             {% endif %}
+            {% set condpagamentoUnic = [] %}
+            {% if g.condpagamentoUnic is defined and g.condpagamentoUnic %}
+                {% set condpagamentoUnic = g.condpagamentoUnic %}
+            {% endif %}
 
             <script>
                 var contratosData = {{ contratos_json|tojson }};
+                var pagamentosData = {{ condpagamentoUnic|tojson }};
             </script>
 
             <select
@@ -281,7 +296,7 @@
                     disabled
                     data-impper-locked="true"
                 {% endif %}
-                onchange="filtrarContrato(contratosData)"
+                onchange="filtrarContrato(contratosData, pagamentosData)"
             >
 
                 <option value="">
@@ -566,32 +581,94 @@
             </div>
 
             <div
-            class="imp-field"
+            class="imp-field imp-field--full"
             data-field-wrap="condPag"
+            data-search-field="condPag"
+                class="imp-field imp-field--full d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
             >
 
-                <label
-                    class="imp-label"
-                    for="condPag"
-                >
-                    Condição de pagamento
-                    <span class="imp-label__required">*</span>
-                </label>
+                <div>
 
-                <input
-                    id="condPag"
-                    name="condPag"
-                    type="text"
-                    class="form-control"
-                    autocomplete="off"
-                    placeholder="Condição de pagamento"
-                    value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
-                    {% if condPag_editavel %}required{% endif %}
-                    {% if not condPag_editavel %}
-                        disabled
-                        data-impper-locked="true"
-                    {% endif %}
+                    <span class="imp-label">
+                        Condição de Pagamento
+                        <span class="imp-label__required">*</span>
+                    </span>
+
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos uma condição de pagamento.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <input
+                type="hidden"
+                id="condPag"
+                name="condPag"
+                value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
+                data-condPag-value
+            >
+
+
+            <select
+                data-condPag-source
+                hidden
+                disabled
+            >
+
+            </select>
+
+
+            <div
+                class="imp-nature-list"
+                id="condPagList"
+                data-condPag-list
+            >
+
+                <div
+                    class="imp-nature-row"
+                    data-condPag-row
+                >
+
+                    <div
+                        class="imp-search-select position-relative flex-grow-1"
+                        data-condPag-combobox
                     >
+
+                        <input
+                            type="search"
+                            class="form-control"
+                            placeholder="Pesquise por código ou descrição"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            data-condPag-search
+                            {% if not condPag_editavel %}
+                                disabled
+                                data-impper-locked="true"
+                            {% endif %}
+                        >
+
+                        <input
+                            type="hidden"
+                            value=""
+                            data-condPag-selected-value
+                        >
+
+                        <div
+                            class="dropdown-menu w-100 imp-search-select__menu"
+                            role="listbox"
+                            data-condPag-dropdown
+                        ></div>
+
+                    </div>
+
+
+                </div>
 
             </div>
 
@@ -831,94 +908,86 @@
 
             </div>
 
+        {% if etapa_id in ['FD-03-B', 'FD-03-A'] or f_oc_criada %}
+            <div
+            class="imp-field"
+            data-field-wrap="oc_criada"
+            >
+
+                <label
+                    class="imp-label"
+                    for="oc_criada"
+                >
+                    Número da OC criada
+                    <span class="imp-label__required">*</span>
+                </label>
+
+                <input
+                    id="oc_criada"
+                    name="oc_criada"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Número da OC criada"
+                    value="{{ f_oc_criada.valor if modo_execucao and f_oc_criada and f_oc_criada.valor is not none else '' }}"
+                    {% if oc_criada_editavel %}required{% endif %}
+                    {% if not oc_criada_editavel %}
+                        disabled
+                        data-impper-locked="true"
+                    {% endif %}
+                    >
+
+            </div>
+        {% endif %}
+        </div>
+</section>
+
+{% set aprovado = 'Aprovado' %}
+{% set reprovado = 'Correção' %}
+                    
+
+{% if modo_execucao and pode_editar %}
+
+    <div class="imp-execution-actions">
+
+        <div class="imp-execution-actions__copy">
+
+            <strong>
+                Revise a solicitação antes de prosseguir.
+            </strong>
+
+            <span>
+                Escolha a ação que deseja realizar nesta etapa.
+            </span>
+
         </div>
 
-</section>
-<script>
-    async function filtrarContrato(contratos) {
-        const contratoSelect = document.querySelector('[data-contrato-source]');
-        const coligada = document.getElementById('obra_colig').value;
+        <div class="d-flex flex-column flex-sm-row gap-2">
 
-        const match = contratos.filter(
-            (contrato) => String(contrato["CODCOLIGADA"]) === String(coligada)
-        );
 
-        contratoSelect.innerHTML = '';
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', '{{ aprovado }}')"
+            >
+            {% if etapa_id in ['FD-01', 'FD-02'] %}
+                Aprovar
+            {% else %}
+                Concluir
+            {% endif %}
+            </button>
 
-        const fragment = document.createDocumentFragment();
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelationModal"
+            >
+                Cancelar
+            </button>
 
-        for (const cont of match) {
-            const option = document.createElement('option');
-            const codigoContrato = cont["CODIGOCONTRATO"];
+        </div>
 
-            option.value = codigoContrato;
-            option.textContent = cont["LABEL"];
-            fragment.appendChild(option);
-        }
+    </div>
 
-        contratoSelect.appendChild(fragment);
-        document.querySelector('[data-contrato-value]').onchange = () => infoContrato(match);
-        window.ImpperSearchSelect.initSearchField(document, 'contrato');
-        return match
-    }
-    async function infoContrato(match) {
-        const selectedContrato = document.querySelector('[data-contrato-value]').value;
-        const contratoInfo = match.find(
-            (contrato) => String(contrato["CODIGOCONTRATO"]) === String(selectedContrato)
-        );
-        if (!contratoInfo) return;
-
-        const valor = document.getElementById('valor_contrato_PD');
-        const fornecedor = document.getElementById('fornecedor');
-        const valor_atual = document.getElementById('valor_atual');
-        valor.value = contratoInfo["VALORCONTRATO"];
-        fornecedor.value = contratoInfo["FORNECEDOR"];
-        valor_atual.value = parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
-    }
-
-    async function valor_solictado(){
-        const valorSolicitado = document.getElementById('valor_solicitado').value;
-        const botao = document.getElementById('submitButton');
-        if (parseFloat(valorSolicitado) < 10000) {
-            alert("O valor solicitado deve ser maior ou igual a 10000");
-            botao.disabled = true;
-            return false;
-        } else {
-            botao.disabled = false;
-        }
-    }
-
-    function updateAnexoRemoveButtons() {
-        const rows = document.querySelectorAll('#anexosList [data-anexo-row]');
-        rows.forEach((row) => {
-            const button = row.querySelector('[data-remove-anexo]');
-            if (button) button.hidden = rows.length === 1;
-        });
-    }
-
-    document.getElementById('addAnexoButton')?.addEventListener('click', () => {
-        const list = document.getElementById('anexosList');
-        const firstRow = list?.querySelector('[data-anexo-row]');
-        if (!firstRow) return;
-
-        const clone = firstRow.cloneNode(true);
-        const input = clone.querySelector('[data-anexo-input]');
-        if (input) {
-            input.value = '';
-            input.required = false;
-        }
-
-        list.appendChild(clone);
-        updateAnexoRemoveButtons();
-    });
-
-    document.getElementById('anexosList')?.addEventListener('click', (event) => {
-        const removeButton = event.target.closest('[data-remove-anexo]');
-        if (!removeButton) return;
-
-        removeButton.closest('[data-anexo-row]')?.remove();
-        updateAnexoRemoveButtons();
-    });
-
-    updateAnexoRemoveButtons();
-</script>
+{% endif %}

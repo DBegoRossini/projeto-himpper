@@ -51,6 +51,18 @@
     if modo_execucao else none
 %}
 
+{% set f_anexos_retorno =
+    formularios_map.get('anexos_retorno')
+    if modo_execucao else none
+%}
+
+{% set exibir_anexos_retorno = namespace(valor=false) %}
+{% for etapa_historico in historico_etapas|default([]) %}
+    {% if etapa_historico.id_etapa|string|trim == 'OC-07' %}
+        {% set exibir_anexos_retorno.valor = true %}
+    {% endif %}
+{% endfor %}
+
 {% set f_permissao_fora_prazo =
     formularios_map.get('permissao_fora_prazo')
     if modo_execucao else none
@@ -272,6 +284,15 @@
         and f_documentos_financeiro
         and (f_documentos_financeiro.editavel|string|lower|trim)
             in ['1', 'true']
+    )
+%}
+
+{% set anexos_retorno_editavel =
+    modo_execucao
+    and permitir_edicao
+    and (
+        not f_anexos_retorno
+        or (f_anexos_retorno.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -2837,7 +2858,7 @@
                         class="imp-upload__input"
                         accept=".pdf,application/pdf"
                         data-impper-file-output="#documentosFinanceiroName"
-                        onchange="const fallback = document.getElementById('documentosFinanceiroFallback'); if (fallback) { fallback.name = this.files && this.files.length ? '' : 'documentos_financeiro'; }"
+                        onchange="const documentosFallback = document.getElementById('documentosFinanceiroFallback'); if (documentosFallback) { documentosFallback.name = this.files && this.files.length ? '' : 'documentos_financeiro'; }"
                         {% if
                             not modo_execucao
                             or not (
@@ -2952,7 +2973,7 @@
                         class="imp-upload__input"
                         accept=".pdf,application/pdf"
                         data-impper-file-output="#permissaoForaPrazoName"
-                        onchange="const fallback = document.getElementById('permissaoForaPrazoFallback'); if (fallback) { fallback.name = this.files && this.files.length ? '' : 'permissao_fora_prazo'; }"
+                        onchange="const permissaoFallback = document.getElementById('permissaoForaPrazoFallback'); if (permissaoFallback) { permissaoFallback.name = this.files && this.files.length ? '' : 'permissao_fora_prazo'; }"
                     >
 
                     <label
@@ -2994,6 +3015,86 @@
     </div>
 
 </section>
+
+{% if modo_execucao and exibir_anexos_retorno.valor %}
+
+    <section class="imp-form-section">
+
+        <div class="imp-form-section__head">
+            <div class="imp-form-section__copy">
+                <h3 class="imp-card__title">
+                    Anexos do retorno
+                </h3>
+                <p class="imp-card__subtitle">
+                    Consulte os anexos enviados pelo solicitante ou adicione novos arquivos quando permitido.
+                </p>
+            </div>
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="anexos_retorno"
+        >
+
+            {% if f_anexos_retorno and f_anexos_retorno.valor %}
+                <div class="imp-execution-current-file">
+                    <div>
+                        <strong>Arquivo atual</strong>
+                        <span>Anexo registrado no retorno da solicitação.</span>
+                    </div>
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for('download_arquivo', id_arquivo=f_anexos_retorno.id) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+                </div>
+            {% endif %}
+
+            <div
+                class="imp-nature-list"
+                id="anexosRetornoList"
+                data-anexos-retorno-list
+            >
+                <div class="imp-anexo-row" data-anexo-retorno-row>
+                    <input
+                        type="file"
+                        name="anexos_retorno"
+                        class="form-control flex-grow-1"
+                        data-anexo-retorno-input
+                        {% if anexos_retorno_editavel and not f_anexos_retorno %}required{% endif %}
+                        {% if not anexos_retorno_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm imp-anexo-remove"
+                        data-remove-anexo-retorno
+                        aria-label="Remover anexo"
+                        hidden
+                        {% if not anexos_retorno_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                        Remover
+                    </button>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-neutral btn-sm"
+                data-add-anexo-retorno
+                {% if not anexos_retorno_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+                + Adicionar anexo
+            </button>
+
+        </div>
+
+    </section>
+
+{% endif %}
 
 {% if modo_execucao %}
 
