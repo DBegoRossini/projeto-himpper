@@ -8,9 +8,6 @@
       .toLowerCase()
       .trim();
 
-  // Agora aceita "description" explicitamente, em vez de deduzir via
-  // parsing de "valor - descrição" no label. Isso evita perder
-  // informação quando o label não segue esse padrão à risca.
   const createOption = ({ value, label, description }) => {
     const optionValue = String(value ?? "").trim();
     const optionLabel = String(label ?? value ?? "").trim();
@@ -49,9 +46,9 @@
     return items.filter(item => item.search.includes(normalizedTerm));
   };
 
-  // Descrição agora vem direto do dado da option, sem tentar
-  // "descascar" o prefixo "valor - " do label. Se não houver
-  // description explícita, cai de volta pro label (comportamento antigo).
+  // Descrição vem direto do dado da option, sem tentar "descascar" o
+  // prefixo "valor - " do label. Se não houver description explícita,
+  // cai de volta pro label (comportamento antigo).
   const getDescription = option => option.description || option.label;
 
   const getDisplayValue = option => {
@@ -466,8 +463,6 @@
     });
   };
 
-  // Nomeia os inputs com o índice da linha (ex.: destinatariosN/assinado_emN)
-  // para que fiquem correlacionados pelo número da linha no banco.
   const renumberRepeatableRows = (container, rowSelector, fields, removeSelector) => {
     const rows = Array.from(container.querySelectorAll(rowSelector));
 
@@ -484,8 +479,6 @@
     });
   };
 
-  // Função genérica de "adicionar linha" reutilizada por destinatários,
-  // observadores e qualquer outra lista repetível baseada em clonagem de linha.
   const initRepeatableList = ({
     listSelector,
     rowSelector,
@@ -906,10 +899,11 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
   } else if (id_etapa === 'Cancelado'){
     id_etapa = 'Cancelado'
   }
-   const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
-      method: 'POST',
-      body: formData
-    });
+
+  const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
+    method: 'POST',
+    body: formData
+  });
   window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}`;
   return formData;
 };
@@ -933,6 +927,13 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
+    if (
+      field.name === 'comentario'
+      && !['Aprovado', 'Finalizado'].includes(id_proxet)
+    ) {
+      return;
+    }
+
     if (field.type === 'file' && field.files.length === 0){
       return field.files.length;
     } else if (field.type === 'file' && field.files.length > 0) {
@@ -947,8 +948,6 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   if (id_proxet === 'Correcao'){
     const etapaSelect = document.getElementById('correctionTarget');
     id_proxet = etapaSelect.value
-  } else if (id_proxet === 'Cancelado'){
-    id_proxet = 'Cancelado'
   }
 
   if (['Aprovado', 'Finalizado'].includes(id_proxet)) {
@@ -959,21 +958,93 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
     formData.set('correction_reason', valorComentario);
   }
 
-   console.log(id_etapa);
-   const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
-      method: 'POST',
-      body: formData
-    });
+  console.log(id_etapa);
+  const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
+    method: 'POST',
+    body: formData
+  });
   window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
   return formData;
 };
 
+function abrirModalConclusao(id_proxet) {
+  const modalElement = document.getElementById('completionModal');
+
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.dataset.conclusionTarget = id_proxet;
+  bootstrap.Modal.getOrCreateInstance(modalElement).show();
+}
+
+function confirmarConclusao(document, id_chamada, id_etapa) {
+  const modalElement = document.getElementById('completionModal');
+  const id_proxet = modalElement?.dataset.conclusionTarget;
+
+  if (!id_proxet) {
+    return;
+  }
+
+  return enviarEtapa(document, id_chamada, id_etapa, id_proxet);
+}
+
+async function filtrarForm(document){
+  const checagem = document.querySelector(
+    '[name="tp_checagem"]:checked'
+  )?.value;
+  console.log('checagem:', checagem);
+  const empreendimento = document.getElementsByName('empreendimento')[0]?.value;
+  console.log('empreendimento:', empreendimento);
+  const form_abertos = JSON.parse(
+    document.getElementById('teste').textContent
+  );
+  let lista_final = []
+  let resultado = document.getElementById('resultado');
+  resultado.textContent = '[]';
+  const empCheck = new Map();
+  if (checagem && empreendimento){
+    for (const form of form_abertos){
+      const registro = empCheck.get(form.id_chamada) || {
+        criterios: new Set(),
+        camposNao: []
+      };
+
+      if (form.campo === 'tp_checagem' && form.valor === checagem){
+        registro.criterios.add('Checagem');
+      }
+      if (form.campo === 'empreendimento' && form.valor === empreendimento){
+        registro.criterios.add('Empreendimento');
+      }
+      if (form.valor === 'NAO'){
+        registro.criterios.add('NAO');
+        registro.camposNao.push(form.campo);
+      }
+
+      empCheck.set(form.id_chamada, registro);
+    }
+
+    for (const registro of empCheck.values()){
+      const temTodosOsCriterios =
+        registro.criterios.has('Checagem') &&
+        registro.criterios.has('Empreendimento') &&
+        registro.criterios.has('NAO');
+
+      if (temTodosOsCriterios){
+        lista_final.push(...registro.camposNao);
+      }
+    }
+  }
+  resultado.textContent = JSON.stringify(lista_final);
+  window.ImpperForms?.refreshConditionalSections(document);
+  return lista_final;
+}
+
 async function assumir(idChamada, id_etapa) {
   await fetch(`/Assumir/${idChamada}/${id_etapa}`, { method: "POST" });
-  location.reload(); 
+  location.reload();
 };
 
-// Mantida para compatibilidade; os campos agora se auto-inicializam via [data-search-field].
 function campoPesquisa(document, campo) {
   return window.ImpperSearchSelect.initSearchField(document, campo);
 }

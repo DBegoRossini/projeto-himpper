@@ -671,33 +671,20 @@ def exec_tarefas(id_chamada, id_etapa, context):
         modo_execucao= us_atuante,
     )
 
-def detect_mime(file_bytes: bytes) -> str:
-    # PDF
-    if file_bytes.startswith(b'%PDF'):
-        return 'application/pdf'
-    # PNG
-    if file_bytes.startswith(b'\x89PNG'):
-        return 'image/png'
-    # JPEG
-    if file_bytes[:3] == b'\xff\xd8\xff':
-        return 'image/jpeg'
-    # DOCX / ZIP (DOCX é um ZIP internamente)
-    if file_bytes[:2] == b'PK':
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    # fallback
-    return 'application/octet-stream'
 
 @app.route("/arquivo/<int:id_arquivo>")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def download_arquivo(id_arquivo, context):
     data = Formularios.query.filter_by(id=id_arquivo).first()
-    file_bytes = base64.b64decode(data.valor) if data else None
+    data_splitted = data.valor.split(" - ") if data and data.valor else []
+    file_bytes = base64.b64decode(data_splitted[1]) if data else None
 
     if not file_bytes:
         abort(404)
 
-    mime = detect_mime(file_bytes)
+    mime = data_splitted[0] if data else None
+    print(mime)
     file_io = BytesIO(file_bytes)
 
     return send_file(

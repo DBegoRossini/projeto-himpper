@@ -1429,7 +1429,7 @@
                         class="imp-upload__input"
                         type="file"
                         id="planilha_servicos"
-                        name="Planilha de Serviços Contratados"
+                        name="planilha_servicos"
                         data-impper-file-output="#planilhaServicosFileName"
                         {% if
                             not modo_execucao
@@ -1559,7 +1559,7 @@
                         class="imp-upload__input"
                         type="file"
                         id="cronograma_execucao"
-                        name="Cronograma de Execução de Serviços"
+                        name="cronograma_execucao"
                         data-impper-file-output="#cronogramaExecucaoFileName"
                         {% if
                             not modo_execucao
@@ -2665,4 +2665,56 @@
         </div>
     </div>
 </section>
+{% endif %}
+
+{% set aprovado = 'Aprovado' %}
+{% set reprovado = 'Reprovado' %}
+
+{% if modo_execucao and pode_editar %}
+
+    <div class="imp-execution-actions">
+
+        <div class="imp-execution-actions__copy">
+
+            <strong>
+                Revise a solicitação antes de prosseguir.
+            </strong>
+
+            <span>
+                Escolha a ação que deseja realizar nesta etapa.
+            </span>
+
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="abrirModalConclusao('{{ aprovado }}')"
+            >
+            Aprovar
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelationModal"
+            >
+            Reprovar
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#correctionModal"
+            >
+                Correção
+            </button>
+        </div>
+
+    </div>
+
 {% endif %}
