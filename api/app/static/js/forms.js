@@ -964,6 +964,13 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
+    if (
+      field.name === 'comentario'
+      && !['Aprovado', 'Finalizado'].includes(id_proxet)
+    ) {
+      return;
+    }
+
     if (field.type === 'file' && field.files.length === 0){
       return field.files.length;
     } else if (field.type === 'file' && field.files.length > 0) {
@@ -990,10 +997,48 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   return formData;
 };
 
-async function assumir(idChamada, id_etapa) {
-  await fetch(`/Assumir/${idChamada}/${id_etapa}`, { method: "POST" });
-  location.reload(); 
-};
+function abrirModalConclusao(id_proxet) {
+  const modalElement = document.getElementById('completionModal');
+
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.dataset.conclusionTarget = id_proxet;
+  bootstrap.Modal.getOrCreateInstance(modalElement).show();
+}
+
+function confirmarConclusao(document, id_chamada, id_etapa) {
+  const modalElement = document.getElementById('completionModal');
+  const id_proxet = modalElement?.dataset.conclusionTarget;
+
+  if (!id_proxet) {
+    return;
+  }
+
+  return enviarEtapa(document, id_chamada, id_etapa, id_proxet);
+}
+
+async function filtrarForm(document){
+  const checagem = document.querySelector(
+    '[name="tp_checagem"]:checked'
+  )?.value;
+  console.log('checagem:', checagem);
+  const empreendimento = document.getElementsByName('empreendimento')[0]?.value;
+  console.log('empreendimento:', empreendimento);
+  const form_abertos = JSON.parse(
+    document.getElementById('teste').textContent
+);
+  let lista_final = []
+  let resultado = document.getElementById('resultado');
+  resultado.textContent = '[]';
+  const empCheck = new Map();
+  if (checagem && empreendimento){
+    for (const form of form_abertos){
+      const registro = empCheck.get(form.id_chamada) || {
+        criterios: new Set(),
+        camposNao: []
+      };
 
 // Mantida para compatibilidade; os campos agora se auto-inicializam via [data-search-field].
 function campoPesquisa(document, campo) {
