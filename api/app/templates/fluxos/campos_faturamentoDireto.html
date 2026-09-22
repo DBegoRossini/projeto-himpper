@@ -979,7 +979,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-primary"
-                    onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'Suprimentos')"
+                    onclick="abrirModalConclusao('Suprimentos')"
                 >
                 Enviar para Suprimentos
                 </button>
@@ -988,7 +988,7 @@
             <button
                 type="button"
                 class="btn btn-primary"
-                onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', '{{ aprovado }}')"
+                onclick="abrirModalConclusao('{{ aprovado }}')"
             >
             {% if etapa_id in ['FD-01', 'FD-02'] %}
                 Aprovar
@@ -1002,7 +1002,7 @@
                     type="button"
                     class="btn btn-outline-primary"
                     data-bs-toggle="modal"
-                    data-bs-target="#cancelationModal"
+                    data-bs-target="#correctionModal"
                 >
                     Correção
                 </button>

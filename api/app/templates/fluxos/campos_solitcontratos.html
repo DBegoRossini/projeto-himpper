@@ -2666,3 +2666,55 @@
     </div>
 </section>
 {% endif %}
+
+{% set aprovado = 'Aprovado' %}
+{% set reprovado = 'Reprovado' %}
+
+{% if modo_execucao and pode_editar %}
+
+    <div class="imp-execution-actions">
+
+        <div class="imp-execution-actions__copy">
+
+            <strong>
+                Revise a solicitação antes de prosseguir.
+            </strong>
+
+            <span>
+                Escolha a ação que deseja realizar nesta etapa.
+            </span>
+
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="abrirModalConclusao('{{ aprovado }}')"
+            >
+            Aprovar
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelationModal"
+            >
+            Reprovar
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#correctionModal"
+            >
+                Correção
+            </button>
+        </div>
+
+    </div>
+
+{% endif %}
