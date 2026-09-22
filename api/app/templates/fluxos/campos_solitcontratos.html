@@ -150,10 +150,10 @@
     {% set _ = f_assinado_em.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
 
-{% set f_observadores = [] %}
-{% for key in keys if 'observadores' in key %}
-    {% set _ = f_observadores.append(formularios_map.get(key) if modo_execucao else none) %}
-{% endfor %}
+{% set f_observadores =
+    formularios_map.get('observadores')
+    if modo_execucao else none
+%}
 
 {% set f_contrato_assinado =
     formularios_map.get('contrato_assinado')
@@ -461,7 +461,7 @@
     or (
         permitir_edicao
         and f_observadores
-        and (f_observadores[0].editavel|string|lower|trim)
+        and (f_observadores.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -2105,6 +2105,7 @@
 </section>
 {% endif %}
 
+{% if etapa_id == 'EC-01-C' or f_destinatarios %}
 <section class="imp-form-section">
     <div class="imp-form-section__head">
 
@@ -2334,7 +2335,7 @@
                                             type="text"
                                             name="destinatarios{{ loop.index0 }}"
                                             class="form-control"
-                                            placeholder="E-mail ou nome do destinatário"
+                                            placeholder="E-mail do destinatário"
                                             data-destinatario-input
                                             value="{{ f_destinatario.valor if f_destinatario and f_destinatario.valor is not none else '' }}"
                                             {% if destinatarios_editavel %}required{% endif %}
@@ -2458,76 +2459,60 @@
 
             </div>
 
+            {% if modo_execucao and f_observadores %}
+                {% for observador in f_observadores %}
+                    <div class="imp-execution-current-file">
+
+                        <div>
+
+                        <strong>
+                            Observador atual
+                        </strong>
+
+                        <span>
+                            {{ observador.valor }}
+                        </span>
+
+                        </div>
+
+
+                    </div>
+
+                {% endfor %}
+            {% endif %}
+
             <div
                 class="imp-nature-list"
                 id="observadoresList"
                 data-observadores-list
             >
 
-                {% if modo_execucao and f_observadores %}
+                <div
+                    class="imp-observador-row"
+                    data-observador-row
+                >
 
-                    {% for f_observador in f_observadores %}
-
-                        <div
-                            class="imp-observador-row"
-                            data-observador-row
-                        >
-
-                            <input
-                                type="text"
-                                name="observadores{{ loop.index0 }}"
-                                class="form-control flex-grow-1"
-                                data-observador-input
-                                value="{{ f_observador.valor if f_observador and f_observador.valor is not none else '' }}"
-                                {% if observadores_editavel %}required{% endif %}
-                                {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
-                            >
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary btn-sm imp-observador-remove"
-                                data-remove-observador
-                                aria-label="Remover Observador"
-                                {% if f_observadores|length <= 1 %}hidden{% endif %}
-                                {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
-                            >
-                                Remover
-                            </button>
-
-                        </div>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <div
-                        class="imp-observador-row"
-                        data-observador-row
+                    <input
+                        type="text"
+                        name="observadores"
+                        class="form-control flex-grow-1"
+                        data-observador-input
+                        {% if observadores_editavel %}required{% endif %}
+                        {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
                     >
 
-                        <input
-                            type="text"
-                            name="observadores0"
-                            class="form-control flex-grow-1"
-                            data-observador-input
-                            {% if observadores_editavel %}required{% endif %}
-                            {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
-                        >
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm imp-observador-remove"
+                        data-remove-observador
+                        aria-label="Remover Observador"
+                        hidden
+                        {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                        Remover
+                    </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary btn-sm imp-observador-remove"
-                            data-remove-observador
-                            aria-label="Remover Observador"
-                            hidden
-                            {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
-                        >
-                            Remover
-                        </button>
-
-                    </div>
-
-                {% endif %}
+                </div>
 
             </div>
 
@@ -2535,3 +2520,149 @@
         
     </div>
 </section>
+{% endif %}
+
+{% if etapa_id == 'EC-04' or f_contrato_assinado %}
+<section class="imp-section">
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Contrato assinado
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="planilha_servicos"
+        >
+
+            <span class="imp-label">
+                Planilha de Serviços Contratados
+                <span class="imp-label__required">*</span>
+            </span>
+
+
+            {% if
+                modo_execucao
+                and f_planilha_servicos
+                and f_planilha_servicos.valor
+            %}
+
+                <div class="imp-execution-current-file">
+
+                    <div>
+
+                        <strong>
+                            Arquivo atual
+                        </strong>
+
+                        <span>
+                            Planilha de serviços registrada nesta solicitação.
+                        </span>
+
+                    </div>
+
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(
+                            'download_arquivo',
+                            id_arquivo=f_planilha_servicos.id
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if planilha_servicos_editavel %}
+
+                <div class="imp-upload">
+
+                    <input
+                        class="imp-upload__input"
+                        type="file"
+                        id="contrato_assinado"
+                        name="Contrato Assinado"
+                        data-impper-file-output="#contratoAssinadoFileName"
+                        {% if
+                            not modo_execucao
+                            or not (
+                                f_planilha_servicos
+                                and f_planilha_servicos.valor
+                            )
+                        %}
+                            required
+                        {% endif %}
+                    >
+
+                    <label
+                        class="imp-upload__label"
+                        for="contrato_assinado"
+                    >
+
+                        <span class="imp-upload__copy">
+
+                            <strong>
+
+                                {% if
+                                    modo_execucao
+                                    and f_contrato_assinado
+                                    and f_contrato_assinado.valor
+                                %}
+                                    Substituir arquivo
+                                {% else %}
+                                    Anexe o arquivo
+                                {% endif %}
+
+                            </strong>
+
+                            <span>
+                                Selecione o contrato assinado.
+                            </span>
+
+                        </span>
+
+                        <span class="imp-upload__action">
+                            Selecionar arquivo
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div
+                    id="contratoAssinadoFileName"
+                    class="imp-file-name"
+                >
+                    Nenhum novo arquivo selecionado.
+                </div>
+
+
+            {% elif not (
+                modo_execucao
+                and f_contrato_assinado
+                and f_contrato_assinado.valor
+            ) %}
+
+                <p class="imp-help">
+                    Nenhum arquivo anexado.
+                </p>
+
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+{% endif %}

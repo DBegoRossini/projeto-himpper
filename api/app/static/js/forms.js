@@ -466,50 +466,59 @@
     });
   };
 
-  // Nomeia os inputs com o índice da linha (destinatariosN/assinado_emN)
+  // Nomeia os inputs com o índice da linha (ex.: destinatariosN/assinado_emN)
   // para que fiquem correlacionados pelo número da linha no banco.
-  const renumberDestinatariosRows = list => {
-    const rows = Array.from(list.querySelectorAll("[data-destinatario-row]"));
+  const renumberRepeatableRows = (container, rowSelector, fields, removeSelector) => {
+    const rows = Array.from(container.querySelectorAll(rowSelector));
 
     rows.forEach((row, index) => {
-      const destinatarioInput = row.querySelector("[data-destinatario-input]");
-      const assinadoEmInput = row.querySelector("[data-assinado-em-input]");
-      const removeButton = row.querySelector("[data-remove-destinatario]");
+      fields.forEach(({ selector, prefix }) => {
+        const input = row.querySelector(selector);
 
-      if (destinatarioInput) destinatarioInput.name = `destinatarios${index}`;
-      if (assinadoEmInput) assinadoEmInput.name = `assinado_em${index}`;
+        if (input) input.name = `${prefix}${index}`;
+      });
+
+      const removeButton = row.querySelector(removeSelector);
+
       if (removeButton) removeButton.hidden = rows.length === 1;
     });
   };
 
-  const initDestinatariosList = scope => {
+  // Função genérica de "adicionar linha" reutilizada por destinatários,
+  // observadores e qualquer outra lista repetível baseada em clonagem de linha.
+  const initRepeatableList = ({
+    listSelector,
+    rowSelector,
+    addSelector,
+    removeSelector,
+    fields
+  }) => scope => {
     const root = scope || document;
 
-    root.querySelectorAll("[data-destinatarios-list]").forEach(list => {
-      const addButton = root.querySelector("[data-add-destinatario]");
+    root.querySelectorAll(listSelector).forEach(list => {
+      const addButton = root.querySelector(addSelector);
+      const container = list.querySelector("tbody") || list;
 
-      renumberDestinatariosRows(list);
+      renumberRepeatableRows(container, rowSelector, fields, removeSelector);
 
       list.addEventListener("click", event => {
-        const removeButton = event.target.closest(
-          "[data-remove-destinatario]"
-        );
+        const removeButton = event.target.closest(removeSelector);
 
         if (!removeButton || removeButton.disabled) return;
 
-        const row = removeButton.closest("[data-destinatario-row]");
-        const rows = list.querySelectorAll("[data-destinatario-row]");
+        const row = removeButton.closest(rowSelector);
+        const rows = container.querySelectorAll(rowSelector);
 
         if (row && rows.length > 1) {
           row.remove();
-          renumberDestinatariosRows(list);
+          renumberRepeatableRows(container, rowSelector, fields, removeSelector);
         }
       });
 
       addButton?.addEventListener("click", () => {
         if (addButton.disabled) return;
 
-        const rows = list.querySelectorAll("[data-destinatario-row]");
+        const rows = container.querySelectorAll(rowSelector);
         const lastRow = rows[rows.length - 1];
 
         if (!lastRow) return;
@@ -521,74 +530,32 @@
           input.setCustomValidity("");
         });
 
-        list.appendChild(clone);
-        renumberDestinatariosRows(list);
+        container.appendChild(clone);
+        renumberRepeatableRows(container, rowSelector, fields, removeSelector);
 
-        clone.querySelector("[data-destinatario-input]")?.focus();
+        clone.querySelector(fields[0].selector)?.focus();
       });
     });
   };
 
-  // Nomeia os inputs com o índice da linha (observadoresN) para
-  // preservar cada valor como um campo distinto no envio do formulário.
-  const renumberObservadoresRows = list => {
-    const rows = Array.from(list.querySelectorAll("[data-observador-row]"));
+  const initDestinatariosList = initRepeatableList({
+    listSelector: "[data-destinatarios-list]",
+    rowSelector: "[data-destinatario-row]",
+    addSelector: "[data-add-destinatario]",
+    removeSelector: "[data-remove-destinatario]",
+    fields: [
+      { selector: "[data-destinatario-input]", prefix: "destinatarios" },
+      { selector: "[data-assinado-em-input]", prefix: "assinado_em" }
+    ]
+  });
 
-    rows.forEach((row, index) => {
-      const observadorInput = row.querySelector("[data-observador-input]");
-      const removeButton = row.querySelector("[data-remove-observador]");
-
-      if (observadorInput) observadorInput.name = `observadores${index}`;
-      if (removeButton) removeButton.hidden = rows.length === 1;
-    });
-  };
-
-  const initObservadoresList = scope => {
-    const root = scope || document;
-
-    root.querySelectorAll("[data-observadores-list]").forEach(list => {
-      const addButton = root.querySelector("[data-add-observador]");
-
-      renumberObservadoresRows(list);
-
-      list.addEventListener("click", event => {
-        const removeButton = event.target.closest(
-          "[data-remove-observador]"
-        );
-
-        if (!removeButton || removeButton.disabled) return;
-
-        const row = removeButton.closest("[data-observador-row]");
-        const rows = list.querySelectorAll("[data-observador-row]");
-
-        if (row && rows.length > 1) {
-          row.remove();
-          renumberObservadoresRows(list);
-        }
-      });
-
-      addButton?.addEventListener("click", () => {
-        if (addButton.disabled) return;
-
-        const rows = list.querySelectorAll("[data-observador-row]");
-        const lastRow = rows[rows.length - 1];
-
-        if (!lastRow) return;
-
-        const clone = lastRow.cloneNode(true);
-
-        clone.querySelectorAll("input").forEach(input => {
-          input.value = "";
-          input.setCustomValidity("");
-        });
-
-        list.appendChild(clone);
-        renumberObservadoresRows(list);
-
-        clone.querySelector("[data-observador-input]")?.focus();
-      });
-    });
-  };
+  const initObservadoresList = initRepeatableList({
+    listSelector: "[data-observadores-list]",
+    rowSelector: "[data-observador-row]",
+    addSelector: "[data-add-observador]",
+    removeSelector: "[data-remove-observador]",
+    fields: [{ selector: "[data-observador-input]", prefix: "observadores" }]
+  });
 
   window.ImpperSearchSelect = {
     normalizeText,
@@ -966,13 +933,6 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
-    if (
-      field.name === 'comentario'
-      && !['Aprovado', 'Finalizado'].includes(id_proxet)
-    ) {
-      return;
-    }
-
     if (field.type === 'file' && field.files.length === 0){
       return field.files.length;
     } else if (field.type === 'file' && field.files.length > 0) {
@@ -990,6 +950,15 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   } else if (id_proxet === 'Cancelado'){
     id_proxet = 'Cancelado'
   }
+
+  if (['Aprovado', 'Finalizado'].includes(id_proxet)) {
+    const comentario = document.getElementById('comentario_conclusao');
+    const valorComentario = comentario?.value?.trim() || '';
+
+    formData.set('comentario', valorComentario);
+    formData.set('correction_reason', valorComentario);
+  }
+
    console.log(id_etapa);
    const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
       method: 'POST',
@@ -999,48 +968,10 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   return formData;
 };
 
-function abrirModalConclusao(id_proxet) {
-  const modalElement = document.getElementById('completionModal');
-
-  if (!modalElement) {
-    return;
-  }
-
-  modalElement.dataset.conclusionTarget = id_proxet;
-  bootstrap.Modal.getOrCreateInstance(modalElement).show();
-}
-
-function confirmarConclusao(document, id_chamada, id_etapa) {
-  const modalElement = document.getElementById('completionModal');
-  const id_proxet = modalElement?.dataset.conclusionTarget;
-
-  if (!id_proxet) {
-    return;
-  }
-
-  return enviarEtapa(document, id_chamada, id_etapa, id_proxet);
-}
-
-async function filtrarForm(document){
-  const checagem = document.querySelector(
-    '[name="tp_checagem"]:checked'
-  )?.value;
-  console.log('checagem:', checagem);
-  const empreendimento = document.getElementsByName('empreendimento')[0]?.value;
-  console.log('empreendimento:', empreendimento);
-  const form_abertos = JSON.parse(
-    document.getElementById('teste').textContent
-);
-  let lista_final = []
-  let resultado = document.getElementById('resultado');
-  resultado.textContent = '[]';
-  const empCheck = new Map();
-  if (checagem && empreendimento){
-    for (const form of form_abertos){
-      const registro = empCheck.get(form.id_chamada) || {
-        criterios: new Set(),
-        camposNao: []
-      };
+async function assumir(idChamada, id_etapa) {
+  await fetch(`/Assumir/${idChamada}/${id_etapa}`, { method: "POST" });
+  location.reload(); 
+};
 
 // Mantida para compatibilidade; os campos agora se auto-inicializam via [data-search-field].
 function campoPesquisa(document, campo) {
