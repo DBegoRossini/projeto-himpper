@@ -1388,30 +1388,22 @@ function filtrarDestinosCorrecaoOC() {
     String(
       stageElement.dataset.ocHasCentralHistory || ""
     ).trim().toLowerCase() === "true";
-  const validationStages = [
-    "OC-C-06-C",
-    "OC-05-A",
-    "OC-05-B"
-  ];
-  const centralCorrectionTarget = currentStage === "OC-01"
-    ? ["OC-C-03"]
-    : validationStages.includes(currentStage) && hasCentralHistory
-      ? ["OC-C-06-B"]
-      : [];
-
-  if (currentStage === "OC-05-A") {
-    centralCorrectionTarget.push("OC-C-06-C");
-  }
+  const correctionTargets = {
+    "OC-01": ["OC-C-03"],
+    "OC-C-06-B": ["OC-C-06-A"],
+    "OC-C-06-C": [hasCentralHistory ? "OC-C-06-B" : "OC-C-06-A"],
+    "OC-05-B": [hasCentralHistory ? "OC-C-06-B" : "OC-C-06-A"],
+    "OC-05-A": hasCentralHistory
+      ? ["OC-C-06-C", "OC-C-06-B"]
+      : ["OC-C-06-C", "OC-C-06-A"],
+    "OC-05-C": hasCentralHistory
+      ? ["OC-C-06-C", "OC-C-06-B"]
+      : ["OC-C-06-C", "OC-C-06-A"]
+  };
+  const allowedTargets = correctionTargets[currentStage] || [];
 
   Array.from(target.options).forEach(option => {
-    const isCentralCorrection = [
-      "OC-C-03",
-      "OC-C-06-B"
-    ].includes(option.value);
-
-    option.hidden = centralCorrectionTarget.length
-      ? !centralCorrectionTarget.includes(option.value)
-      : isCentralCorrection && option.value !== "OC-C-06-C";
+    option.hidden = !allowedTargets.includes(option.value);
   });
 
   const visibleOptions = Array.from(target.options)
