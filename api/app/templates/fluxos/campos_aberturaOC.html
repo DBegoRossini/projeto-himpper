@@ -90,6 +90,7 @@
         'OC-05-A',
         'OC-05-B',
         'OC-05-C',
+        'OC-10',
         'OC-07',
         'OC-C-06-A',
         'OC-C-06-B'
@@ -304,7 +305,7 @@
                Não aparece em OC-C-03
                ================================================= #}
 
-            {% if etapa_atual != 'OC-C-03' and etapa_atual != 'OC-C-06-A' %}
+            {% if etapa_atual != 'OC-10' and etapa_atual != 'OC-C-03' and etapa_atual != 'OC-C-06-A' %}
 
                 <button
                     type="button"
@@ -341,18 +342,17 @@
                     class="btn btn-primary"
                     onclick="abrirModalConclusao('Aprovado')"
                 >
-                    Concluir
+                    {% if etapa_atual == 'OC-10' %}Aprovar{% else %}Concluir{% endif %}
                 </button>
 
             {% endif %}
 
 
-            {# =================================================
-               CANCELAR
-               Não aparece em OC-C-03
-               ================================================= #}
+                {# =================================================
+                    CANCELAR
+                    ================================================= #}
 
-            {% if etapa_atual != 'OC-C-03' %}
+                {% if etapa_atual %}
 
                 <button
                     type="button"
@@ -360,7 +360,7 @@
                     data-bs-toggle="modal"
                     data-bs-target="#cancelationModal"
                 >
-                    Cancelar
+                    {% if etapa_atual == 'OC-10' %}Reprovar{% else %}Cancelar{% endif %}
                 </button>
 
             {% endif %}
