@@ -807,7 +807,7 @@
 
             </div>
 
-             <div
+            <div
                 class="imp-field imp-field--full"
                 data-field-wrap="anexos"
             >
@@ -942,8 +942,19 @@
         </div>
 </section>
 
-{% set aprovado = 'Aprovado' %}
-{% set reprovado = 'Correção' %}
+
+{% if etapa_id in ['FD-01', 'FD-02'] %}
+    {% set aprovado = 'Aprovado' %}
+{% else %}
+    {% set aprovado = 'Concluir' %}
+{% endif %}
+
+{% if etapa_id in ['FD-01', 'FD-02'] %}
+    {% set reprovado = 'FD-C-07' %}
+{% else %}
+    {% set reprovado = 'Cancelar' %}
+{% endif %}
+
                     
 
 {% if modo_execucao and pode_editar %}
@@ -964,6 +975,15 @@
 
         <div class="d-flex flex-column flex-sm-row gap-2">
 
+            {% if etapa_id in ['FD-02'] %}
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'Suprimentos')"
+                >
+                Enviar para Suprimentos
+                </button>
+            {% endif %}
 
             <button
                 type="button"
@@ -977,15 +997,16 @@
             {% endif %}
             </button>
 
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#cancelationModal"
-            >
-                Cancelar
-            </button>
-
+            {% if etapa_id in ['FD-01', 'FD-02'] %}
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#cancelationModal"
+                >
+                    Correção
+                </button>
+            {% endif %}
         </div>
 
     </div>

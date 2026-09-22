@@ -436,7 +436,6 @@
                         value="{{ execucao.id if execucao else '' }}"
                     >
 
-
                     {% set modo_execucao = true %}
                     {% set permitir_edicao = pode_editar %}
 
@@ -743,6 +742,103 @@
                             onclick="enviarEtapa(document, '{{ id_chamada }}', '{{ etapa_id }}', 'Cancelado')"
                         >
                             Cancelar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    {% if pode_editar %}
+
+        <div
+            class="modal fade"
+            id="completionModal"
+            tabindex="-1"
+            aria-labelledby="completionModalLabel"
+            aria-hidden="true"
+        >
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <div>
+
+                            <span class="imp-kicker">
+                                Solicitação #{{ id_chamada }}
+                            </span>
+
+                            <h2
+                                class="modal-title fs-5"
+                                id="completionModalLabel"
+                            >
+                                Confirmar conclusão
+                            </h2>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fechar"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p class="imp-subtitle">
+                            Tem certeza que deseja concluir esta etapa?
+                        </p>
+
+                        <div class="imp-field">
+
+                            <label
+                                class="imp-label"
+                                for="comentario_conclusao"
+                            >
+                                Comentário
+                                <span class="imp-help">(opcional)</span>
+                            </label>
+
+                            <textarea
+                                id="comentario_conclusao"
+                                name="comentario"
+                                class="form-control"
+                                rows="4"
+                                maxlength="2000"
+                                placeholder="Adicione um comentário sobre esta etapa, se necessário."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-neutral"
+                            data-bs-dismiss="modal"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            onclick="confirmarConclusao(document, '{{ id_chamada }}', '{{ etapa_id }}')"
+                        >
+                            Concluir
                         </button>
 
                     </div>

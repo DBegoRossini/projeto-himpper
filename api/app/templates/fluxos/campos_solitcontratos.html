@@ -15,6 +15,10 @@
     formularios_map.get('tp_contrato')
     if modo_execucao else none
 %}
+{% set f_faturamento_direto =
+    formularios_map.get('faturamento_direto')
+    if modo_execucao else none
+%}
 
 {% set f_mot_adit =
     formularios_map.get('mot_adit')
@@ -72,49 +76,90 @@
 %}
 
 {% set f_pz_entrega =
-    formularios_map.get('Prazo para entrega')
+    formularios_map.get('pz_entrega')
     if modo_execucao else none
 %}
 
 {% set f_pz_entrega_objeto =
-    formularios_map.get('Prazo Para Entrega do Objeto/Serviço')
+    formularios_map.get('pz_entrega_objeto')
     if modo_execucao else none
 %}
 
 {% set f_planilha_servicos =
-    formularios_map.get('Planilha de Serviços Contratados')
+    formularios_map.get('planilha_servicos')
     if modo_execucao else none
 %}
 
 {% set f_cronograma_execucao =
-    formularios_map.get('Cronograma de Execução de Serviços')
+    formularios_map.get('cronograma_execucao')
     if modo_execucao else none
 %}
 
 {% set f_quadro_concorrencia =
-    formularios_map.get('Quadro de Concorrência Aprovado')
+    formularios_map.get('quadro_concorrencia')
     if modo_execucao else none
 %}
 
 {% set f_percentual_mdo =
-    formularios_map.get('Percentual de MDO')
+    formularios_map.get('percentual_mdo')
     if modo_execucao else none
 %}
 
 {% set f_percentual_mat =
-    formularios_map.get('Percentual de MAT')
+    formularios_map.get('percentual_mat')
     if modo_execucao else none
 %}
 
 {% set f_proposta =
-    formularios_map.get('Proposta')
+    formularios_map.get('proposta')
     if modo_execucao else none
 %}
 
 {% set f_observacoes =
-    formularios_map.get('Observacoes')
+    formularios_map.get('observacoes')
     if modo_execucao else none
 %}
+
+{% set f_cont_IA =
+    formularios_map.get('cont_IA')
+    if modo_execucao else none
+%}
+
+{% set f_obs_IA =
+    formularios_map.get('obs_IA')
+    if modo_execucao else none
+%}
+
+{% set f_contrato_preenchido =
+    formularios_map.get('contrato_preenchido')
+    if modo_execucao else none
+%}
+
+{% set f_nm_envelope =
+    formularios_map.get('nm_envelope')
+    if modo_execucao else none
+%}
+
+{% set keys = formularios_map.keys() if modo_execucao else [] %}
+{% set f_destinatarios = [] %}
+{% set f_assinado_em = [] %}
+{% for key in keys if 'destinatarios' in key %}
+    {% set _ = f_destinatarios.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+{% for key in keys if 'assinado_em' in key %}
+    {% set _ = f_assinado_em.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
+{% set f_observadores = [] %}
+{% for key in keys if 'observadores' in key %}
+    {% set _ = f_observadores.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
+{% set f_contrato_assinado =
+    formularios_map.get('contrato_assinado')
+    if modo_execucao else none
+%}
+
 
 
 {# =========================================================
@@ -137,6 +182,16 @@
         permitir_edicao
         and f_tp_contrato
         and (f_tp_contrato.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set faturamento_direto_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_faturamento_direto
+        and (f_faturamento_direto.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -341,6 +396,86 @@
     )
 %}
 
+{% set cont_IA_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_cont_IA
+        and (f_cont_IA.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set obs_IA_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_obs_IA
+        and (f_obs_IA.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set contrato_preenchido_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_contrato_preenchido
+        and (f_contrato_preenchido.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set nm_envelope_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_nm_envelope
+        and (f_nm_envelope.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set destinatarios_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_destinatarios
+        and (f_destinatarios.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set assinado_em_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_assinado_em
+        and (f_assinado_em.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set observadores_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_observadores
+        and (f_observadores[0].editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set contrato_assinado_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_contrato_assinado
+        and (f_contrato_assinado.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
 
 {# =========================================================
    TIPO DE SOLICITAÇÃO
@@ -449,6 +584,93 @@
                 </option>
 
             </select>
+
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="faturamento_direto"
+        >
+
+            <span class="imp-label">
+                Faturamento Direto?
+                <span class="imp-label__required">*</span>
+            </span>
+
+
+            <div
+                class="imp-choice-grid imp-choice-grid--three"
+                role="radiogroup"
+                aria-label="faturamento_direto"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        id="faturamento_direto"
+                        name="faturamento_direto"
+                        value="NAO"
+                        {% if faturamento_direto_editavel %}required{% endif %}
+                        {% if
+                            modo_execucao
+                            and f_faturamento_direto
+                            and f_faturamento_direto.valor == 'NAO'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not faturamento_direto_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Não
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        id="faturamento_direto"
+                        name="faturamento_direto"
+                        value="SIM"
+                        {% if
+                            modo_execucao
+                            and f_faturamento_direto
+                            and f_faturamento_direto.valor == 'SIM'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not faturamento_direto_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Sim
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
 
         </div>
 
@@ -1467,7 +1689,7 @@
                         class="imp-upload__input"
                         type="file"
                         id="quadro_concorrencia"
-                        name="Quadro de Concorrência Aprovado"
+                        name="quadro_concorrencia"
                         data-impper-file-output="#quadroConcorrenciaFileName"
                         {% if
                             not modo_execucao
@@ -1556,7 +1778,7 @@
                 class="form-control"
                 type="text"
                 id="percentual_mdo"
-                name="Percentual de MDO"
+                name="percentual_mdo"
                 placeholder="%"
                 oninput="mascaraPercent(this)"
                 value="{{ f_percentual_mdo.valor if modo_execucao and f_percentual_mdo and f_percentual_mdo.valor is not none else '' }}"
@@ -1587,7 +1809,7 @@
                 class="form-control"
                 type="text"
                 id="percentual_mat"
-                name="Percentual de MAT"
+                name="percentual_mat"
                 placeholder="%"
                 oninput="mascaraPercent(this)"
                 value="{{ f_percentual_mat.valor if modo_execucao and f_percentual_mat and f_percentual_mat.valor is not none else '' }}"
@@ -1687,8 +1909,8 @@
                     <input
                         class="imp-upload__input"
                         type="file"
-                        id="Proposta"
-                        name="Proposta"
+                        id="proposta"
+                        name="proposta"
                         data-impper-file-output="#propostaFileName"
                         {% if
                             not modo_execucao
@@ -1801,7 +2023,7 @@
             <textarea
                 class="form-control"
                 id="observacoes"
-                name="Observacoes"
+                name="observacoes"
                 {% if observacoes_editavel %}required{% endif %}
                 {% if not observacoes_editavel %}
                     disabled
@@ -1813,4 +2035,503 @@
 
     </div>
 
+</section>
+
+{% if etapa_id == 'EC-01-C' %}
+<section class="imp-form-section">
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Contrato preenchido - IA
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="imp-form-grid">
+        <div class="imp-execution-current-file">
+
+            <div>
+
+                <strong>
+                    Contrato preenchido - IA
+                </strong>
+
+                <span>
+                    Contrato preenchido pela IA nesta solicitação.
+                </span>
+
+            </div>
+
+            <a
+                class="btn btn-outline-primary btn-sm"
+                href="{{ url_for(
+                    'download_arquivo',
+                    id_arquivo=f_cont_IA.id
+                ) }}"
+                target="_blank"
+                rel="noopener"
+            >
+                Visualizar arquivo
+            </a>
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="obs_IA"
+        >
+
+            <label
+                class="imp-label"
+                for="obs_IA"
+            >
+                Observações
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <textarea
+                class="form-control"
+                id="obs_IA"
+                name="obs_IA"
+                disabled
+                data-impper-locked="true"
+            >{{ f_obs_IA.valor if modo_execucao and f_obs_IA and f_obs_IA.valor is not none else '' }}</textarea>
+
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="imp-form-section">
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Envio do Contrato Para Assinatura
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="contrato_preenchido"
+        >
+
+            <span class="imp-label">
+                Contrato preenchido em pdf
+                <span class="imp-label__required">*</span>
+            </span>
+
+
+            {% if
+                modo_execucao
+                and f_contrato_preenchido
+                and f_contrato_preenchido.valor
+            %}
+
+                <div class="imp-execution-current-file">
+
+                    <div>
+
+                        <strong>
+                            Arquivo atual
+                        </strong>
+
+                        <span>
+                            Proposta registrada nesta solicitação.
+                        </span>
+
+                    </div>
+
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(
+                            'download_arquivo',
+                            id_arquivo=f_contrato_preenchido.id
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if contrato_preenchido_editavel %}
+
+                <div class="imp-upload">
+
+                    <input
+                        class="imp-upload__input"
+                        type="file"
+                        id="contrato_preenchido"
+                        name="contrato_preenchido"
+                        data-impper-file-output="#contrato_preenchidoFileName"
+                        {% if
+                            not modo_execucao
+                            or not (
+                                f_contrato_preenchido
+                                and f_contrato_preenchido.valor
+                            )
+                        %}
+                            required
+                        {% endif %}
+                    >
+
+                    <label
+                        class="imp-upload__label"
+                        for="contrato_preenchido"
+                    >
+
+                        <span class="imp-upload__copy">
+
+                            <strong>
+
+                                {% if
+                                    modo_execucao
+                                    and f_contrato_preenchido
+                                    and f_contrato_preenchido.valor
+                                %}
+                                    Substituir contrato preenchido
+                                {% else %}
+                                    Anexe o contrato preenchido
+                                {% endif %}
+
+                            </strong>
+
+                            <span>
+                                Selecione o arquivo do contrato preenchido.
+                            </span>
+
+                        </span>
+
+                        <span class="imp-upload__action">
+                            Selecionar arquivo
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div
+                    id="contrato_preenchidoFileName"
+                    class="imp-file-name"
+                >
+                    Nenhum novo arquivo selecionado.
+                </div>
+
+
+            {% elif not (
+                modo_execucao
+                and f_contrato_preenchido
+                and f_contrato_preenchido.valor
+            ) %}
+
+                <p class="imp-help">
+                    Nenhum arquivo anexado.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+         <div
+            class="imp-field"
+            data-field-wrap="nm_envelope"
+        >
+
+            <label
+                class="imp-label"
+                for="nm_envelope"
+            >
+                Nome do Envelope TOTVS Sign
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                class="form-control"
+                type="text"
+                id="nm_envelope"
+                name="nm_envelope"
+                value="{{ f_nm_envelope.valor if modo_execucao and f_nm_envelope and f_nm_envelope.valor is not none else '' }}"
+                {% if nm_envelope_editavel %}required{% endif %}
+                {% if not nm_envelope_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+        </div>
+
+         <div
+            class="imp-field imp-field--full"
+            data-field-wrap="destinatarios"
+        >
+
+            <div
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+            >
+
+                <div>
+
+                    <span class="imp-label">
+                        Destinatários
+                        <span class="imp-label__required">*</span>
+                    </span>
+
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos um destinatário. Você pode adicionar outros quando necessário.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-neutral btn-sm align-self-start"
+                    id="addDestinatarioButton"
+                    data-add-destinatario
+                    {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                >
+                    + Adicionar destinatário
+                </button>
+
+            </div>
+
+            <div class="imp-table-wrap">
+
+                <table class="imp-table" id="destinatariosList" data-destinatarios-list>
+
+                    <thead>
+                        <tr>
+                            <th>Destinatário</th>
+                            <th>Assinado em</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% if modo_execucao and f_destinatarios %}
+
+                            {% for f_destinatario in f_destinatarios %}
+                                {% set f_assinado = f_assinado_em[loop.index0] if loop.index0 < (f_assinado_em|length) else none %}
+
+                                <tr data-destinatario-row>
+
+                                    <td>
+                                        <input
+                                            type="text"
+                                            name="destinatarios{{ loop.index0 }}"
+                                            class="form-control"
+                                            placeholder="E-mail ou nome do destinatário"
+                                            data-destinatario-input
+                                            value="{{ f_destinatario.valor if f_destinatario and f_destinatario.valor is not none else '' }}"
+                                            {% if destinatarios_editavel %}required{% endif %}
+                                            {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                        >
+                                    </td>
+
+                                    <td>
+                                        <input
+                                            type="text"
+                                            name="assinado_em{{ loop.index0 }}"
+                                            class="form-control"
+                                            placeholder="Assinado em"
+                                            data-assinado-em-input
+                                            value="{{ f_assinado.valor if f_assinado and f_assinado.valor is not none else '' }}"
+                                            readonly
+                                            {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                        >
+                                    </td>
+
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-primary btn-sm imp-destinatario-remove"
+                                            data-remove-destinatario
+                                            aria-label="Remover Destinatário"
+                                            {% if f_destinatarios|length <= 1 %}hidden{% endif %}
+                                            {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                        >
+                                            Remover
+                                        </button>
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <tr data-destinatario-row>
+
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="destinatarios0"
+                                        class="form-control"
+                                        placeholder="E-mail ou nome do destinatário"
+                                        data-destinatario-input
+                                        {% if destinatarios_editavel %}required{% endif %}
+                                        {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                    >
+                                </td>
+
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="assinado_em0"
+                                        class="form-control"
+                                        placeholder="Assinado em"
+                                        data-assinado-em-input
+                                        readonly
+                                        disabled data-impper-locked="true"
+                                    >
+                                </td>
+
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary btn-sm imp-destinatario-remove"
+                                        data-remove-destinatario
+                                        aria-label="Remover Destinatário"
+                                        hidden
+                                        {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                    >
+                                        Remover
+                                    </button>
+                                </td>
+
+                            </tr>
+
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="observadores"
+        >
+
+            <div
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
+            >
+
+                <div>
+
+                    <span class="imp-label">
+                        Observadores
+                        <span class="imp-label__required">*</span>
+                    </span>
+
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos um observador. Você pode adicionar outros quando necessário.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-neutral btn-sm align-self-start"
+                    id="addObservadorButton"
+                    data-add-observador
+                    {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                >
+                    + Adicionar observador
+                </button>
+
+            </div>
+
+            <div
+                class="imp-nature-list"
+                id="observadoresList"
+                data-observadores-list
+            >
+
+                {% if modo_execucao and f_observadores %}
+
+                    {% for f_observador in f_observadores %}
+
+                        <div
+                            class="imp-observador-row"
+                            data-observador-row
+                        >
+
+                            <input
+                                type="text"
+                                name="observadores{{ loop.index0 }}"
+                                class="form-control flex-grow-1"
+                                data-observador-input
+                                value="{{ f_observador.valor if f_observador and f_observador.valor is not none else '' }}"
+                                {% if observadores_editavel %}required{% endif %}
+                                {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                            >
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm imp-observador-remove"
+                                data-remove-observador
+                                aria-label="Remover Observador"
+                                {% if f_observadores|length <= 1 %}hidden{% endif %}
+                                {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                            >
+                                Remover
+                            </button>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div
+                        class="imp-observador-row"
+                        data-observador-row
+                    >
+
+                        <input
+                            type="text"
+                            name="observadores0"
+                            class="form-control flex-grow-1"
+                            data-observador-input
+                            {% if observadores_editavel %}required{% endif %}
+                            {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary btn-sm imp-observador-remove"
+                            data-remove-observador
+                            aria-label="Remover Observador"
+                            hidden
+                            {% if not observadores_editavel %}disabled data-impper-locked="true"{% endif %}
+                        >
+                            Remover
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+        
+    </div>
 </section>
