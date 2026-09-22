@@ -356,6 +356,13 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
       .filter(f => f.name);
   const formData = new FormData();
   fields.forEach(field => {
+    if (
+      field.name === 'comentario'
+      && !['Aprovado', 'Finalizado'].includes(id_proxet)
+    ) {
+      return;
+    }
+
     if (field.type === 'file' && field.files.length === 0){
       return field.files.length;
     } else if (field.type === 'file' && field.files.length > 0) {
@@ -379,6 +386,28 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
   return formData;
 };
+
+function abrirModalConclusao(id_proxet) {
+  const modalElement = document.getElementById('completionModal');
+
+  if (!modalElement) {
+    return;
+  }
+
+  modalElement.dataset.conclusionTarget = id_proxet;
+  bootstrap.Modal.getOrCreateInstance(modalElement).show();
+}
+
+function confirmarConclusao(document, id_chamada, id_etapa) {
+  const modalElement = document.getElementById('completionModal');
+  const id_proxet = modalElement?.dataset.conclusionTarget;
+
+  if (!id_proxet) {
+    return;
+  }
+
+  return enviarEtapa(document, id_chamada, id_etapa, id_proxet);
+}
 
 async function filtrarForm(document){
   const checagem = document.querySelector(
