@@ -1,0 +1,128 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+<section class="imp-form-section">
+    <div class="imp-form-section__head">
+        <div class="imp-form-section__copy">
+            <h3 class="imp-card__title">Tipo de atividade</h3>
+        </div>
+    </div>
+
+    <div class="imp-form-grid">
+        <div class="imp-field imp-field--full">
+            <label class="imp-label" for="tipo_atividade">
+                Tipo de atividade
+                <span class="imp-label__required">*</span>
+            </label>
+            <select id="tipo_atividade" name="tipo_atividade" class="form-select" required>
+                <option value="">Selecione uma opção</option>
+                <option value="CADASTRO_FORNECEDOR">Cadastro de fornecedor</option>
+                <option value="ALTERACAO_FORMA_PAGAMENTO">Alteração/cadastro de forma de pagamento</option>
+                <option value="ALTERACAO_DADOS_FORNECEDOR">Alteração de dados do fornecedor</option>
+            </select>
+        </div>
+    </div>
+</section>
+
+<section
+    class="imp-form-section"
+    data-impper-show-when="tipo_atividade:CADASTRO_FORNECEDOR"
+    hidden
+>
+    <div class="imp-form-section__head">
+        <div class="imp-form-section__copy">
+            <h3 class="imp-card__title">Dados do fornecedor</h3>
+        </div>
+    </div>
+
+    <div class="imp-form-grid">
+        <div class="imp-field">
+            <label class="imp-label" for="razao_social_fornecedor">Razão social <span class="imp-label__required">*</span></label>
+            <input id="razao_social_fornecedor" name="razao_social_fornecedor" type="text" class="form-control" maxlength="200" required>
+        </div>
+
+        <div class="imp-field">
+            <label class="imp-label" for="cnpj_cpf_fornecedor">CNPJ/CPF <span class="imp-label__required">*</span></label>
+            <input id="cnpj_cpf_fornecedor" name="cnpj_cpf_fornecedor" type="text" class="form-control" inputmode="numeric" autocomplete="off" maxlength="18" required data-fornecedor-documento>
+            <p class="imp-help" data-fornecedor-documento-message hidden></p>
+            <select hidden aria-hidden="true" data-fornecedores-cadastrados>
+                {% if g.fornUnic is defined %}
+                    {% for cnpj, nome in g.fornUnic %}
+                        <option value="{{ cnpj }}">{{ nome }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="imp-field">
+            <label class="imp-label" for="inscricao_estadual">Inscrição estadual <span class="imp-help">(se possuir)</span></label>
+            <input id="inscricao_estadual" name="inscricao_estadual" type="text" class="form-control" maxlength="30">
+        </div>
+
+        <div class="imp-field imp-field--full">
+            <label class="imp-label" for="endereco_completo">Endereço completo <span class="imp-label__required">*</span></label>
+            <textarea id="endereco_completo" name="endereco_completo" class="form-control" rows="3" maxlength="500" required></textarea>
+        </div>
+
+        <div class="imp-field">
+            <label class="imp-label" for="telefone_fornecedor">Telefone <span class="imp-label__required">*</span></label>
+            <input id="telefone_fornecedor" name="telefone_fornecedor" type="tel" class="form-control" maxlength="30" required>
+        </div>
+
+        <div class="imp-field">
+            <label class="imp-label" for="email_fornecedor">E-mail <span class="imp-label__required">*</span></label>
+            <input id="email_fornecedor" name="email_fornecedor" type="email" class="form-control" maxlength="200" required>
+        </div>
+
+        <div class="imp-field imp-field--full">
+            <span class="imp-label">Forma de pagamento <span class="imp-label__required">*</span></span>
+            <div class="imp-choice-grid imp-choice-grid--two" data-forma-pagamento-group>
+                <label class="imp-choice"><input type="checkbox" name="forma_pagamento" value="BOLETO"><span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Boleto</span></span></label>
+                <label class="imp-choice"><input type="checkbox" name="forma_pagamento" value="DADOS_BANCARIOS"><span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Dados bancários</span></span></label>
+                <label class="imp-choice"><input type="checkbox" name="forma_pagamento" value="CARTAO_CREDITO"><span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Cartão de crédito</span></span></label>
+                <label class="imp-choice"><input type="checkbox" name="forma_pagamento" value="DEBITO_AUTOMATICO"><span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Débito automático</span></span></label>
+                <label class="imp-choice"><input type="checkbox" name="forma_pagamento" value="PERMUTA"><span class="imp-choice__content"><span class="imp-choice__dot"></span><span class="imp-choice__text">Permuta</span></span></label>
+            </div>
+            <p class="imp-help" data-forma-pagamento-message hidden></p>
+        </div>
+    </div>
+</section>
+
+<section
+    class="imp-form-section"
+    data-impper-show-when="tipo_atividade:CADASTRO_FORNECEDOR"
+    hidden
+>
+    <div class="imp-form-section__head">
+        <div class="imp-form-section__copy">
+            <h3 class="imp-card__title">Dados bancários</h3>
+        </div>
+    </div>
+
+    <div class="imp-form-grid" data-impper-show-when="forma_pagamento:DADOS_BANCARIOS" hidden>
+        <div class="imp-field">
+            <label class="imp-label" for="nome_banco">Nome do banco <span class="imp-label__required">*</span></label>
+            <input id="nome_banco" name="nome_banco" type="text" class="form-control" maxlength="120" required>
+        </div>
+        <div class="imp-field">
+            <label class="imp-label" for="agencia_bancaria">Agência <span class="imp-label__required">*</span></label>
+            <input id="agencia_bancaria" name="agencia_bancaria" type="text" class="form-control" maxlength="20" required>
+        </div>
+        <div class="imp-field">
+            <label class="imp-label" for="conta_bancaria">Conta <span class="imp-label__required">*</span></label>
+            <input id="conta_bancaria" name="conta_bancaria" type="text" class="form-control" maxlength="30" required>
+        </div>
+        <div class="imp-field">
+            <label class="imp-label" for="digito_conta">Dígito da conta <span class="imp-label__required">*</span></label>
+            <input id="digito_conta" name="digito_conta" type="text" class="form-control" maxlength="5" required>
+        </div>
+        <div class="imp-field imp-field--full">
+            <label class="imp-label" for="tipo_conta">Conta corrente ou poupança <span class="imp-label__required">*</span></label>
+            <select id="tipo_conta" name="tipo_conta" class="form-select" required>
+                <option value="">Selecione uma opção</option>
+                <option value="CORRENTE">Conta corrente</option>
+                <option value="POUPANCA">Poupança</option>
+            </select>
+        </div>
+    </div>
+</section>
