@@ -143,12 +143,18 @@
 {% set keys = formularios_map.keys() if modo_execucao else [] %}
 {% set f_destinatarios = [] %}
 {% set f_assinado_em = [] %}
+{% set f_acoes = [] %}
 {% for key in keys if 'destinatarios' in key %}
     {% set _ = f_destinatarios.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
 {% for key in keys if 'assinado_em' in key %}
     {% set _ = f_assinado_em.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
+
+{% for key in keys if 'acao' in key %}
+    {% set _ = f_acoes.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
 
 {% set f_observadores =
     formularios_map.get('observadores')
@@ -466,6 +472,17 @@
         permitir_edicao
         and f_observadores
         and (f_observadores.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set acao_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and f_acoes
+        and (f_acoes[0].editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -2320,6 +2337,7 @@
                     <thead>
                         <tr>
                             <th>Destinatário</th>
+                            <th>Ação</th>
                             <th>Assinado em</th>
                             <th></th>
                         </tr>
@@ -2331,11 +2349,12 @@
 
                             {% for f_destinatario in f_destinatarios %}
                                 {% set f_assinado = f_assinado_em[loop.index0] if loop.index0 < (f_assinado_em|length) else none %}
+                                {% set f_acao = f_acoes[loop.index0] if loop.index0 < (f_acoes|length) else none %}
 
                                 <tr data-destinatario-row>
 
                                     <td>
-                                        <input
+                                        <select
                                             type="text"
                                             name="destinatarios{{ loop.index0 }}"
                                             class="form-control"
@@ -2345,6 +2364,30 @@
                                             {% if destinatarios_editavel %}required{% endif %}
                                             {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                         >
+                                         <option value="">Selecione um destinatário</option>
+                                        {% for colaborador in g.colaboradores %}
+                                            <option value="{{ colaborador.mail }}">{{ colaborador.displayName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                        
+                                    </td>
+
+                                    <td>
+                                        <select
+                                            type="text"
+                                            name="acao{{ loop.index0 }}"
+                                            class="form-control"
+                                            data-acao-input
+                                            value="{{ f_acao.valor if f_acao and f_acao.valor is not none else '' }}"
+                                            {% if destinatarios_editavel %}required{% endif %}
+                                            {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                        >
+                                        <option value="">{{ f_acao.valor if f_acao and f_acao.valor is not none else '' }}</option>
+                                        <option value="0" {% if f_acao[loop.index0] == '0' %}selected{% endif %}>Assinar</option>
+                                        <option value="1" {% if f_acao[loop.index0] == '1' %}selected{% endif %}>Visualizar</option>
+                                        <option value="2" {% if f_acao[loop.index0] == '2' %}selected{% endif %}>Testemunhar</option> 
+                                        <option value="4" {% if f_acao[loop.index0] == '4' %}selected{% endif %}>Assinar com certificado</option>
+                                    </select>
                                     </td>
 
                                     <td>
@@ -2382,7 +2425,7 @@
                             <tr data-destinatario-row>
 
                                 <td>
-                                    <input
+                                    <select
                                         type="text"
                                         name="destinatarios0"
                                         class="form-control"
@@ -2391,6 +2434,26 @@
                                         {% if destinatarios_editavel %}required{% endif %}
                                         {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                     >
+                                        <option value="">Selecione um destinatário</option>
+                                        {% for colaborador in g.colaboradores %}
+                                            <option value="{{ colaborador.mail }}">{{ colaborador.displayName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select
+                                        name="acao0"
+                                        class="form-control"
+                                        data-acao-input
+                                        {% if acao_editavel %}required{% endif %}
+                                        {% if not acao_editavel %}disabled data-impper-locked="true"{% endif %}
+                                    >
+                                        <option value="0" {% if f_acao[loop.index0] == '0' %}selected{% endif %}>Assinar</option>
+                                        <option value="1" {% if f_acao[loop.index0] == '1' %}selected{% endif %}>Visualizar</option>
+                                        <option value="2" {% if f_acao[loop.index0] == '2' %}selected{% endif %}>Testemunhar</option> 
+                                        <option value="4" {% if f_acao[loop.index0] == '4' %}selected{% endif %}>Assinar com certificado</option>
+                                    </select>
                                 </td>
 
                                 <td>
