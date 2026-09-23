@@ -95,13 +95,17 @@ def with_info_user(view_func):
         return view_func(*args, **kwargs)
     return wrapper
 
-def carregar_info_form():
+def carregar_info_form(context):
     credentials = base64.b64encode(
         f"{os.getenv('rm_user')}:{base64.b64decode(os.getenv('rm_senha')).decode()}".encode()
     ).decode()
     user_email = g.info_user.get("mail")
     user = user_email.split("@")[0]
-    print(user)
+    access_token = context['access_token']
+    colaboradores = requests.get(
+                f"https://graph.microsoft.com/v1.0/users?$select=displayName,mail",
+                        headers={"Authorization": f"Bearer {access_token}"}
+            )
     g.coligMov = requests.get(
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
@@ -153,7 +157,8 @@ def carregar_info_form():
     g.fornUnic = fornecedores.items()
     g.contratosUnic = contratos.items()
     g.condpagamentoUnic = condpagamento.json()
-
+    g.colaboradores = colaboradores.json()
+    print(g.colaboradores)
 
 @app.context_processor
 def inject_info_user():
@@ -363,26 +368,25 @@ def caixaentrada(context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def assumir_tarefa(context, id_chamada, id_etapa):
-    if flask_request.method == "POST":
-        print('COMEÇANDO ASSUMIR TAREFA')
-        user = context["user"]
-        user_oid = user.get("oid") or user.get("id")
-        execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
-        print('EXECUÇÃO ENCONTRADA:', execucao)
-        print(id_chamada)
-        if execucao:
-            execucao.executor = user_oid
-            execucao.assumida_em = datetime.utcnow()
-            database.session.commit()
-    return redirect(url_for("caixaentrada"))
-
-@app.route("/abandonar/<int:id_chamada>")
-@auth.login_required(scopes=["User.Read"])
-@with_info_user
-def abandonar_tarefa(context, id_chamada):
+    print('COMEÇANDO ASSUMIR TAREFA')
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
-    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid).first()
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
+    print('EXECUÇÃO ENCONTRADA:', execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = user_oid
+        execucao.assumida_em = datetime.utcnow()
+        database.session.commit()
+    return redirect(url_for("caixaentrada"))
+
+@app.route("/abandonar/<int:id_chamada>/<id_etapa>")
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def abandonar_tarefa(context, id_chamada, id_etapa):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid, id_etapa=id_etapa).first()
     if execucao:
         execucao.executor = None
         execucao.assumida_em = None
@@ -409,7 +413,7 @@ def novasolicitacao(context):
 def ini_flow(id_fluxo, context):
     print(id_fluxo)
     fluxo = flows.query.get(id_fluxo)
-    carregar_info_form()
+    carregar_info_form(context)
 
     execucao_aberta = (
         Execucao.query
@@ -640,7 +644,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
     }
  
     if fluxo and fluxo.nome == "fluxo_aberturaOC":
-        carregar_info_form()
+        carregar_info_form(context)
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
     etapas_split = etapa.responsaveis.split(";")
