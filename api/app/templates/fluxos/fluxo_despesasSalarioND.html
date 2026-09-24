@@ -1,0 +1,116 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Despesas Salário + ND
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">Despesas Salário + ND</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Preencha as informações abaixo para abrir uma nova solicitação.
+    </p>
+{% endblock %}
+
+{% block main %}
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    >
+
+    <section class="imp-stack imp-gap-6 imp-form-page">
+
+        <div>
+            <span class="imp-kicker">Despesas</span>
+            <h2 class="imp-title">Nova solicitação</h2>
+            <p class="imp-subtitle">
+                Informe o título da solicitação e anexe os documentos em PDF necessários.
+            </p>
+        </div>
+
+        <div class="imp-form-shell">
+            <form
+                id="purchaseForm"
+                class="imp-form"
+                novalidate
+            >
+                {% include "fluxos/campos_despesasSalarioND.html" %}
+
+                <div
+                    id="generalMessage"
+                    class="imp-form-message"
+                    role="alert"
+                    aria-live="polite"
+                    hidden
+                ></div>
+
+                <div class="imp-form-actions">
+                    <div class="imp-form-note">
+                        Revise os dados antes de enviar. Campos marcados com * são obrigatórios.
+                    </div>
+
+                    <div class="imp-cluster">
+                        <a class="btn btn-neutral" href="{{ url_for('novasolicitacao') }}">
+                            Voltar
+                        </a>
+
+                        <button type="button" id="submitButton" class="btn btn-primary" onclick="enviarFormulario(document, 8, 'DS-00')">
+
+                            <span
+                                class="imp-spinner imp-spinner--sm imp-spinner--light"
+                                id="submitSpinner"
+                                hidden
+                            ></span>
+
+                            <span id="submitLabel" >
+                                Enviar solicitação
+                            </span>
+
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </section>
+
+    <script
+        defer
+        src="{{ url_for('static', filename='js/forms.js') }}"
+    ></script>
+
+    <script>
+        function updateDespesaAnexoRemoveButtons() {
+            const rows = document.querySelectorAll('#despesaAnexosList [data-anexo-row]');
+            rows.forEach((row) => {
+                const button = row.querySelector('[data-remove-anexo]');
+                if (button) button.hidden = rows.length === 1;
+            });
+        }
+
+        document.getElementById('addDespesaAnexoButton')?.addEventListener('click', () => {
+            const list = document.getElementById('despesaAnexosList');
+            const firstRow = list?.querySelector('[data-anexo-row]');
+            if (!firstRow) return;
+
+            const clone = firstRow.cloneNode(true);
+            const input = clone.querySelector('[data-anexo-input]');
+            if (input) {
+                input.value = '';
+                input.required = false;
+            }
+
+            list.appendChild(clone);
+            updateDespesaAnexoRemoveButtons();
+        });
+
+        document.getElementById('despesaAnexosList')?.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-anexo]');
+            if (!removeButton) return;
+
+            removeButton.closest('[data-anexo-row]')?.remove();
+            updateDespesaAnexoRemoveButtons();
+        });
+
+        updateDespesaAnexoRemoveButtons();
+    </script>
+{% endblock %}
