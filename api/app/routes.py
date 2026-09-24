@@ -653,8 +653,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     if fluxo.id == 1:
             token_us = requests.post("https://totvssign.staging.totvs.app/identityintegration/v3/auth/login", json={
-                "username": "debora.rossini@grupoimpper.com.br",
-                "password": "4879@@De"
+                "username": "p.plataform@grupoimpper.com.br",
+                "password": "$)2]4Qy7op/V5~Y"
             })
             access_token_sign = token_us.json().get('data').get('token')
             grupos_sign = requests.get("https://totvssign.staging.totvs.app/contact/v2/grupos", headers={
