@@ -6,8 +6,8 @@
    REGISTROS DO FORMULÁRIO
    ========================================================= #}
 
-{% set f_tp_solicitacao =
-    formularios_map.get('tp_solicitacao')
+{% set f_tp_solic =
+    formularios_map.get('tp_solic')
     if modo_execucao else none
 %}
 
@@ -140,15 +140,31 @@
     if modo_execucao else none
 %}
 
+{% set f_tp_destinatario =
+    formularios_map.get('tp_destinatario')
+    if modo_execucao else none
+%}
+
+{% set grupo_dest =
+    formularios_map.get('grupo_dest')
+    if modo_execucao else none
+%}
+
 {% set keys = formularios_map.keys() if modo_execucao else [] %}
 {% set f_destinatarios = [] %}
 {% set f_assinado_em = [] %}
+{% set f_acoes = [] %}
 {% for key in keys if 'destinatarios' in key %}
     {% set _ = f_destinatarios.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
 {% for key in keys if 'assinado_em' in key %}
     {% set _ = f_assinado_em.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
+
+{% for key in keys if 'acao' in key %}
+    {% set _ = f_acoes.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
 
 {% set f_observadores =
     formularios_map.get('observadores')
@@ -166,12 +182,12 @@
    PERMISSÕES DE EDIÇÃO
    ========================================================= #}
 
-{% set tp_solicitacao_editavel =
+{% set tp_solic_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_tp_solicitacao
-        and (f_tp_solicitacao.editavel|string|lower|trim)
+        and f_tp_solic
+        and (f_tp_solic.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -438,6 +454,28 @@
     )
 %}
 
+{% set tp_destinatario_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and f_tp_destinatario
+        and (f_tp_destinatario.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set grupo_dest_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and f_grupo_dest
+        and (f_grupo_dest.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
 {% set destinatarios_editavel =
     not modo_execucao
     or etapa_id == 'EC-01-C'
@@ -466,6 +504,17 @@
         permitir_edicao
         and f_observadores
         and (f_observadores.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set acao_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and f_acoes
+        and (f_acoes[0].editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -505,12 +554,12 @@
 
         <div
             class="imp-field imp-field--full"
-            data-field-wrap="tp_solicitacao"
+            data-field-wrap="tp_solic"
         >
 
             <label
                 class="imp-label"
-                for="tp_solicitacao"
+                for="tp_solic"
             >
                 Tipo de Solicitação
                 <span class="imp-label__required">*</span>
@@ -518,11 +567,11 @@
 
 
             <select
-                id="tp_solicitacao"
-                name="tp_solicitacao"
+                id="tp_solic"
+                name="tp_solic"
                 class="form-select"
-                {% if tp_solicitacao_editavel %}required{% endif %}
-                {% if not tp_solicitacao_editavel %}
+                {% if tp_solic_editavel %}required{% endif %}
+                {% if not tp_solic_editavel %}
                     disabled
                     data-impper-locked="true"
                 {% endif %}
@@ -533,8 +582,8 @@
                     disabled
                     {% if not (
                         modo_execucao
-                        and f_tp_solicitacao
-                        and f_tp_solicitacao.valor
+                        and f_tp_solic
+                        and f_tp_solic.valor
                     ) %}
                         selected
                     {% endif %}
@@ -547,8 +596,8 @@
                     value="Emissão de contratos para engenharia"
                     {% if
                         modo_execucao
-                        and f_tp_solicitacao
-                        and f_tp_solicitacao.valor
+                        and f_tp_solic
+                        and f_tp_solic.valor
                             == 'Emissão de contratos para engenharia'
                     %}
                         selected
@@ -562,8 +611,8 @@
                     value="Emissão de contratos para projetos"
                     {% if
                         modo_execucao
-                        and f_tp_solicitacao
-                        and f_tp_solicitacao.valor
+                        and f_tp_solic
+                        and f_tp_solic.valor
                             == 'Emissão de contratos para projetos'
                     %}
                         selected
@@ -577,8 +626,8 @@
                     value="Emissão de contratos diversos"
                     {% if
                         modo_execucao
-                        and f_tp_solicitacao
-                        and f_tp_solicitacao.valor
+                        and f_tp_solic
+                        and f_tp_solic.valor
                             == 'Emissão de contratos diversos'
                     %}
                         selected
@@ -603,7 +652,7 @@
 
 
             <div
-                class="imp-choice-grid imp-choice-grid--three"
+                class="imp-choice-grid imp-choice-grid--two"
                 role="radiogroup"
                 aria-label="faturamento_direto"
             >
@@ -1287,7 +1336,7 @@
         <div
             class="imp-field"
             data-field-wrap="pz_entrega"
-            data-impper-show-when="tp_solicitacao:Emissão de contratos para projetos|Emissão de contratos diversos"
+            data-impper-show-when="tp_solic:Emissão de contratos para projetos|Emissão de contratos diversos"
             hidden
         >
 
@@ -1326,7 +1375,7 @@
 <section
     class="imp-form-section"
     id="eng-wrapper"
-    data-impper-show-when="tp_solicitacao:Emissão de contratos para engenharia"
+    data-impper-show-when="tp_solic:Emissão de contratos para engenharia"
     hidden
 >
 
@@ -1838,7 +1887,7 @@
 <section
     class="imp-form-section"
     id="proj-wrapper"
-    data-impper-show-when="tp_solicitacao:Emissão de contratos para projetos"
+    data-impper-show-when="tp_solic:Emissão de contratos para projetos"
     hidden
 >
 
@@ -2279,9 +2328,167 @@
 
         </div>
 
-         <div
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="tp_destinatario"
+        >
+
+            <span class="imp-label">
+                Tipo de Responsáveis
+                <span class="imp-label__required">*</span>
+            </span>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="tp_destinatario"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        id="tp_destinatario"
+                        name="tp_destinatario"
+                        value="GRUPOS"
+                        {% if tp_destinatario_editavel %}required{% endif %}
+                        {% if
+                            modo_execucao
+                            and f_tp_destinatario
+                            and f_tp_destinatario.valor == 'GRUPOS'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not tp_destinatario_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Grupo
+                        </span>
+
+                    </span>
+
+                </label>
+
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        id="tp_destinatario"
+                        name="tp_destinatario"
+                        value="USUARIOS"
+                        {% if
+                            modo_execucao
+                            and f_tp_destinatario
+                            and f_tp_destinatario.valor == 'USUARIOS'
+                        %}
+                            checked
+                        {% endif %}
+                        {% if not tp_destinatario_editavel %}
+                            disabled
+                            data-impper-locked="true"
+                        {% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Escolher Usuários
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="grupo_dest"
+            data-impper-show-when="tp_destinatario:GRUPOS"
+        >
+
+            <label
+                class="imp-label"
+                for="grupo_dest"
+            >
+                Grupos Totvs Sign
+                <span class="imp-label__required">*</span>
+            </label>
+
+
+            <select
+                id="grupo_dest"
+                name="grupo_dest"
+                class="form-select"
+                autocomplete="organization"
+                {% if grupo_dest_editavel %}required{% endif %}
+                {% if not grupo_dest_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+                <option value="">
+                    Selecione um grupo Totvs Sign
+                </option>
+
+
+                {% if grupoSign is not none %}
+
+                    {% for grupo in grupoSign %}
+
+                        <option
+                            value="{{ grupo.id }}"
+                            {% if
+                                modo_execucao
+                                and f_grupo_dest
+                                and (f_grupo_dest.valor|string)
+                                    == (grupo.id|string)
+                            %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ grupo.nome }}
+                        </option>
+
+                    {% endfor %}
+
+
+                {% elif
+                    modo_execucao
+                    and f_grupo_dest
+                    and f_grupo_dest.valor
+                %}
+
+                    <option
+                        value="{{ f_grupo_dest.valor }}"
+                        selected
+                    >
+                        {{ f_grupo_dest.valor }}
+                    </option>
+
+                {% endif %}
+
+            </select>
+
+        </div>
+
+        <div
             class="imp-field imp-field--full"
             data-field-wrap="destinatarios"
+            data-impper-show-when="tp_destinatario:USUARIOS"
         >
 
             <div
@@ -2320,6 +2527,7 @@
                     <thead>
                         <tr>
                             <th>Destinatário</th>
+                            <th>Ação</th>
                             <th>Assinado em</th>
                             <th></th>
                         </tr>
@@ -2331,11 +2539,12 @@
 
                             {% for f_destinatario in f_destinatarios %}
                                 {% set f_assinado = f_assinado_em[loop.index0] if loop.index0 < (f_assinado_em|length) else none %}
+                                {% set f_acao = f_acoes[loop.index0] if loop.index0 < (f_acoes|length) else none %}
 
                                 <tr data-destinatario-row>
 
                                     <td>
-                                        <input
+                                        <select
                                             type="text"
                                             name="destinatarios{{ loop.index0 }}"
                                             class="form-control"
@@ -2345,6 +2554,30 @@
                                             {% if destinatarios_editavel %}required{% endif %}
                                             {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                         >
+                                         <option value="">Selecione um destinatário</option>
+                                        {% for colaborador in colaboradores %}
+                                            <option value="{{ colaborador.mail }}" {% if f_destinatario and f_destinatario.valor == colaborador.mail %}selected{% endif %}>{{ colaborador.displayName }} ({{ colaborador.mail}})</option>
+                                        {% endfor %}
+                                    </select>
+                                        
+                                    </td>
+
+                                    <td>
+                                        <select
+                                            type="text"
+                                            name="acao{{ loop.index0 }}"
+                                            class="form-control"
+                                            data-acao-input
+                                            value="{{ f_acao.valor if f_acao and f_acao.valor is not none else '' }}"
+                                            {% if destinatarios_editavel %}required{% endif %}
+                                            {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
+                                        >
+                                        <option value="">{{ f_acao.valor if f_acao and f_acao.valor is not none else '' }}</option>
+                                        <option value="0" {% if f_acao and f_acao.valor == '0' %}selected{% endif %}>Assinar</option>
+                                        <option value="1" {% if f_acao and f_acao.valor == '1' %}selected{% endif %}>Visualizar</option>
+                                        <option value="2" {% if f_acao and f_acao.valor == '2' %}selected{% endif %}>Testemunhar</option> 
+                                        <option value="4" {% if f_acao and f_acao.valor == '4' %}selected{% endif %}>Assinar com certificado</option>
+                                    </select>
                                     </td>
 
                                     <td>
@@ -2382,7 +2615,7 @@
                             <tr data-destinatario-row>
 
                                 <td>
-                                    <input
+                                    <select
                                         type="text"
                                         name="destinatarios0"
                                         class="form-control"
@@ -2391,6 +2624,26 @@
                                         {% if destinatarios_editavel %}required{% endif %}
                                         {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                     >
+                                        <option value="">Selecione um destinatário</option>
+                                        {% for colaborador in colaboradores %}
+                                            <option value="{{ colaborador.mail }}" {% if f_destinatario and f_destinatario.valor == colaborador.mail %}selected{% endif %}>{{ colaborador.displayName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select
+                                        name="acao0"
+                                        class="form-control"
+                                        data-acao-input
+                                        {% if acao_editavel %}required{% endif %}
+                                        {% if not acao_editavel %}disabled data-impper-locked="true"{% endif %}
+                                    >
+                                        <option value="0" {% if f_acao and f_acao.valor == '0' %}selected{% endif %}>Assinar</option>
+                                        <option value="1" {% if f_acao and f_acao.valor == '1' %}selected{% endif %}>Visualizar</option>
+                                        <option value="2" {% if f_acao and f_acao.valor == '2' %}selected{% endif %}>Testemunhar</option> 
+                                        <option value="4" {% if f_acao and f_acao.valor == '4' %}selected{% endif %}>Assinar com certificado</option>
+                                    </select>
                                 </td>
 
                                 <td>
@@ -2432,6 +2685,7 @@
         <div
             class="imp-field imp-field--full"
             data-field-wrap="observadores"
+            data-impper-show-when="tp_destinatario:USUARIOS"
         >
 
             <div
