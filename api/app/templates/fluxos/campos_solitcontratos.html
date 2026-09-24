@@ -1352,7 +1352,7 @@
                 class="form-control"
                 type="text"
                 id="pz_entrega"
-                name="Prazo para entrega"
+                name="pz_entrega"
                 value="{{ f_pz_entrega.valor if modo_execucao and f_pz_entrega and f_pz_entrega.valor is not none else '' }}"
                 {% if pz_entrega_editavel %}required{% endif %}
                 {% if not pz_entrega_editavel %}
@@ -1412,7 +1412,7 @@
                 class="form-control"
                 type="date"
                 id="pz_entrega_objeto"
-                name="Prazo Para Entrega do Objeto/Serviço"
+                name="pz_entrega_objeto"
                 value="{{ f_pz_entrega_objeto.valor if modo_execucao and f_pz_entrega_objeto and f_pz_entrega_objeto.valor is not none else '' }}"
                 {% if pz_entrega_objeto_editavel %}required{% endif %}
                 {% if not pz_entrega_objeto_editavel %}
