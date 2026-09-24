@@ -105,5 +105,9 @@ if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET"
         redirect_uri=app.config["REDIRECT_URI"]
     )
 
+<<<<<<< HEAD
 from app import routes
 """
+=======
+from app import routes
+>>>>>>> 1c8d0d46a088a1bfa7213e954a9697a99f33678a

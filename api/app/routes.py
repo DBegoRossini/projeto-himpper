@@ -1,6 +1,8 @@
 import os
 from io import BytesIO
 import requests
+import time
+import threading
 from functools import wraps
 from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, request as flask_request
@@ -11,6 +13,78 @@ import base64
 
 INFO_USER_CACHE_VERSION = 2
 URL_RM = "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051"
+
+# Caches em memória para evitar 1 chamada ao Graph por linha do banco (N+1).
+GROUPS_CACHE_TTL = 600
+DISPLAYNAME_CACHE_TTL = 1800
+_GROUPS_CACHE = {}       # user_id -> (timestamp, set(group_ids))
+_DISPLAYNAME_CACHE = {}  # user_id -> (timestamp, displayName)
+_groups_cache_lock = threading.Lock()
+_displayname_cache_lock = threading.Lock()
+
+
+def get_groups_membership(user_id, access_token):
+    """Retorna os ids de grupo de um usuário, com cache para evitar chamadas repetidas ao Graph."""
+    if not user_id:
+        return set()
+    now = time.time()
+    with _groups_cache_lock:
+        cached = _GROUPS_CACHE.get(user_id)
+        if cached and now - cached[0] < GROUPS_CACHE_TTL:
+            return cached[1]
+    resp = requests.get(
+        f"https://graph.microsoft.com/v1.0/users/{user_id}/memberOf?$select=id",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    grupos = set()
+    if resp.ok:
+        grupos = {grp.get("id") for grp in resp.json().get("value", []) if grp.get("id")}
+    with _groups_cache_lock:
+        _GROUPS_CACHE[user_id] = (now, grupos)
+    return grupos
+
+
+def get_display_names(user_ids, access_token):
+    """Resolve displayName de vários ids de uma vez (cache + $batch do Graph), evitando 1 request por linha."""
+    resultado = {}
+    faltantes = []
+    now = time.time()
+    ids_unicos = {uid for uid in user_ids if uid}
+    with _displayname_cache_lock:
+        for uid in ids_unicos:
+            cached = _DISPLAYNAME_CACHE.get(uid)
+            if cached and now - cached[0] < DISPLAYNAME_CACHE_TTL:
+                resultado[uid] = cached[1]
+            else:
+                faltantes.append(uid)
+
+    for i in range(0, len(faltantes), 20):
+        lote = faltantes[i:i + 20]
+        batch_body = {
+            "requests": [
+                {"id": uid, "method": "GET", "url": f"/users/{uid}?$select=displayName"}
+                for uid in lote
+            ]
+        }
+        resp = requests.post(
+            "https://graph.microsoft.com/v1.0/$batch",
+            headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+            json=batch_body
+        )
+        if not resp.ok:
+            continue
+        for item in resp.json().get("responses", []):
+            uid = item.get("id")
+            nome = "Desconhecido"
+            if item.get("status") == 200:
+                nome = item.get("body", {}).get("displayName", "Desconhecido")
+            resultado[uid] = nome
+            with _displayname_cache_lock:
+                _DISPLAYNAME_CACHE[uid] = (now, nome)
+
+    for uid in faltantes:
+        resultado.setdefault(uid, "Desconhecido")
+    return resultado
 
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
@@ -95,30 +169,27 @@ def with_info_user(view_func):
         return view_func(*args, **kwargs)
     return wrapper
 
-def carregar_info_form(context):
+def carregar_info_form(id_fluxo):
     credentials = base64.b64encode(
         f"{os.getenv('rm_user')}:{base64.b64decode(os.getenv('rm_senha')).decode()}".encode()
     ).decode()
     user_email = g.info_user.get("mail")
-    user = user_email.split("@")[0]
-    access_token = context['access_token']
-    colaboradores = requests.get(
-                f"https://graph.microsoft.com/v1.0/users?$select=displayName,mail",
-                        headers={"Authorization": f"Bearer {access_token}"}
-            )
     g.coligMov = requests.get(
         f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
         headers={"Authorization": f"Basic {credentials}"}
     )
-    g.infoContrat = requests.get(
-        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.1/1/G",
-        headers={"Authorization": f"Basic {credentials}"}
-    )
+    if id_fluxo == '4':
+        print("Carregando informações do contrato")
+        g.infoContrat = requests.get(
+            f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.1/1/G",
+            headers={"Authorization": f"Basic {credentials}"}
+        )
 
-    condpagamento = requests.get(
-        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.2/1/G",
-        headers={"Authorization": f"Basic {credentials}"}
-    )
+        condpagamento = requests.get(
+            f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/impperflows.2/1/G",
+            headers={"Authorization": f"Basic {credentials}"}
+        )
+        g.condpagamentoUnic = condpagamento.json()
     coligadas = {}
     movimentos = {}
     ccusto = {}
@@ -156,9 +227,6 @@ def carregar_info_form(context):
     g.ccustoUnic = ccusto.items()
     g.fornUnic = fornecedores.items()
     g.contratosUnic = contratos.items()
-    g.condpagamentoUnic = condpagamento.json()
-    g.colaboradores = colaboradores.json()
-    print(g.colaboradores)
 
 @app.context_processor
 def inject_info_user():
@@ -260,15 +328,15 @@ def solicitacoes(context):
     groups = g.info_user.get("groups", [])
 
     solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
-    ids_por_grupo = []
+    chamadas_por_solicitante = {}
     for solic in solicitantes:
-        resp = requests.get(
-            f"https://graph.microsoft.com/v1.0/users/{solic.solicitante}/memberOf?$select=id",
-            headers={"Authorization": f"Bearer {context['access_token']}"}
-        )
-        grupos_solicitante = [grp.get("id") for grp in resp.json().get("value", [])]
+        chamadas_por_solicitante.setdefault(solic.solicitante, []).append(solic.id)
+
+    ids_por_grupo = []
+    for solicitante_id, chamada_ids in chamadas_por_solicitante.items():
+        grupos_solicitante = get_groups_membership(solicitante_id, context['access_token'])
         if any(grp in groups for grp in grupos_solicitante):
-            ids_por_grupo.append(solic.id)
+            ids_por_grupo.extend(chamada_ids)
 
     solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
         .join(Execucao, Execucao.id_chamada == Chamada.id)\
@@ -335,26 +403,26 @@ def caixaentrada(context):
         Etapas.id.label("id_etapa"),
         Chamada.solicitante
     ).order_by(Chamada.id.asc()).all()
+
+    ids_para_nome = set()
+    for row in pendencias_raw:
+        ids_para_nome.add(row.solicitante)
+        if row.executor:
+            ids_para_nome.add(row.executor)
+    nomes = get_display_names(ids_para_nome, access_token)
+
     pendencias = []
     for row in pendencias_raw:
-        solicitante = requests.get(
-            f"https://graph.microsoft.com/v1.0/users/{row.solicitante}?$select=displayName",
-                    headers={"Authorization": f"Bearer {access_token}"}
-        )
-        executor = requests.get(
-                    f"https://graph.microsoft.com/v1.0/users/{row.executor}?$select=displayName",
-                            headers={"Authorization": f"Bearer {access_token}"}
-                )
         pendencias.append({
                 "protocolo":   row.id,
-                "solicitante": solicitante.json().get("displayName", "Desconhecido"),
+                "solicitante": nomes.get(row.solicitante, "Desconhecido"),
                 "tipo":        row.fluxo_nome,
                 "recebida_em": row.data_solicitacao,
                 "etapa": row.etapa_nome,
                 "id_etapa": row.id_etapa,
                 "status_label": row.status,
                 "executor": row.executor,
-                "exec_name": executor.json().get("displayName", "Desconhecido") if row.executor else None,
+                "exec_name": nomes.get(row.executor) if row.executor else None,
                 "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
             })
     return render_template(
@@ -397,9 +465,14 @@ def abandonar_tarefa(context, id_chamada, id_etapa):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def novasolicitacao(context):
+    user = context["user"]
     groups   = g.info_user.get("groups", [])
+    user_oid = user.get("oid") or user.get("id")
     grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
-    fluxos = flows.query.filter(or_(*grupos_conditions)).all()
+    fluxos = flows.query.filter(\
+        or_(
+            flows.acesso.in_([user_oid]),
+            *grupos_conditions)).all()
     print(fluxos)
     return render_template(
         'novasolicitacao.html',
@@ -411,10 +484,9 @@ def novasolicitacao(context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def ini_flow(id_fluxo, context):
-    print(id_fluxo)
     fluxo = flows.query.get(id_fluxo)
-    carregar_info_form(context)
-
+    print(id_fluxo)
+    carregar_info_form(id_fluxo)
     execucao_aberta = (
         Execucao.query
         .join(Chamada, Chamada.id == Execucao.id_chamada)
@@ -561,6 +633,21 @@ def exec_tarefas(id_chamada, id_etapa, context):
             "data": chamada_raw.data,
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
+    if fluxo.id == 1:
+            token_us = requests.post("https://totvssign.totvs.app/identityintegration/v3/auth/login", json={
+                "username": "debora.rossini@grupoimpper.com.br",
+                "password": "4879@@De"
+            })
+            access_token_sign = token_us.json().get('data').get('token')
+            grupos_sign = requests.get("https://totvssign.totvs.app/contact/v2/grupos", headers={
+                "Authorization": f"Bearer {access_token_sign}"
+            }).json().get('data')
+            access_token = context['access_token']
+            colaboradores = requests.get(
+                    f"https://graph.microsoft.com/v1.0/users?$select=displayName,mail",
+                            headers={"Authorization": f"Bearer {access_token}"}
+                ).json().get('value', [])
+    
     etapas_correcao = Etapas.query.filter(Etapas.id_flow==fluxo.id, Etapas.id.like("%-C-%")).all() if fluxo else []
     execucoes_historico = (
         Execucao.query
@@ -605,7 +692,6 @@ def exec_tarefas(id_chamada, id_etapa, context):
         })
 
     exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
-    print(id_chamada)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
     execucao = []
@@ -643,8 +729,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
         for formulario in formularios
     }
  
-    if fluxo and fluxo.nome == "fluxo_aberturaOC":
-        carregar_info_form(context)
+    if fluxo and (fluxo.nome == "fluxo_aberturaOC" or fluxo.id == 1):
+        carregar_info_form(fluxo.id)
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
     etapas_split = etapa.responsaveis.split(";")
@@ -655,8 +741,6 @@ def exec_tarefas(id_chamada, id_etapa, context):
         us_atuante = True
     else:
         us_atuante = False
-    print(execucao[0]["executor_id"])
-    print(us_atuante)
     return render_template(
         "execTarefas.html",
         user=context["user"],
@@ -673,6 +757,8 @@ def exec_tarefas(id_chamada, id_etapa, context):
         user_id=user_oid,
         form_abertos = [],
         modo_execucao= us_atuante,
+        grupoSign = grupos_sign if fluxo.id == 1 else None,
+        colaboradores=colaboradores if fluxo.id == 1 else None
     )
 
 
@@ -827,15 +913,15 @@ def historico(context):
     grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
 
     solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
-    ids_por_grupo = []
+    chamadas_por_solicitante = {}
     for solic in solicitantes:
-        resp = requests.get(
-            f"https://graph.microsoft.com/v1.0/users/{solic.solicitante}/memberOf?$select=id",
-            headers={"Authorization": f"Bearer {context['access_token']}"}
-        )
-        grupos_solicitante = [grp.get("id") for grp in resp.json().get("value", [])]
+        chamadas_por_solicitante.setdefault(solic.solicitante, []).append(solic.id)
+
+    ids_por_grupo = []
+    for solicitante_id, chamada_ids in chamadas_por_solicitante.items():
+        grupos_solicitante = get_groups_membership(solicitante_id, context['access_token'])
         if any(grp in groups for grp in grupos_solicitante):
-            ids_por_grupo.append(solic.id)
+            ids_por_grupo.extend(chamada_ids)
 
     solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
     .join(Execucao, Execucao.id_chamada == Chamada.id)\
