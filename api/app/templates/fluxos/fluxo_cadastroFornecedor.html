@@ -1,0 +1,72 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Cadastro de fornecedor
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">Cadastro de fornecedor</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Cadastre ou solicite alterações nos dados de um fornecedor.
+    </p>
+{% endblock %}
+
+{% block main %}
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    >
+
+    <section class="imp-stack imp-gap-6 imp-form-page">
+        <div>
+            <span class="imp-kicker">Fornecedores</span>
+            <h2 class="imp-title">Nova solicitação</h2>
+            <p class="imp-subtitle">
+                Informe o tipo de atividade e os dados necessários para a solicitação.
+            </p>
+        </div>
+
+        <div class="imp-form-shell">
+            <form
+                id="supplierForm"
+                class="imp-form"
+                novalidate
+                data-id-fluxo="{{ request.view_args.get('id_fluxo', '') }}"
+                data-id-etapa-inicial="CF-00"
+            >
+                {% include "fluxos/campos_cadastroFornecedor.html" %}
+
+                <div
+                    id="generalMessage"
+                    class="imp-form-message"
+                    role="alert"
+                    aria-live="polite"
+                    hidden
+                ></div>
+
+                <div class="imp-form-actions">
+                    <div class="imp-form-note">
+                        Revise os dados antes de enviar. Campos marcados com * são obrigatórios.
+                    </div>
+
+                    <div class="imp-cluster">
+                        <a class="btn btn-neutral" href="{{ url_for('novasolicitacao') }}">
+                            Voltar
+                        </a>
+                        <button
+                            type="button"
+                            id="submitButton"
+                            class="btn btn-primary"
+                            onclick="enviarCadastroFornecedor(document)"
+                        >
+                            Enviar solicitação
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/formulario-cadastro-fornecedor.js') }}"></script>
+{% endblock %}

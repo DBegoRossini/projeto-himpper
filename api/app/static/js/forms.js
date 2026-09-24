@@ -896,6 +896,8 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
   if (id_etapa === 'Correcao'){
     const etapaSelect = document.getElementById('correctionTarget');
     id_etapa = etapaSelect.value
+  } else if (id_etapa === 'Cancelado'){
+    id_etapa = 'Cancelado'
   }
 
   const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
