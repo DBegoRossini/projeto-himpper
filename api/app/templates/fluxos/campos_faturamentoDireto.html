@@ -601,70 +601,68 @@
                 </div>
 
 
-            </div>
+                <input
+                    type="hidden"
+                    id="condPag"
+                    name="condPag"
+                    value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
+                    data-condPag-value
+                >
 
 
-            <input
-                type="hidden"
-                id="condPag"
-                name="condPag"
-                value="{{ f_condPag.valor if modo_execucao and f_condPag and f_condPag.valor is not none else '' }}"
-                data-condPag-value
-            >
+                <select
+                    data-condPag-source
+                    hidden
+                    disabled
+                >
 
+                </select>
 
-            <select
-                data-condPag-source
-                hidden
-                disabled
-            >
-
-            </select>
-
-
-            <div
-                class="imp-nature-list"
-                id="condPagList"
-                data-condPag-list
-            >
 
                 <div
-                    class="imp-nature-row"
-                    data-condPag-row
+                    class="imp-nature-list"
+                    id="condPagList"
+                    data-condPag-list
                 >
 
                     <div
-                        class="imp-search-select position-relative flex-grow-1"
-                        data-condPag-combobox
+                        class="imp-nature-row"
+                        data-condPag-row
                     >
 
-                        <input
-                            type="search"
-                            class="form-control"
-                            placeholder="Pesquise por código ou descrição"
-                            autocomplete="off"
-                            role="combobox"
-                            aria-autocomplete="list"
-                            aria-expanded="false"
-                            data-condPag-search
-                            {% if not condPag_editavel %}
-                                disabled
-                                data-impper-locked="true"
-                            {% endif %}
-                        >
-
-                        <input
-                            type="hidden"
-                            value=""
-                            data-condPag-selected-value
-                        >
-
                         <div
-                            class="dropdown-menu w-100 imp-search-select__menu"
-                            role="listbox"
-                            data-condPag-dropdown
-                        ></div>
+                            class="imp-search-select position-relative flex-grow-1"
+                            data-condPag-combobox
+                        >
 
+                            <input
+                                type="search"
+                                class="form-control"
+                                placeholder="Pesquise por código ou descrição"
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                data-condPag-search
+                                {% if not condPag_editavel %}
+                                    disabled
+                                    data-impper-locked="true"
+                                {% endif %}
+                            >
+
+                            <input
+                                type="hidden"
+                                value=""
+                                data-condPag-selected-value
+                            >
+
+                            <div
+                                class="dropdown-menu w-100 imp-search-select__menu"
+                                role="listbox"
+                                data-condPag-dropdown
+                            ></div>
+
+                        </div>
                     </div>
 
 
@@ -673,7 +671,7 @@
             </div>
 
             <div
-            class="imp-field"
+            class="imp-field imp-field--full"
             data-field-wrap="eMail"
             >
 
@@ -701,6 +699,16 @@
                     >
 
             </div>
+
+            <div
+            class="imp-field imp-field--full"
+            data-field-wrap="local_receb_rb"
+        >
+
+            <span class="imp-label">
+                Local de Recebimento
+                <span class="imp-label__required">*</span>
+            </span>
 
             <div
                 class="imp-choice-grid imp-choice-grid--two"
@@ -777,7 +785,7 @@
             </div>
 
             <div
-            class="imp-field"
+            class="imp-field imp-field--full"
             data-field-wrap="local_receb"
             data-impper-show-when="local_receb_rb:OUTRO"
             >

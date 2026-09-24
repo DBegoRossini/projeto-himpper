@@ -86,6 +86,27 @@ def get_display_names(user_ids, access_token):
         resultado.setdefault(uid, "Desconhecido")
     return resultado
 
+
+# Consulta de coligadas/movimentos/centro de custo/fornecedores/contratos muda pouco, então é cacheada.
+COLIGMOV_CACHE_TTL = 300
+_COLIGMOV_CACHE = {"timestamp": 0, "data": None}
+_coligmov_cache_lock = threading.Lock()
+
+
+def _obter_coligmov(credentials):
+    now = time.time()
+    with _coligmov_cache_lock:
+        if _COLIGMOV_CACHE["data"] is not None and now - _COLIGMOV_CACHE["timestamp"] < COLIGMOV_CACHE_TTL:
+            return _COLIGMOV_CACHE["data"]
+    resp = requests.get(
+        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
+        headers={"Authorization": f"Basic {credentials}"}
+    )
+    with _coligmov_cache_lock:
+        _COLIGMOV_CACHE["data"] = resp
+        _COLIGMOV_CACHE["timestamp"] = now
+    return resp
+
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
         .order_by(Notificacoes.data_criacao.desc()).all()
@@ -174,10 +195,7 @@ def carregar_info_form(id_fluxo):
         f"{os.getenv('rm_user')}:{base64.b64decode(os.getenv('rm_senha')).decode()}".encode()
     ).decode()
     user_email = g.info_user.get("mail")
-    g.coligMov = requests.get(
-        f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/JUR.1/1/G",
-        headers={"Authorization": f"Basic {credentials}"}
-    )
+    g.coligMov = _obter_coligmov(credentials)
     if id_fluxo == '4':
         print("Carregando informações do contrato")
         g.infoContrat = requests.get(
@@ -634,12 +652,12 @@ def exec_tarefas(id_chamada, id_etapa, context):
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     if fluxo.id == 1:
-            token_us = requests.post("https://totvssign.totvs.app/identityintegration/v3/auth/login", json={
+            token_us = requests.post("https://totvssign.staging.totvs.app/identityintegration/v3/auth/login", json={
                 "username": "debora.rossini@grupoimpper.com.br",
                 "password": "4879@@De"
             })
             access_token_sign = token_us.json().get('data').get('token')
-            grupos_sign = requests.get("https://totvssign.totvs.app/contact/v2/grupos", headers={
+            grupos_sign = requests.get("https://totvssign.staging.totvs.app/contact/v2/grupos", headers={
                 "Authorization": f"Bearer {access_token_sign}"
             }).json().get('data')
             access_token = context['access_token']
