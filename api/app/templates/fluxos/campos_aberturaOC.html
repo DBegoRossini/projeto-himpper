@@ -2,6 +2,9 @@
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
 {% set etapa_atual = etapa_id|default('') %}
+{% set executor_atual = execucao[0].get('executor_id')|string|trim|lower if execucao else '' %}
+{% set usuario_atual = user_id|string|trim|lower if user_id else '' %}
+{% set oc_pode_editar = pode_editar or (executor_atual and executor_atual == usuario_atual) %}
 {% set passou_central_notas = namespace(valor=false) %}
 
 {% for etapa_historico in historico_etapas|default([]) %}
@@ -281,7 +284,7 @@
    AÇÕES DE EXECUÇÃO
    ========================================================= #}
 
-{% if modo_execucao and pode_editar %}
+{% if modo_execucao and oc_pode_editar %}
 
     <div class="imp-execution-actions">
  

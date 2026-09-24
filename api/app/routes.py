@@ -363,17 +363,16 @@ def caixaentrada(context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def assumir_tarefa(context, id_chamada, id_etapa):
-    if flask_request.method == "POST":
-        print('COMEÇANDO ASSUMIR TAREFA')
-        user = context["user"]
-        user_oid = user.get("oid") or user.get("id")
-        execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
-        print('EXECUÇÃO ENCONTRADA:', execucao)
-        print(id_chamada)
-        if execucao:
-            execucao.executor = user_oid
-            execucao.assumida_em = datetime.utcnow()
-            database.session.commit()
+    print('COMEÇANDO ASSUMIR TAREFA')
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
+    print('EXECUÇÃO ENCONTRADA:', execucao)
+    print(id_chamada)
+    if execucao:
+        execucao.executor = user_oid
+        execucao.assumida_em = datetime.utcnow()
+        database.session.commit()
     return redirect(url_for("caixaentrada"))
 
 @app.route("/abandonar/<int:id_chamada>")
@@ -393,9 +392,14 @@ def abandonar_tarefa(context, id_chamada):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def novasolicitacao(context):
+    user = context["user"]
     groups   = g.info_user.get("groups", [])
+    user_oid = user.get("oid") or user.get("id")
     grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
-    fluxos = flows.query.filter(or_(*grupos_conditions)).all()
+    fluxos = flows.query.filter(\
+        or_(
+            flows.acesso.in_([user_oid]),
+            *grupos_conditions)).all()
     print(fluxos)
     return render_template(
         'novasolicitacao.html',
