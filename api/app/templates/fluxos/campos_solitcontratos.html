@@ -145,7 +145,7 @@
     if modo_execucao else none
 %}
 
-{% set grupo_dest =
+{% set f_grupo_dest =
     formularios_map.get('grupo_dest')
     if modo_execucao else none
 %}
@@ -2479,10 +2479,16 @@
 
         </div>
 
+        <input
+            type="hidden"
+            name="has_destinatarios"
+            value="{{ '1' if modo_execucao and f_destinatarios else '0' }}"
+        >
+
         <div
             class="imp-field imp-field--full"
             data-field-wrap="destinatarios"
-            data-impper-show-when="tp_destinatario:USUARIOS"
+            data-impper-show-when="tp_destinatario:USUARIOS || has_destinatarios:1"
         >
 
             <div
