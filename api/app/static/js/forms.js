@@ -538,6 +538,7 @@
     removeSelector: "[data-remove-destinatario]",
     fields: [
       { selector: "[data-destinatario-input]", prefix: "destinatarios" },
+      { selector: "[data-acao-input]", prefix: "acao" },
       { selector: "[data-assinado-em-input]", prefix: "assinado_em" }
     ]
   });

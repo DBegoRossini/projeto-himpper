@@ -152,24 +152,18 @@
 
 {% set keys = formularios_map.keys() if modo_execucao else [] %}
 {% set f_destinatarios = [] %}
-{% set f_assinado_em = [] %}
-{% set f_acoes = [] %}
 {% for key in keys if 'destinatarios' in key %}
     {% set _ = f_destinatarios.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
-{% for key in keys if 'assinado_em' in key %}
-    {% set _ = f_assinado_em.append(formularios_map.get(key) if modo_execucao else none) %}
+{% set f_assinado_em_0 = formularios_map.get('assinado_em0') if modo_execucao else none %}
+{% set f_acao_0 = formularios_map.get('acao0') if modo_execucao else none %}
+
+
+{% set f_observadores = [] %}
+{% for key in keys if 'observadores' in key %}
+    {% set _ = f_observadores.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
-
-{% for key in keys if 'acao' in key %}
-    {% set _ = f_acoes.append(formularios_map.get(key) if modo_execucao else none) %}
-{% endfor %}
-
-
-{% set f_observadores =
-    formularios_map.get('observadores')
-    if modo_execucao else none
-%}
+{% set f_observador_0 = formularios_map.get('observadores0') if modo_execucao else none %}
 
 {% set f_contrato_assinado =
     formularios_map.get('contrato_assinado')
@@ -491,8 +485,8 @@
     not modo_execucao
     or (
         permitir_edicao
-        and f_assinado_em
-        and (f_assinado_em.editavel|string|lower|trim)
+        and f_assinado_em_0
+        and (f_assinado_em_0.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -502,8 +496,8 @@
     or etapa_id == 'EC-01-C'
     or (
         permitir_edicao
-        and f_observadores
-        and (f_observadores.editavel|string|lower|trim)
+        and f_observador_0
+        and (f_observador_0.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -513,8 +507,8 @@
     or etapa_id == 'EC-01-C'
     or (
         permitir_edicao
-        and f_acoes
-        and (f_acoes[0].editavel|string|lower|trim)
+        and f_acao_0
+        and (f_acao_0.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -2538,8 +2532,9 @@
                         {% if modo_execucao and f_destinatarios %}
 
                             {% for f_destinatario in f_destinatarios %}
-                                {% set f_assinado = f_assinado_em[loop.index0] if loop.index0 < (f_assinado_em|length) else none %}
-                                {% set f_acao = f_acoes[loop.index0] if loop.index0 < (f_acoes|length) else none %}
+                                {% set destinatario_index = f_destinatario.campo|replace('destinatarios', '') %}
+                                {% set f_assinado = formularios_map.get('assinado_em' ~ destinatario_index) %}
+                                {% set f_acao = formularios_map.get('acao' ~ destinatario_index) %}
 
                                 <tr data-destinatario-row>
 
@@ -2797,19 +2792,19 @@
     <div class="imp-form-grid">
         <div
             class="imp-field imp-field--full"
-            data-field-wrap="planilha_servicos"
+            data-field-wrap="contrato_assinado"
         >
 
             <span class="imp-label">
-                Planilha de Serviços Contratados
+                Contrato assinado
                 <span class="imp-label__required">*</span>
             </span>
 
 
             {% if
                 modo_execucao
-                and f_planilha_servicos
-                and f_planilha_servicos.valor
+                and f_contrato_assinado
+                and f_contrato_assinado.valor
             %}
 
                 <div class="imp-execution-current-file">
@@ -2821,7 +2816,7 @@
                         </strong>
 
                         <span>
-                            Planilha de serviços registrada nesta solicitação.
+                            Contrato assinado registrado nesta solicitação.
                         </span>
 
                     </div>
@@ -2830,7 +2825,7 @@
                         class="btn btn-outline-primary btn-sm"
                         href="{{ url_for(
                             'download_arquivo',
-                            id_arquivo=f_planilha_servicos.id
+                            id_arquivo=f_contrato_assinado.id
                         ) }}"
                         target="_blank"
                         rel="noopener"
@@ -2843,7 +2838,7 @@
             {% endif %}
 
 
-            {% if planilha_servicos_editavel %}
+            {% if contrato_assinado_editavel %}
 
                 <div class="imp-upload">
 
@@ -2851,13 +2846,13 @@
                         class="imp-upload__input"
                         type="file"
                         id="contrato_assinado"
-                        name="Contrato Assinado"
+                        name="contrato_assinado"
                         data-impper-file-output="#contratoAssinadoFileName"
                         {% if
                             not modo_execucao
                             or not (
-                                f_planilha_servicos
-                                and f_planilha_servicos.valor
+                                f_contrato_assinado
+                                and f_contrato_assinado.valor
                             )
                         %}
                             required
