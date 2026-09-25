@@ -4,6 +4,10 @@
   const normalizeDocument = value =>
     String(value || "").replace(/\D/g, "");
 
+  // execTarefas.html reuses a shared form (id="purchaseForm") instead of #supplierForm
+  const getSupplierForm = scope =>
+    scope.querySelector("#supplierForm") || scope.querySelector("form[data-execution-form]");
+
   const registeredDocuments = () => {
     const source = document.querySelector("[data-fornecedores-cadastrados]");
 
@@ -221,8 +225,7 @@
   };
 
   window.enviarCadastroFornecedor = formDocument => {
-    const form = formDocument.querySelector("#supplierForm");
-
+    const form = getSupplierForm(formDocument);
     if (
       !form
       || !validateSupplier(form)
@@ -255,7 +258,7 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("supplierForm");
+    const form = getSupplierForm(document);
     const documentInput = form?.querySelector("[data-fornecedor-documento]");
 
     if (form) {
