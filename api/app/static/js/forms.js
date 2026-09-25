@@ -551,6 +551,57 @@
     fields: [{ selector: "[data-observador-input]", prefix: "observadores" }]
   });
 
+  // Anexo rows keep the same "name" across clones (backend reads them via getlist), so no renumbering is done here.
+  const initAnexosLists = scope => {
+    const root = scope || document;
+
+    root.querySelectorAll("[data-anexos-list]").forEach(list => {
+      const wrapper = list.closest("[data-field-wrap]") || list.parentElement;
+      const addButton = wrapper?.querySelector("[data-add-anexo]");
+
+      const updateRemoveButtons = () => {
+        const rows = list.querySelectorAll("[data-anexo-row]");
+
+        rows.forEach(row => {
+          const removeButton = row.querySelector("[data-remove-anexo]");
+
+          if (removeButton) removeButton.hidden = rows.length === 1;
+        });
+      };
+
+      list.addEventListener("click", event => {
+        const removeButton = event.target.closest("[data-remove-anexo]");
+
+        if (!removeButton || removeButton.disabled) return;
+
+        removeButton.closest("[data-anexo-row]")?.remove();
+        updateRemoveButtons();
+      });
+
+      addButton?.addEventListener("click", () => {
+        if (addButton.disabled) return;
+
+        const rows = list.querySelectorAll("[data-anexo-row]");
+        const lastRow = rows[rows.length - 1];
+
+        if (!lastRow) return;
+
+        const clone = lastRow.cloneNode(true);
+        const input = clone.querySelector("[data-anexo-input]");
+
+        if (input) {
+          input.value = "";
+          input.required = false;
+        }
+
+        list.appendChild(clone);
+        updateRemoveButtons();
+      });
+
+      updateRemoveButtons();
+    });
+  };
+
   window.ImpperSearchSelect = {
     normalizeText,
     createOption,
@@ -809,6 +860,7 @@
       initSearchFields(scope);
       initDestinatariosList(scope);
       initObservadoresList(scope);
+      initAnexosLists(scope);
     },
     refreshConditionalSections,
     bindDependentSelect,

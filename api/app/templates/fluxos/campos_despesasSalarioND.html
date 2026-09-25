@@ -5,7 +5,7 @@
 {% set f_anexos_despesa = [] %}
 {% if modo_execucao %}
     {% for campo, registro in formularios_map.items() %}
-        {% if campo == 'anexos_despesa' %}
+        {% if 'anexos_despesa' in campo %}
             {% set _ = f_anexos_despesa.append(registro) %}
         {% endif %}
     {% endfor %}

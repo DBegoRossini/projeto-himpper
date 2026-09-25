@@ -77,40 +77,4 @@
         defer
         src="{{ url_for('static', filename='js/forms.js') }}"
     ></script>
-
-    <script>
-        function updateDespesaAnexoRemoveButtons() {
-            const rows = document.querySelectorAll('#despesaAnexosList [data-anexo-row]');
-            rows.forEach((row) => {
-                const button = row.querySelector('[data-remove-anexo]');
-                if (button) button.hidden = rows.length === 1;
-            });
-        }
-
-        document.getElementById('addDespesaAnexoButton')?.addEventListener('click', () => {
-            const list = document.getElementById('despesaAnexosList');
-            const firstRow = list?.querySelector('[data-anexo-row]');
-            if (!firstRow) return;
-
-            const clone = firstRow.cloneNode(true);
-            const input = clone.querySelector('[data-anexo-input]');
-            if (input) {
-                input.value = '';
-                input.required = false;
-            }
-
-            list.appendChild(clone);
-            updateDespesaAnexoRemoveButtons();
-        });
-
-        document.getElementById('despesaAnexosList')?.addEventListener('click', (event) => {
-            const removeButton = event.target.closest('[data-remove-anexo]');
-            if (!removeButton) return;
-
-            removeButton.closest('[data-anexo-row]')?.remove();
-            updateDespesaAnexoRemoveButtons();
-        });
-
-        updateDespesaAnexoRemoveButtons();
-    </script>
 {% endblock %}
