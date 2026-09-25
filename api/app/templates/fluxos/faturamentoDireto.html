@@ -170,40 +170,6 @@
                 botao.disabled = false;
             }
         }
-
-        function updateAnexoRemoveButtons() {
-            const rows = document.querySelectorAll('#anexosList [data-anexo-row]');
-            rows.forEach((row) => {
-                const button = row.querySelector('[data-remove-anexo]');
-                if (button) button.hidden = rows.length === 1;
-            });
-        }
-
-        document.getElementById('addAnexoButton')?.addEventListener('click', () => {
-            const list = document.getElementById('anexosList');
-            const firstRow = list?.querySelector('[data-anexo-row]');
-            if (!firstRow) return;
-
-            const clone = firstRow.cloneNode(true);
-            const input = clone.querySelector('[data-anexo-input]');
-            if (input) {
-                input.value = '';
-                input.required = false;
-            }
-
-            list.appendChild(clone);
-            updateAnexoRemoveButtons();
-        });
-
-        document.getElementById('anexosList')?.addEventListener('click', (event) => {
-            const removeButton = event.target.closest('[data-remove-anexo]');
-            if (!removeButton) return;
-
-            removeButton.closest('[data-anexo-row]')?.remove();
-            updateAnexoRemoveButtons();
-        });
-
-        updateAnexoRemoveButtons();
     </script>
 
 {% endblock %}

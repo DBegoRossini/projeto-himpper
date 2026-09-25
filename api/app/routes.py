@@ -489,7 +489,7 @@ def novasolicitacao(context):
     grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
     fluxos = flows.query.filter(\
         or_(
-            flows.acesso.in_([user_oid]),
+            flows.acesso.like(f"%{user_oid}%"),
             *grupos_conditions)).all()
     print(fluxos)
     return render_template(
