@@ -954,6 +954,13 @@
             src="{{ url_for('static', filename='js/formulario-financeiro-oc.js') }}"
         ></script>
 
+    {% elif fluxo and fluxo.nome == 'fluxo_cadastroFornecedor' %}
+
+        <script
+            defer
+            src="{{ url_for('static', filename='js/formulario-cadastro-fornecedor.js') }}"
+        ></script>
+
     {% endif %}
 
 {% endblock %}
