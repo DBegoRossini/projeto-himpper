@@ -11,6 +11,8 @@
     {% endfor %}
 {% endif %}
 
+{% set f_ret_sistema = formularios_map.get('ret_sistema') if modo_execucao else none %}
+
 {% set titulo_editavel =
     not modo_execucao
     or (
@@ -29,6 +31,17 @@
         and (
             not f_anexos_despesa
             or (f_anexos_despesa[0].editavel|string|lower|trim) in ['1', 'true']
+        )
+    )
+%}
+
+{% set ret_sistema_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and (
+            not f_ret_sistema
+            or (f_ret_sistema.editavel|string|lower|trim) in ['1', 'true']
         )
     )
 %}
@@ -151,7 +164,7 @@
                         class="form-control flex-grow-1"
                         accept="application/pdf"
                         data-anexo-input
-                        {% if anexos_despesa_editavel %}required{% endif %}
+                        {% if anexos_despesa_editavel and f_anexos_despesa.length == 0 %}required{% endif %}
                         {% if not anexos_despesa_editavel %}disabled data-impper-locked="true"{% endif %}
                     >
 
@@ -170,6 +183,56 @@
 
             </div>
 
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="ret_sistema"
+        >
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Tipo"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="ret_sistema"
+                        value="SISTEMA"
+                        {% if f_ret_sistema and f_ret_sistema.valor == 'SISTEMA' %}checked{% endif %}
+                        {% if ret_sistema_editavel %}required{% endif %}
+                        {% if not ret_sistema_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Recebida em sistema</span>
+                    </span>
+
+                </label>
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="ret_sistema"
+                        value="RETENCAO"
+                        {% if f_ret_sistema and f_ret_sistema.valor == 'RETENCAO' %}checked{% endif %}
+                        {% if ret_sistema_editavel %}required{% endif %}
+                        {% if not ret_sistema_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Possui retenção e precisa passar pelo Dep. Fiscal</span>
+                    </span>
+
+                </label>
+
+            </div>
         </div>
 
     </div>
@@ -194,7 +257,7 @@
         </div>
 
         <div class="d-flex flex-column flex-sm-row gap-2">
-
+            {% if etapa_id != 'SN-C-02' %}
             <button
                 type="button"
                 class="btn btn-outline-primary"
@@ -203,6 +266,7 @@
             >
                 Pedir correção
             </button>
+            {% endif %}
 
             <button
                 type="button"
