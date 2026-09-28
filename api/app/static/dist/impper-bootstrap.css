@@ -267,6 +267,15 @@
   font-weight: var(--imp-weight-medium);
 }
 
+.impper-app .imp-badge--multiline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
 .impper-app .toast-container {
   --bs-toast-zindex: 1200;
 }

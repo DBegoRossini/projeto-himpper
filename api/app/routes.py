@@ -1,4 +1,5 @@
 import os
+import re
 from io import BytesIO
 import requests
 import time
@@ -8,7 +9,7 @@ from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios
 from sqlalchemy import cast, String, or_, and_
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import base64
 
 INFO_USER_CACHE_VERSION = 2
@@ -38,6 +39,26 @@ STATUS_VARIANTS = {
 def status_variant_for(status_label):
     """Mapeia o texto do status para a variante visual do badge (fallback = 'info')."""
     return STATUS_VARIANTS.get((status_label or "").strip().lower(), "info")
+
+
+def normalizar_datetime_utc(valor):
+    if valor.tzinfo is None:
+        return valor.replace(tzinfo=timezone.utc)
+    return valor.astimezone(timezone.utc)
+
+
+def montar_titulo_pendencia(template, formularios_map):
+    """Substitui na string flows.titulo (ex: 'stand - empreendimento - data') cada nome
+    de campo pelo valor preenchido no formulário da chamada, preservando os separadores."""
+    if not template:
+        return None
+
+    def substituir(match):
+        campo = match.group(0)
+        formulario = formularios_map.get(campo)
+        return formulario.valor if formulario and formulario.valor else campo
+
+    return re.sub(r"[^\s\-,;/|()]+", substituir, template)
 
 
 def escopo_solicitacao(solicitante, user_oid, subordinados):
@@ -421,6 +442,7 @@ def solicitacoes(context):
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def caixaentrada(context):
+    now = datetime.now(timezone.utc)
     user = context["user"]
     access_token = context['access_token']
     user_oid = user.get("oid") or user.get("id")
@@ -460,18 +482,32 @@ def caixaentrada(context):
         Chamada.status,
         Etapas.sla,
         Etapas.id.label("id_etapa"),
-        Chamada.solicitante
-    ).order_by(Chamada.id.asc()).all()
+        Chamada.solicitante,
+        flows.titulo
+    ).order_by(Chamada.id.asc()).distinct().all()
 
     ids_para_nome = set()
+    ids_chamada = set()
     for row in pendencias_raw:
         ids_para_nome.add(row.solicitante)
+        ids_chamada.add(row.id)
         if row.executor:
             ids_para_nome.add(row.executor)
     nomes = get_display_names(ids_para_nome, access_token)
 
+    formularios_por_chamada = {}
+    if ids_chamada:
+        formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
+        for formulario in formularios_raw:
+            formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
+
     pendencias = []
     for row in pendencias_raw:
+        prazo = (
+            normalizar_datetime_utc(row.iniciada_em) + timedelta(hours=row.sla)
+            if row.iniciada_em
+            else None
+        )
         pendencias.append({
                 "protocolo":   row.id,
                 "solicitante": nomes.get(row.solicitante, "Desconhecido"),
@@ -482,7 +518,9 @@ def caixaentrada(context):
                 "status_label": row.status,
                 "executor": row.executor,
                 "exec_name": nomes.get(row.executor) if row.executor else None,
-                "prazo": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
+                "prazo": prazo,
+                "atrasada": prazo is not None and now > prazo,
+                "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
             })
     return render_template(
         "caixaentrada.html",

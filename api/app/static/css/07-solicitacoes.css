@@ -107,6 +107,29 @@
   min-width: 10rem;
 }
 
+.imp-request-table--inbox th:nth-child(3),
+.imp-request-table--inbox td:nth-child(3) {
+  max-width: 16rem;
+  white-space: normal;
+}
+
+.imp-request-tipo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  gap: 0.15rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.imp-request-tipo span,
+.imp-request-tipo small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .imp-request-table--inbox td:nth-child(7),
 .imp-request-table--inbox td:nth-child(9) {
   white-space: nowrap;

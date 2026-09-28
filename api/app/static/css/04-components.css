@@ -252,6 +252,13 @@
   white-space: nowrap;
 }
 
+.imp-badge--multiline {
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
 .imp-badge--primary {
   --imp-badge-color: var(--imp-primary);
   --imp-badge-rgb: var(--imp-primary-rgb);
