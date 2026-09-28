@@ -1032,12 +1032,8 @@ function abrirModalConclusao(id_proxet) {
 }
 
 function confirmarConclusao(document, id_chamada, id_etapa) {
-  const modalElement = document.getElementById('completionModal');
-  const id_proxet = modalElement?.dataset.conclusionTarget;
+  const id_proxet = 'Aprovado';
 
-  if (!id_proxet) {
-    return;
-  }
 
   return enviarEtapa(document, id_chamada, id_etapa, id_proxet);
 }

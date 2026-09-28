@@ -22,6 +22,32 @@ _DISPLAYNAME_CACHE = {}  # user_id -> (timestamp, displayName)
 _groups_cache_lock = threading.Lock()
 _displayname_cache_lock = threading.Lock()
 
+STATUS_VARIANTS = {
+    "cancelado": "danger",
+    "cancelada": "danger",
+    "reprovado": "danger",
+    "reprovada": "danger",
+    "finalizado": "success",
+    "finalizada": "success",
+    "pausado": "secondary",
+    "pausada": "secondary",
+    "pendente": "warning",
+}
+
+
+def status_variant_for(status_label):
+    """Mapeia o texto do status para a variante visual do badge (fallback = 'info')."""
+    return STATUS_VARIANTS.get((status_label or "").strip().lower(), "info")
+
+
+def escopo_solicitacao(solicitante, user_oid, subordinados):
+    """Classifica a solicitação em relação ao usuário logado: mine, subordinate ou peer."""
+    if solicitante == f"{user_oid}":
+        return "mine"
+    if solicitante in subordinados:
+        return "subordinate"
+    return "peer"
+
 
 def get_groups_membership(user_id, access_token):
     """Retorna os ids de grupo de um usuário, com cache para evitar chamadas repetidas ao Graph."""
@@ -344,6 +370,7 @@ def solicitacoes(context):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     groups = g.info_user.get("groups", [])
+    subordinados = g.info_user.get("subordinados", [])
 
     solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
     chamadas_por_solicitante = {}
@@ -356,11 +383,11 @@ def solicitacoes(context):
         if any(grp in groups for grp in grupos_solicitante):
             ids_por_grupo.extend(chamada_ids)
 
-    solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
         .join(Execucao, Execucao.id_chamada == Chamada.id)\
         .filter(or_(
             Chamada.solicitante == f"{user_oid}",
-            Chamada.solicitante.in_(g.info_user.get("subordinados", [])),
+            Chamada.solicitante.in_(subordinados),
             Chamada.id.in_(ids_por_grupo)
         ))\
     .add_columns(
@@ -368,7 +395,21 @@ def solicitacoes(context):
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
-    ).order_by(Chamada.id.desc()).all()
+        Chamada.solicitante,
+    ).order_by(Chamada.id.desc()).distinct().all()
+
+    solicitacoes = [
+        {
+            "id": row.id,
+            "tipo": row.tipo,
+            "abertura_label": row.abertura_label,
+            "status_label": row.status_label,
+            "status_variant": status_variant_for(row.status_label),
+            "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
+        }
+        for row in solicitacoes_raw
+    ]
+
     return render_template(
         "solicitacoes.html",
         user=user,
@@ -706,7 +747,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
             "finalizada_em": execucao_registro.finalizada_em,
             "executor": executor_nome,
             "comentario": getattr(execucao_registro, "comentario", None),
-            "atual": execucao_registro.id_etapa == id_etapa
+            "atual": execucao_registro.id_etapa == id_etapa,
         })
 
     exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
@@ -751,7 +792,10 @@ def exec_tarefas(id_chamada, id_etapa, context):
         carregar_info_form(fluxo.id)
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
     groups = g.info_user.get("groups", [])
-    etapas_split = etapa.responsaveis.split(";")
+    if etapa.responsaveis:
+        etapas_split = etapa.responsaveis.split(";")
+    else:
+        etapas_split = []
     grupos_conditions = [grupo in etapas_split for grupo in groups]
     if True in grupos_conditions:
         us_atuante = True
@@ -928,6 +972,7 @@ def historico(context):
     user_oid = user.get("oid") or user.get("id")
     groups = g.info_user.get("groups", [])
     user_job = g.info_user.get("jobTitle", "")
+    subordinados = g.info_user.get("subordinados", [])
     grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
 
     solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
@@ -941,12 +986,12 @@ def historico(context):
         if any(grp in groups for grp in grupos_solicitante):
             ids_por_grupo.extend(chamada_ids)
 
-    solicitacoes = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
     .join(Execucao, Execucao.id_chamada == Chamada.id)\
     .join(Etapas, Etapas.id == Execucao.id_etapa)\
     .filter(or_(
             Chamada.solicitante == f"{user_oid}",
-            Chamada.solicitante.in_(g.info_user.get("subordinados", [])),
+            Chamada.solicitante.in_(subordinados),
             Chamada.id.in_(ids_por_grupo),
             Etapas.responsaveis == f"{user_oid}",
             Etapas.responsaveis.like(f"%{user_oid}%"),
@@ -962,8 +1007,21 @@ def historico(context):
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
-    ).order_by(Chamada.id.desc()).all()
+        Chamada.solicitante.label("solicitante"),
+    ).order_by(Chamada.id.desc()).distinct().all()
 
+    solicitacoes = [
+        {
+            "id": row.id,
+            "tipo": row.tipo,
+            "abertura_label": row.abertura_label,
+            "status_label": row.status_label,
+            "status_variant": status_variant_for(row.status_label),
+            "solicitante": row.solicitante,
+            "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
+        }
+        for row in solicitacoes_raw
+    ]
 
     return render_template(
         'historico.html',

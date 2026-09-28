@@ -329,6 +329,12 @@
         );
 
 
+      const statusFilter =
+        document.querySelector(
+          "[data-request-status-filter]"
+        );
+
+
       if (!searchField) {
         return;
       }
@@ -452,6 +458,12 @@
           );
 
 
+        const selectedStatus =
+          normalize(
+            statusFilter?.value
+          );
+
+
         rows.forEach(row => {
 
           const haystack =
@@ -469,6 +481,12 @@
           const owner =
             normalize(
               row.dataset.owner
+            );
+
+
+          const status =
+            normalize(
+              row.dataset.status
             );
 
 
@@ -492,10 +510,17 @@
               selectedOwner;
 
 
+          const matchesStatus =
+            !selectedStatus ||
+            status ===
+              selectedStatus;
+
+
           const visible =
             matchesSearch &&
             matchesRequester &&
-            matchesOwner;
+            matchesOwner &&
+            matchesStatus;
 
 
           row.hidden =
@@ -617,6 +642,12 @@
         );
 
       ownerFilter
+        ?.addEventListener(
+          "change",
+          sync
+        );
+
+      statusFilter
         ?.addEventListener(
           "change",
           sync

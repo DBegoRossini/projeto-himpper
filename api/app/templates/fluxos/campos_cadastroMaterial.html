@@ -1,0 +1,454 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+{% set f_tipo = formularios_map.get('tipo') if modo_execucao else none %}
+{% set f_natureza = formularios_map.get('natureza') if modo_execucao else none %}
+{% set f_outro = formularios_map.get('outro') if modo_execucao else none %}
+{% set f_outro_desc = formularios_map.get('outro_desc') if modo_execucao else none %}
+{% set f_descricao = formularios_map.get('descricao') if modo_execucao else none %}
+{% set f_imagem = formularios_map.get('imagem') if modo_execucao else none %}
+{% set f_codigo = formularios_map.get('codigo') if modo_execucao else none %}
+
+{% set tipo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_tipo
+        and (f_tipo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set natureza_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_natureza
+        and (f_natureza.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set outro_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_outro
+        and (f_outro.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set outro_desc_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_outro_desc
+        and (f_outro_desc.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set descricao_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_descricao
+        and (f_descricao.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set imagem_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_imagem
+        and (f_imagem.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set codigo_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_codigo
+        and (f_codigo.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Cadastro do Material
+            </h3>
+
+            <p class="imp-card__subtitle">
+                Primeiro, precisamos entender em qual contrato este material se enquadra.
+            </p>
+
+        </div>
+
+    </div>
+    <div class="imp-form-grid">
+         <div
+            class="imp-field imp-field--full"
+            data-field-wrap="tipo"
+        >
+
+            <label
+                class="imp-label"
+                for="tipo"
+            >
+                Tipo
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <select
+                id="tipo"
+                name="tipo"
+                class="form-select"
+                autocomplete="organization"
+                {% if tipo_editavel %}required{% endif %}
+                {% if not tipo_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+                <option value="">
+                    Selecione um tipo
+                </option>
+                <option value="MATERIAL" {% if modo_execucao and f_tipo and f_tipo.valor == 'MATERIAL' %}selected{% endif %}>
+                    Material
+                </option>
+                <option value="SERVICO" {% if modo_execucao and f_tipo and f_tipo.valor == 'SERVICO' %}selected{% endif %}>
+                    Serviço
+                </option>
+
+            </select>
+
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="natureza"
+        >
+
+            <span class="imp-label">
+                Natureza Orçamentária/Financeira
+                <span class="imp-label__required">*</span>
+            </span>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--one"
+                role="radiogroup"
+                aria-label="Natureza Orçamentária/Financeira"
+            >
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="natureza"
+                        value="MATERIAL"
+                        {% if natureza_editavel %}required{% endif %}
+                        {% if modo_execucao and f_natureza and f_natureza.valor == 'MATERIAL' %}checked{% endif %}
+                        {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Material
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="natureza"
+                        value="TERCEIRIZADA"
+                        {% if modo_execucao and f_natureza and f_natureza.valor == 'TERCEIRIZADA' %}checked{% endif %}
+                        {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Mão de obra tercerizada
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="natureza"
+                        value="EQUIPAMENTO"
+                        {% if modo_execucao and f_natureza and f_natureza.valor == 'EQUIPAMENTO' %}checked{% endif %}
+                        {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Equipamento
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="imp-choice">
+
+                    <input
+                        type="radio"
+                        name="natureza"
+                        value="OUTRO"
+                        {% if modo_execucao and f_natureza and f_natureza.valor == 'OUTRO' %}checked{% endif %}
+                        {% if not natureza_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+
+                    <span class="imp-choice__content">
+
+                        <span class="imp-choice__dot"></span>
+
+                        <span class="imp-choice__text">
+                            Outro
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="outro_desc"
+            data-impper-show-when="natureza:OUTRO"
+        >
+
+            <label class="imp-label" for="outro_desc">
+                Outro
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="outro_desc"
+                name="outro_desc"
+                type="text"
+                class="form-control"
+                autocomplete="off"
+                placeholder="Especifique"
+                value="{{ f_outro_desc.valor if modo_execucao and f_outro_desc and f_outro_desc.valor is not none else '' }}"
+                {% if outro_desc_editavel %}required{% endif %}
+                {% if not outro_desc_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="imagem"
+        >
+
+            <span class="imp-label">
+                Imagem
+                <span class="imp-label__required">*</span>
+            </span>
+
+
+            {% if
+                modo_execucao
+                and f_imagem
+                and f_imagem.valor
+            %}
+
+                <div class="imp-execution-current-file">
+
+                    <div>
+
+                        <strong>
+                            Arquivo atual
+                        </strong>
+
+                        <span>
+                            Documento consolidado registrado na solicitação.
+                        </span>
+
+                    </div>
+
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(
+                            'download_arquivo',
+                            id_arquivo=f_imagem.id
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+            {#
+               Fallback do arquivo:
+               - sem arquivo selecionado: envia imagem = ""
+               - ao selecionar um arquivo, o onchange remove o name deste hidden
+                 e somente o arquivo é enviado.
+            #}
+            <input
+                type="hidden"
+                id="imagemFallback"
+                name="imagem"
+                value=""
+            >
+
+
+            {% if imagem_editavel %}
+
+                <div class="imp-upload">
+
+                    <input
+                        id="imagem"
+                        name="imagem"
+                        type="file"
+                        class="imp-upload__input"
+                        accept=".pdf,application/pdf"
+                        data-impper-file-output="#imagemName"
+                        onchange="const imagemFallback = document.getElementById('imagemFallback'); if (imagemFallback) { imagemFallback.name = this.files && this.files.length ? '' : 'imagem'; }"
+                        {% if
+                            not modo_execucao
+                            or not (
+                                f_imagem
+                                and f_imagem.valor
+                            )
+                        %}
+                            required
+                        {% endif %}
+                    >
+
+
+                    <label
+                        class="imp-upload__label"
+                        for="imagem"
+                    >
+
+                        <span class="imp-upload__copy">
+
+                            <strong>
+                                Selecione o documento
+                            </strong>
+
+                            <span>
+                                Selecione um arquivo PDF.
+                            </span>
+
+                        </span>
+
+
+                        <span class="imp-upload__action">
+                            Selecionar arquivo
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div
+                    id="imagemName"
+                    class="imp-file-name"
+                >
+                    Nenhum arquivo selecionado.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        {% if etapa_id in ['MS-01', 'MS-02'] %}
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="codigo"
+        >
+
+            <label class="imp-label" for="codigo">
+                Código do material cadastrado
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="codigo"
+                name="codigo"
+                type="text"
+                class="form-control"
+                autocomplete="off"
+                placeholder="Código criado"
+                value="{{ f_codigo.valor if modo_execucao and f_codigo and f_codigo.valor is not none else '' }}"
+                {% if codigo_editavel %}required{% endif %}
+                {% if not codigo_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+        </div>
+    
+        {% endif %}
+    </div>
+</section>
+{% if modo_execucao and pode_editar %}
+
+    <div class="imp-execution-actions">
+
+        <div class="imp-execution-actions__copy">
+            <strong>
+                Revise a solicitação antes de prosseguir.
+            </strong>
+
+            <span>
+                Escolha a ação que deseja realizar nesta etapa.
+            </span>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="abrirModalConclusao('{{ aprovado }}')"
+            >
+                Concluir
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelationModal"
+            >
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+{% endif %}
