@@ -545,7 +545,14 @@
 
 
                                     <td data-label="Tipo">
-                                        {{ pendencia.tipo }}
+                                        {% if pendencia.titulo %}
+                                            <span class="imp-request-tipo">
+                                                <span>{{ pendencia.titulo }}</span>
+                                                <small>{{ pendencia.tipo }}</small>
+                                            </span>
+                                        {% else %}
+                                            {{ pendencia.tipo }}
+                                        {% endif %}
                                     </td>
 
 
@@ -572,17 +579,19 @@
                                         {% if not pendencia.executor %}
 
                                             <span
-                                                class="badge rounded-pill imp-badge imp-badge--warning"
+                                                class="badge rounded-pill imp-badge imp-badge--warning{% if pendencia.atrasada %} imp-badge--multiline{% endif %}"
                                             >
-                                                Não assumido
+                                                <span>Não assumido</span>
+                                                {% if pendencia.atrasada %}<small>(Em atraso)</small>{% endif %}
                                             </span>
 
                                         {% else %}
 
                                             <span
-                                                class="badge rounded-pill imp-badge imp-badge--success"
+                                                class="badge rounded-pill imp-badge imp-badge--success{% if pendencia.atrasada %} imp-badge--multiline{% endif %}"
                                             >
-                                                Assumido 
+                                                <span>Assumido</span>
+                                                {% if pendencia.atrasada %}<small>(Em atraso)</small>{% endif %}
                                             </span>
 
                                         {% endif %}
@@ -639,7 +648,7 @@
                                                 class="btn btn-neutral btn-sm"
                                                 disabled
                                             >
-                                                Em atendimento
+                                                Assumida
                                             </button>
 
                                         {% endif %}
@@ -760,21 +769,15 @@
 
 
                                     {% if not pendencia.executor %}
-
-                                        <span
-                                            class="badge rounded-pill imp-badge imp-badge--warning"
-                                        >
-                                            Não assumido
+                                        <span class="badge rounded-pill imp-badge imp-badge--warning{% if pendencia.atrasada %} imp-badge--multiline{% endif %}">
+                                            <span>Não assumido</span>
+                                            {% if pendencia.atrasada %}<small>(Em atraso)</small>{% endif %}
                                         </span>
-
                                     {% else %}
-
-                                        <span
-                                            class="badge rounded-pill imp-badge imp-badge--success"
-                                        >
-                                            Assumido
+                                        <span class="badge rounded-pill imp-badge imp-badge--success{% if pendencia.atrasada %} imp-badge--multiline{% endif %}">
+                                            <span>Assumido</span>
+                                            {% if pendencia.atrasada %}<small>(Em atraso)</small>{% endif %}
                                         </span>
-
                                     {% endif %}
 
                                 </div>

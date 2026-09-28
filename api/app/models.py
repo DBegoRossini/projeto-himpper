@@ -9,6 +9,7 @@ class flows(database.Model):
     area_responsavel = database.Column(database.String(100), nullable=False)
     acesso = database.Column(database.String(300), nullable=False)
     versao = database.Column(database.String(3), nullable=False)
+    titulo = database.Column(database.String(100), nullable=False)
 
 class Chamada(database.Model):
     id = database.Column(database.Integer, primary_key=True)
