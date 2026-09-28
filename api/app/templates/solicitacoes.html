@@ -192,36 +192,60 @@
                                 Todos
                             </option>
 
-                            <option value="Em andamento">
+                            <option value="P">
                                 Em andamento
                             </option>
 
-                            <option value="Finalizada">
+                            <option value="F">
                                 Finalizada
                             </option>
 
-                            <option value="Finalizado">
-                                Finalizado
-                            </option>
-
-                            <option value="Cancelada">
+                            <option value="C">
                                 Cancelada
                             </option>
 
-                            <option value="Cancelado">
-                                Cancelado
-                            </option>
-
-                            <option value="Pendente">
+                            <option value="P">
                                 Pendente
                             </option>
 
-                            <option value="Reprovado">
+                            <option value="R">
                                 Reprovado
                             </option>
 
-                            <option value="Pausado">
-                                Pausado
+                        </select>
+
+                    </label>
+
+
+                    <label
+                        class="imp-field imp-request-toolbar__filter"
+                        for="requestOwnerFilter"
+                    >
+
+                        <span class="imp-label">
+                            Solicitado por
+                        </span>
+
+                        <select
+                            id="requestOwnerFilter"
+                            class="form-select"
+                            data-request-owner-filter
+                        >
+
+                            <option value="">
+                                Todos
+                            </option>
+
+                            <option value="mine">
+                                Mim
+                            </option>
+
+                            <option value="peer">
+                                Meus pares
+                            </option>
+
+                            <option value="subordinate">
+                                Meus subordinados
                             </option>
 
                         </select>
@@ -373,6 +397,8 @@
 
                                         data-status="{{ solicitacao.status_label }}"
 
+                                        data-owner="{{ solicitacao.escopo }}"
+
                                         data-original-order="{{ loop.index0 }}"
 
 
@@ -465,6 +491,8 @@
                                 data-request-id="{{ solicitacao.id }}"
 
                                 data-status="{{ solicitacao.status_label }}"
+
+                                data-owner="{{ solicitacao.escopo }}"
 
                                 data-original-order="{{ loop.index0 }}"
 
