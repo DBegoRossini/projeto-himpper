@@ -419,7 +419,9 @@
                                             (
                                                 solicitacao.id ~ ' ' ~
                                                 solicitacao.tipo ~ ' ' ~
-                                                solicitacao.status_label
+                                                solicitacao.status_label ~ ' ' ~
+                                                solicitacao.protocolo ~ ' ' ~
+                                                solicitacao.titulo
                                             )|lower
                                         }}"
                                     >
@@ -436,7 +438,14 @@
 
 
                                         <td data-label="Tipo">
-                                            {{ solicitacao.tipo }}
+                                            {% if solicitacao.titulo %}
+                                                <span class="imp-request-tipo">
+                                                    <span>{{ solicitacao.titulo }}</span>
+                                                    <small>{{ solicitacao.tipo }}</small>
+                                                </span>
+                                            {% else %}
+                                                {{ solicitacao.tipo }}
+                                            {% endif %}
                                         </td>
 
 
@@ -514,7 +523,9 @@
                                     (
                                         solicitacao.id ~ ' ' ~
                                         solicitacao.tipo ~ ' ' ~
-                                        solicitacao.status_label
+                                        solicitacao.status_label ~ ' ' ~
+                                        solicitacao.protocolo ~ ' ' ~
+                                        solicitacao.titulo
                                     )|lower
                                 }}"
                             >

@@ -417,7 +417,19 @@ def solicitacoes(context):
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
         Chamada.solicitante,
+        flows.titulo
     ).order_by(Chamada.id.desc()).distinct().all()
+
+    ids_chamada = set()
+    for row in solicitacoes_raw:
+        ids_chamada.add(row.id)
+
+    formularios_por_chamada = {}
+    if ids_chamada:
+        formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
+        for formulario in formularios_raw:
+            formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
+
 
     solicitacoes = [
         {
@@ -427,6 +439,7 @@ def solicitacoes(context):
             "status_label": row.status_label,
             "status_variant": status_variant_for(row.status_label),
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
+            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
         }
         for row in solicitacoes_raw
     ]
@@ -491,7 +504,7 @@ def caixaentrada(context):
     for row in pendencias_raw:
         ids_para_nome.add(row.solicitante)
         ids_chamada.add(row.id)
-        if row.executor:
+        if row.executor: 
             ids_para_nome.add(row.executor)
     nomes = get_display_names(ids_para_nome, access_token)
 
@@ -1046,7 +1059,19 @@ def historico(context):
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
         Chamada.solicitante.label("solicitante"),
+        flows.titulo
     ).order_by(Chamada.id.desc()).distinct().all()
+
+    ids_chamada = set()
+    for row in solicitacoes_raw:
+        ids_chamada.add(row.id)
+
+    formularios_por_chamada = {}
+    if ids_chamada:
+        formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
+        for formulario in formularios_raw:
+            formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
+
 
     solicitacoes = [
         {
@@ -1057,6 +1082,7 @@ def historico(context):
             "status_variant": status_variant_for(row.status_label),
             "solicitante": row.solicitante,
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
+            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
         }
         for row in solicitacoes_raw
     ]

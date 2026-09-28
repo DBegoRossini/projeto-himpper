@@ -924,6 +924,8 @@ function validarCamposObrigatorios(root) {
 }
 
 async function enviarFormulario(document, id_fluxo, id_etapa) {
+  const botao = document.getElementById('submitButton');
+  botao.disabled = true;
   let form = document.querySelector('form');
   if (!form) {
     form = document
