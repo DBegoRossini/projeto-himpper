@@ -1,6 +1,7 @@
 import os
 import re
 from io import BytesIO
+from zoneinfo import ZoneInfo
 import requests
 import time
 import threading
@@ -549,9 +550,7 @@ def assumir_tarefa(context, id_chamada, id_etapa):
     print('COMEÇANDO ASSUMIR TAREFA')
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
-    execucao = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa).first()
-    print('EXECUÇÃO ENCONTRADA:', execucao)
-    print(id_chamada)
+    execucao = Execucao.query.filter(Execucao.id_chamada==id_chamada, Execucao.id_etapa==id_etapa, Execucao.finalizada_em.is_(None)).first()
     if execucao:
         execucao.executor = user_oid
         execucao.assumida_em = datetime.utcnow()
@@ -565,6 +564,7 @@ def abandonar_tarefa(context, id_chamada, id_etapa):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid, id_etapa=id_etapa).first()
+    print(execucao.json())
     if execucao:
         execucao.executor = None
         execucao.assumida_em = None
@@ -793,7 +793,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
             "id": execucao_registro.id,
             "id_etapa": execucao_registro.id_etapa,
             "nome": etapa_registro.nome if etapa_registro else execucao_registro.id_etapa,
-            "iniciada_em": execucao_registro.iniciada_em,
+            "iniciada_em": execucao_registro.iniciada_em.astimezone(ZoneInfo("America/Sao_Paulo")),
             "assumida_em": execucao_registro.assumida_em,
             "finalizada_em": execucao_registro.finalizada_em,
             "executor": executor_nome,
@@ -802,6 +802,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         })
 
     exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
+    print('EXECUÇÃO RAW ENCONTRADA:', exec_raw.iniciada_em)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
     execucao = []

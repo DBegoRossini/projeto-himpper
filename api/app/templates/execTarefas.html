@@ -211,9 +211,9 @@
 
                     <dd>
 
-                        {% if execucao and execucao.iniciada_em %}
+                        {% if execucao and execucao[0].get("iniciada_em") %}
 
-                            {{ execucao.iniciada_em.strftime('%d/%m/%Y %H:%M') }}
+                            {{ execucao[0].get("iniciada_em").strftime('%d/%m/%Y %H:%M') }}
 
                         {% else %}
 
@@ -836,6 +836,7 @@
                         <button
                             type="button"
                             class="btn btn-primary"
+                            id="confirmButton"
                             onclick="confirmarConclusao(document, '{{ id_chamada }}', '{{ etapa_id }}')"
                         >
                             Concluir
