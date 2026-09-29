@@ -959,11 +959,13 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
     method: 'POST',
     body: formData
   });
-  window.location.href = `/flow/${String(id_fluxo)}/${id_etapa}`;
+  window.location.href = `/novasolicitacao`;
   return formData;
 };
 
 async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
+  const botao = document.querySelector('button[type="button"]');
+  botao.disabled = true;
   const form = document.querySelector('form[data-execution-form]') || document;
   const validationRoot = id_proxet === 'Correcao'
     ? document.getElementById('correctionModal')
@@ -1034,6 +1036,8 @@ function abrirModalConclusao(id_proxet) {
 }
 
 function confirmarConclusao(document, id_chamada, id_etapa) {
+  const botao = document.getElementById('confirmButton');
+  botao.disabled = true;
   const id_proxet = 'Aprovado';
 
 
