@@ -802,7 +802,6 @@ def exec_tarefas(id_chamada, id_etapa, context):
         })
 
     exec_raw = Execucao.query.filter_by(id_chamada=id_chamada, id_etapa=id_etapa, finalizada_em=None).first()
-    print('EXECUÇÃO RAW ENCONTRADA:', exec_raw.iniciada_em)
     if exec_raw is None:
         exec_raw = Execucao.query.filter_by(id_chamada=id_chamada).order_by(Execucao.id.desc()).first()
     execucao = []
