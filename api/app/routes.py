@@ -1024,7 +1024,7 @@ def historico(context):
     groups = g.info_user.get("groups", [])
     user_job = g.info_user.get("jobTitle", "")
     subordinados = g.info_user.get("subordinados", [])
-    grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
+    grupos_conditions = [and_(Etapas.responsaveis.like(f"%{grupo}%"), grupo != '1fa699a0-d6ac-499e-af35-69d7e33e42fb') for grupo in groups]
 
     solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
     chamadas_por_solicitante = {}
@@ -1034,7 +1034,7 @@ def historico(context):
     ids_por_grupo = []
     for solicitante_id, chamada_ids in chamadas_por_solicitante.items():
         grupos_solicitante = get_groups_membership(solicitante_id, context['access_token'])
-        if any(grp in groups for grp in grupos_solicitante):
+        if any(grp in groups and grp != '1fa699a0-d6ac-499e-af35-69d7e33e42fb' for grp in grupos_solicitante):
             ids_por_grupo.extend(chamada_ids)
 
     solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
