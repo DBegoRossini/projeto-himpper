@@ -1,7 +1,10 @@
 from . import database
 from datetime import datetime
+import os
 
 class flows(database.Model):
+    __tablename__ = 'flows'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.Integer, primary_key=True)
     nome = database.Column(database.String(100), nullable=False)
     alias = database.Column(database.String(100), nullable=False)
@@ -12,6 +15,8 @@ class flows(database.Model):
     titulo = database.Column(database.String(100), nullable=False)
 
 class Chamada(database.Model):
+    __tablename__ = 'chamada'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.Integer, primary_key=True)
     id_fluxo = database.Column(database.Integer, database.ForeignKey("flows.id"), nullable=False)
     status = database.Column(database.String(1), nullable=False, default="A")
@@ -19,6 +24,8 @@ class Chamada(database.Model):
     data = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
 
 class Etapas(database.Model):
+    __tablename__ = 'etapas'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.String(100), primary_key=True)
     id_flow = database.Column(database.Integer, database.ForeignKey("flows.id"), nullable=False)
     nome = database.Column(database.String(100), nullable=False)
@@ -26,6 +33,8 @@ class Etapas(database.Model):
     responsaveis = database.Column(database.String(200), nullable=True)
 
 class Execucao(database.Model):
+    __tablename__ = 'execucao'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.Integer, primary_key=True)
     id_chamada = database.Column(database.Integer, database.ForeignKey("chamada.id"), nullable=False)
     id_etapa = database.Column(database.String(100), database.ForeignKey("etapas.id"), nullable=False)
@@ -36,12 +45,16 @@ class Execucao(database.Model):
     comentario = database.Column(database.Text, nullable=True)
 
 class Notificacoes(database.Model):
+    __tablename__ = 'notificacoes'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.Integer, primary_key=True)
     usuario = database.Column(database.String(500), nullable=False)
     data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
     mensagem = database.Column(database.String(500), nullable=False)
 
 class Formularios(database.Model):
+    __tablename__ = 'formularios'
+    __table_args__ = {'schema': os.getenv('DB_SCHEMA')} 
     id = database.Column(database.Integer, primary_key=True)
     id_chamada = database.Column(database.Integer, database.ForeignKey("chamada.id"), nullable=False)
     campo = database.Column(database.String(100), nullable=False)
