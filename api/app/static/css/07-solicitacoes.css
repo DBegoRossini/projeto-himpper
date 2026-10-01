@@ -2,6 +2,70 @@
  * Tela de solicitacoes
  */
 
+.imp-permission-picker {
+  display: grid;
+  gap: var(--imp-space-2);
+}
+
+.imp-permission-picker__selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--imp-space-2);
+}
+
+.imp-permission-picker__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--imp-space-2);
+  max-width: 100%;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--imp-border);
+  border-radius: var(--imp-radius-sm);
+  background: var(--imp-surface-soft);
+  color: var(--imp-text);
+  font-size: var(--imp-text-sm);
+}
+
+.imp-permission-picker__tag > span {
+  overflow-wrap: anywhere;
+}
+
+.imp-permission-picker__remove {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--imp-text-soft);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.imp-permission-picker__remove:hover {
+  color: var(--imp-text);
+}
+
+.imp-permission-picker__option {
+  display: flex;
+  align-items: center;
+  gap: var(--imp-space-2);
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+}
+
+.imp-permission-picker__option[hidden] {
+  display: none;
+}
+
+.imp-permission-picker__option > span {
+  overflow-wrap: anywhere;
+}
+
+.imp-permission-picker__empty {
+  padding: 0.8rem;
+  color: var(--imp-text-muted);
+  font-size: var(--imp-text-sm);
+}
+
 .imp-request-page {
   width: min(100%, 88rem);
 }

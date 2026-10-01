@@ -959,20 +959,23 @@ def permissoes(context):
         return itens
 
     grupos = listar_todos("https://graph.microsoft.com/v1.0/groups?$select=id,displayName")
-    usuarios = listar_todos("https://graph.microsoft.com/v1.0/users?$select=id,displayName")
+    usuarios = listar_todos("https://graph.microsoft.com/v1.0/users?$select=id,displayName,jobTitle")
+    valores_especiais_etapa = ["Solicitante", "automacao"]
 
     permis = []
     for grupo in grupos:
         if grupo.get("id"):
             permis.append({
                 "id": str(grupo.get("id")).strip(),
-                "displayName": (grupo.get("displayName") or "").strip()
+                "displayName": (grupo.get("displayName") or "").strip(),
+                "tipo": "Grupo"
             })
     for us in usuarios:
         if us.get("id"):
             permis.append({
                 "id": str(us.get("id")).strip(),
-                "displayName": (us.get("displayName") or us.get("userPrincipalName") or "").strip()
+                "displayName": (us.get("displayName") or us.get("userPrincipalName") or "").strip(),
+                "tipo": "Pessoa"
             })
 
     # Remove duplicados por ID e ordena alfabeticamente por displayName.
@@ -983,6 +986,13 @@ def permissoes(context):
         permis_unicos.values(),
         key=lambda x: (x.get("displayName") or "").lower()
     )
+    cargos_permissoes = sorted({
+        (usuario.get("jobTitle") or "").strip()
+        for usuario in usuarios
+        if (usuario.get("jobTitle") or "").strip()
+        and (usuario.get("jobTitle") or "").strip().casefold()
+        not in {valor.casefold() for valor in valores_especiais_etapa}
+    }, key=str.casefold)
 
     def normalizar_ids_acesso(valor):
         # Aceita ',' e ';' como separadores e remove entradas vazias ou '-'.
@@ -1002,6 +1012,18 @@ def permissoes(context):
     }
     
     Flows = flows.query.all()
+    etapas_por_fluxo = {}
+    for etapa in Etapas.query.order_by(Etapas.nome).all():
+        etapas_por_fluxo.setdefault(etapa.id_flow, []).append({
+            "id": etapa.id,
+            "nome": etapa.nome,
+            "responsaveis": [
+                item.strip()
+                for item in (etapa.responsaveis or "").replace(",", ";").split(";")
+                if item.strip()
+            ],
+        })
+
     Fluxos = []
     for fluxo in Flows:
         ids_fluxo = normalizar_ids_acesso(fluxo.acesso)
@@ -1016,20 +1038,55 @@ def permissoes(context):
             "acesso_ids": ",".join(ids_fluxo),
             "acesso": ", ".join(nomes_fluxo) if nomes_fluxo else "Não informado",
             "alias": fluxo.alias,
-            "area_responsavel": fluxo.area_responsavel
+            "area_responsavel": fluxo.area_responsavel,
+            "etapas": etapas_por_fluxo.get(fluxo.id, [])
         })
 
     if flask_request.method == "POST":
         fluxo_id = (flask_request.form.get("fluxo_id") or "").strip()
         nova_permissao_raw = (flask_request.form.get("novas_permissoes") or "").strip()
+        tipo_permissao = (flask_request.form.get("tipo_permissao") or "FLUXO").strip().lower()
+        nova_permissao = None
 
-        if nova_permissao_raw in ("", "-"):
-            nova_permissao = ""
-        else:
+        if tipo_permissao == "etapas":
+            id_etapa = (flask_request.form.get("id_etapa") or "").strip()
+            try:
+                etapa_db = Etapas.query.filter_by(
+                    id=id_etapa,
+                    id_flow=int(fluxo_id),
+                ).first()
+            except ValueError:
+                etapa_db = None
+
+            if etapa_db is not None:
+                ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
+                permissoes_atuais = {
+                    item.strip().casefold()
+                    for item in (etapa_db.responsaveis or "").replace(",", ";").split(";")
+                    if item.strip()
+                }
+                permissoes_validas = (
+                    set(permis_unicos)
+                    | {cargo.casefold() for cargo in cargos_permissoes}
+                    | {valor.casefold() for valor in valores_especiais_etapa}
+                    | permissoes_atuais
+                )
+                if all(item.casefold() in permissoes_validas for item in ids_normalizados):
+                    etapa_db.responsaveis = ";".join(ids_normalizados)
+                    try:
+                        database.session.commit()
+                        return redirect(url_for("permissoes"))
+                    except Exception as e:
+                        database.session.rollback()
+                        print("Erro ao salvar permissões da etapa:", repr(e))
+
+        elif tipo_permissao == "fluxo":
             ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
             nova_permissao = ",".join(ids_normalizados)
+        else:
+            nova_permissao = None
 
-        if fluxo_id:
+        if fluxo_id and nova_permissao is not None and tipo_permissao == "fluxo":
             try:
                 fluxo_db = flows.query.filter_by(id=int(fluxo_id)).first()
                 if fluxo_db is not None:
@@ -1050,6 +1107,8 @@ def permissoes(context):
         user=context['user'],
         fluxos=Fluxos,
         opcoes_permissoes=opcoes_permissoes,
+        cargos_permissoes=cargos_permissoes,
+        valores_especiais_etapa=valores_especiais_etapa,
         versoes_unicas=versoes_unicas,
     )
 
