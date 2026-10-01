@@ -436,26 +436,19 @@ def index(*, context):
 def solicitacoes(context):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
-    groups = g.info_user.get("groups", [])
     subordinados = g.info_user.get("subordinados", [])
-
-    solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
-    chamadas_por_solicitante = {}
-    for solic in solicitantes:
-        chamadas_por_solicitante.setdefault(solic.solicitante, []).append(solic.id)
-
-    ids_por_grupo = []
-    for solicitante_id, chamada_ids in chamadas_por_solicitante.items():
-        grupos_solicitante = get_groups_membership(solicitante_id, context['access_token'])
-        if any(grp in groups for grp in grupos_solicitante):
-            ids_por_grupo.extend(chamada_ids)
+    user_department = (g.info_user.get("department") or "").strip()
+    ids_mesmo_department = get_users_by_department(
+        user_department,
+        context["access_token"]
+    )
 
     solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
         .join(Execucao, Execucao.id_chamada == Chamada.id)\
         .filter(or_(
             Chamada.solicitante == f"{user_oid}",
             Chamada.solicitante.in_(subordinados),
-            Chamada.id.in_(ids_por_grupo)
+            Chamada.solicitante.in_(ids_mesmo_department)
         ))\
     .add_columns(
         Chamada.id,
