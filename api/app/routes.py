@@ -21,8 +21,10 @@ GROUPS_CACHE_TTL = 600
 DISPLAYNAME_CACHE_TTL = 1800
 _GROUPS_CACHE = {}       # user_id -> (timestamp, set(group_ids))
 _DISPLAYNAME_CACHE = {}  # user_id -> (timestamp, displayName)
+_DEPARTMENT_CACHE = {}   # user_id -> (timestamp, department)
 _groups_cache_lock = threading.Lock()
 _displayname_cache_lock = threading.Lock()
+_department_cache_lock = threading.Lock()
 
 STATUS_VARIANTS = {
     "cancelado": "danger",
@@ -135,6 +137,49 @@ def get_display_names(user_ids, access_token):
     return resultado
 
 
+def get_departments(user_ids, access_token):
+    """Resolve o department de vários usuários em lote, com cache temporário."""
+    resultado = {}
+    faltantes = []
+    now = time.time()
+    ids_unicos = {uid for uid in user_ids if uid}
+    with _department_cache_lock:
+        for uid in ids_unicos:
+            cached = _DEPARTMENT_CACHE.get(uid)
+            if cached and now - cached[0] < DISPLAYNAME_CACHE_TTL:
+                resultado[uid] = cached[1]
+            else:
+                faltantes.append(uid)
+
+    for i in range(0, len(faltantes), 20):
+        lote = faltantes[i:i + 20]
+        batch_body = {
+            "requests": [
+                {"id": uid, "method": "GET", "url": f"/users/{uid}?$select=department"}
+                for uid in lote
+            ]
+        }
+        resp = requests.post(
+            "https://graph.microsoft.com/v1.0/$batch",
+            headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+            json=batch_body
+        )
+        if not resp.ok:
+            continue
+        for item in resp.json().get("responses", []):
+            uid = item.get("id")
+            department = ""
+            if item.get("status") == 200:
+                department = item.get("body", {}).get("department") or ""
+            resultado[uid] = department
+            with _department_cache_lock:
+                _DEPARTMENT_CACHE[uid] = (now, department)
+
+    for uid in faltantes:
+        resultado.setdefault(uid, "")
+    return resultado
+
+
 # Consulta de coligadas/movimentos/centro de custo/fornecedores/contratos muda pouco, então é cacheada.
 COLIGMOV_CACHE_TTL = 300
 _COLIGMOV_CACHE = {"timestamp": 0, "data": None}
@@ -188,7 +233,7 @@ def carregar_info_usuario(context):
     access_token = context['access_token']
 
     info1 = requests.get(
-        f"https://graph.microsoft.com/v1.0/users/{user_id}?$select=id,displayName,mail,jobTitle",
+        f"https://graph.microsoft.com/v1.0/users/{user_id}?$select=id,displayName,mail,jobTitle,department",
         headers={"Authorization": f"Bearer {access_token}"}
     )
     info2 = requests.get(
@@ -211,6 +256,7 @@ def carregar_info_usuario(context):
         "displayName": info1.json().get("displayName", ""),
         "jobTitle":    info1.json().get("jobTitle", ""),
         "mail":        info1.json().get("mail", ""),
+        "department":  info1.json().get("department", ""),
         "groups":      [grp["id"] for grp in groups if grp.get("id")],
         "superior":    info3.json().get("id", ""),
         "subordinados": [sub["id"] for sub in info4.json().get("value", []) if sub.get("id")],
@@ -1023,19 +1069,21 @@ def historico(context):
     user_oid = user.get("oid") or user.get("id")
     groups = g.info_user.get("groups", [])
     user_job = g.info_user.get("jobTitle", "")
+    user_department = (g.info_user.get("department") or "").strip().casefold()
     subordinados = g.info_user.get("subordinados", [])
     grupos_conditions = [Etapas.responsaveis.like(f"%{grupo}%") for grupo in groups]
 
-    solicitantes = Chamada.query.add_columns(Chamada.solicitante, Chamada.id).all()
-    chamadas_por_solicitante = {}
-    for solic in solicitantes:
-        chamadas_por_solicitante.setdefault(solic.solicitante, []).append(solic.id)
-
-    ids_por_grupo = []
-    for solicitante_id, chamada_ids in chamadas_por_solicitante.items():
-        grupos_solicitante = get_groups_membership(solicitante_id, context['access_token'])
-        if any(grp in groups for grp in grupos_solicitante):
-            ids_por_grupo.extend(chamada_ids)
+    solicitante_ids = {
+        solicitante_id
+        for (solicitante_id,) in Chamada.query.with_entities(Chamada.solicitante).all()
+        if solicitante_id
+    }
+    departamentos = get_departments(solicitante_ids, context["access_token"])
+    ids_mesmo_department = [
+        solicitante_id
+        for solicitante_id, department in departamentos.items()
+        if user_department and (department or "").strip().casefold() == user_department
+    ]
 
     solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
     .join(Execucao, Execucao.id_chamada == Chamada.id)\
@@ -1043,7 +1091,7 @@ def historico(context):
     .filter(or_(
             Chamada.solicitante == f"{user_oid}",
             Chamada.solicitante.in_(subordinados),
-            Chamada.id.in_(ids_por_grupo),
+            Chamada.solicitante.in_(ids_mesmo_department),
             Etapas.responsaveis == f"{user_oid}",
             Etapas.responsaveis.like(f"%{user_oid}%"),
             Etapas.responsaveis.like(f"%{user_job}%"),
