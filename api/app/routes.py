@@ -307,32 +307,23 @@ def carregar_info_form(id_fluxo):
     fornecedores = {}
     contratos = {}
     dados =  g.coligMov.json()
-    if isinstance(dados, dict):
-        registros = dados.get("value") or dados.get("items") or dados.get("data") or []
-    elif isinstance(dados, list):
-        registros = dados
     
-    for colig in registros:
-        if colig.get("TIPO") == "COLIGADA":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            coligadas[valor] = label
-        elif colig.get("TIPO") == "MOVIMENTO":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            movimentos[valor] = label
-        elif colig.get("TIPO") == "CENTRO DE CUSTO":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            ccusto[valor] = label
-        elif colig.get("TIPO") == "FORNECEDOR":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            fornecedores[valor] = label
-        elif colig.get("TIPO") == "CONTRATO":
-            label = colig.get("LABELMOV")
-            valor = colig.get("VALORMOV")
-            contratos[valor] = label
+    destinos = {
+        "COLIGADA": coligadas,
+        "MOVIMENTO": movimentos,
+        "CENTRO DE CUSTO": ccusto,
+        "FORNECEDOR": fornecedores,
+        "CONTRATO": contratos,
+    }
+    for colig in dados:
+        destino = destinos.get(colig.get("TIPO"))
+        if destino is None:
+            continue
+        valor = colig.get("VALORMOV", colig.get("VALORCOLIG"))
+        label = colig.get("LABELMOV", colig.get("LABELCOLIG"))
+        if valor is None or label is None:
+            continue
+        destino[valor] = label    
     g.coligadasUnic = coligadas.items()
     g.movimentosUnic = movimentos.items()
     g.ccustoUnic = ccusto.items()
@@ -942,6 +933,7 @@ def download_arquivo(id_arquivo, context):
 def permissoes(context):
     access_token = context['access_token']
     headers = {"Authorization": f"Bearer {access_token}"}
+    erro_permissao = None
 
     def listar_todos(url):
         itens = []
@@ -1047,6 +1039,7 @@ def permissoes(context):
         nova_permissao_raw = (flask_request.form.get("novas_permissoes") or "").strip()
         tipo_permissao = (flask_request.form.get("tipo_permissao") or "FLUXO").strip().lower()
         nova_permissao = None
+        print("POST permissoes:", tipo_permissao, fluxo_id, flask_request.form.get("id_etapa"), nova_permissao_raw)
 
         if tipo_permissao == "etapas":
             id_etapa = (flask_request.form.get("id_etapa") or "").strip()
@@ -1058,7 +1051,9 @@ def permissoes(context):
             except ValueError:
                 etapa_db = None
 
-            if etapa_db is not None:
+            if etapa_db is None:
+                erro_permissao = "Etapa não encontrada para este fluxo. Nada foi salvo."
+            else:
                 ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
                 permissoes_atuais = {
                     item.strip().casefold()
@@ -1071,14 +1066,25 @@ def permissoes(context):
                     | {valor.casefold() for valor in valores_especiais_etapa}
                     | permissoes_atuais
                 )
-                if all(item.casefold() in permissoes_validas for item in ids_normalizados):
-                    etapa_db.responsaveis = ";".join(ids_normalizados)
+                invalidos = [item for item in ids_normalizados if item.casefold() not in permissoes_validas]
+                novo_valor = ";".join(ids_normalizados)
+                limite = Etapas.__table__.c.responsaveis.type.length
+                if invalidos:
+                    erro_permissao = f"Valores não reconhecidos, nada foi salvo: {', '.join(invalidos)}"
+                elif limite and len(novo_valor) > limite:
+                    erro_permissao = (
+                        f"A lista tem {len(novo_valor)} caracteres e o campo da etapa aceita no máximo {limite}. "
+                        "Remova responsáveis ou use um grupo."
+                    )
+                else:
+                    etapa_db.responsaveis = novo_valor
                     try:
                         database.session.commit()
                         return redirect(url_for("permissoes"))
                     except Exception as e:
                         database.session.rollback()
                         print("Erro ao salvar permissões da etapa:", repr(e))
+                        erro_permissao = "Não foi possível gravar no banco. Veja o log do servidor."
 
         elif tipo_permissao == "fluxo":
             ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
@@ -1110,6 +1116,7 @@ def permissoes(context):
         cargos_permissoes=cargos_permissoes,
         valores_especiais_etapa=valores_especiais_etapa,
         versoes_unicas=versoes_unicas,
+        erro_permissao=erro_permissao,
     )
 
 @app.route("/historico", methods=["POST", "GET"])

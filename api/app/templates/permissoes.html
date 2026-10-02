@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/07-solicitacoes.css') }}"/>
 
     <section class="imp-stack imp-gap-6 imp-request-page imp-request-page--inbox">
+        {% if erro_permissao %}
+        <div class="alert alert-danger" role="alert">{{ erro_permissao }}</div>
+        {% endif %}
         <div>
             <span class="imp-kicker">Gestão de acessos</span>
             <h2 class="imp-title">Fluxos para controle de permissões</h2>
