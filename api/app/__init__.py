@@ -7,6 +7,7 @@ from flask import Flask
 from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 import redis as redis_lib
+from sqlalchemy import MetaData
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -22,6 +23,7 @@ try:
     print("REDIS PING:", r.ping())
 except Exception as e:
     print("REDIS ERROR:", repr(e))
+    
 
 db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT", "5432")
@@ -49,7 +51,8 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "connect_args": {"options": "-csearch_path=public"}
 }
 
-database = SQLAlchemy(app)
+DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
+database = SQLAlchemy(app, metadata=MetaData(schema=DB_SCHEMA))
 
 auth = None
 if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET", "REDIRECT_URI")):
@@ -65,6 +68,7 @@ from app import routes
 """
 from sshtunnel import SSHTunnelForwarder
 from paramiko import Ed25519Key
+from sqlalchemy import MetaData
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -93,7 +97,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-database = SQLAlchemy(app)
+# Schema aplicado a todas as tabelas e chaves estrangeiras dos modelos.
+DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
+database = SQLAlchemy(app, metadata=MetaData(schema=DB_SCHEMA))
 
 auth = None
 if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET", "REDIRECT_URI")):

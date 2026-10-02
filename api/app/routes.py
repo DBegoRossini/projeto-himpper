@@ -593,7 +593,6 @@ def abandonar_tarefa(context, id_chamada, id_etapa):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     execucao = Execucao.query.filter_by(id_chamada=id_chamada, executor=user_oid, id_etapa=id_etapa).first()
-    print(execucao.json())
     if execucao:
         execucao.executor = None
         execucao.assumida_em = None
