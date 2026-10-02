@@ -51,7 +51,6 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "connect_args": {"options": "-csearch_path=public"}
 }
 
-database = SQLAlchemy(app)
 DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
 database = SQLAlchemy(app, metadata=MetaData(schema=DB_SCHEMA))
 
