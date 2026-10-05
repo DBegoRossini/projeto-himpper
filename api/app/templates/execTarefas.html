@@ -33,7 +33,11 @@
         else ''
     %}
 
+    {% set visao_geral = etapa_id|string|trim == '0' %}
+
     {% set pode_editar =
+        not visao_geral
+        and
         execucao
         and executor_id != ''
         and executor_id == usuario_id
@@ -305,7 +309,7 @@
 
         </section>
 
-        {% if execucao and execucao[0].get("executor") == None and executor == True %}
+        {% if not visao_geral and execucao and execucao[0].get("executor") == None and executor == True %}
 
             <section class="imp-execution-notice imp-execution-notice--warning">
 
@@ -330,7 +334,7 @@
 
             </section>
 
-        {% elif execucao and execucao[0].get("executor") and execucao[0].get("executor_id") != user_id %}
+        {% elif not visao_geral and execucao and execucao[0].get("executor") and execucao[0].get("executor_id") != user_id %}
 
             <section class="imp-execution-notice imp-execution-notice--info">
 
@@ -348,7 +352,7 @@
                 </div>
 
             </section>
-        {% elif execucao and execucao[0].get("executor_id") == user_id %}
+        {% elif not visao_geral and execucao and execucao[0].get("executor_id") == user_id %}
 
             <section class="imp-execution-notice imp-execution-notice--info">
 

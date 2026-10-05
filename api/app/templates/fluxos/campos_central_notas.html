@@ -1,7 +1,10 @@
 {% set modo_execucao = modo_execucao|default(false) %}
 {% set permitir_edicao_central = permitir_edicao|default(true) %}
 
-{% set numero_oc_liberado_por_etapa = etapa_id|default('') == 'OC-01' %}
+{% set numero_oc_liberado_por_etapa =
+    etapa_id|default('') == 'OC-01'
+    or etapa_id|string|trim == '0'
+%}
 {% set consulta_central_notas =
     modo_execucao
     and etapa_id|default('') in ['OC-04', 'OC-C-06-B']
