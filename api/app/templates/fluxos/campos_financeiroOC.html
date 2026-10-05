@@ -52,6 +52,11 @@
     if modo_execucao else none
 %}
 
+{% set f_arquivo_oc_rm =
+    formularios_map.get('arquivo_oc_rm')
+    if modo_execucao else none
+%}
+
 {% set f_anexos_retorno =
     formularios_map.get('anexos_retorno')
     if modo_execucao else none
@@ -284,6 +289,16 @@
         permitir_edicao
         and f_documentos_financeiro
         and (f_documentos_financeiro.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set arquivo_oc_rm_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_arquivo_oc_rm
+        and (f_arquivo_oc_rm.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -3102,3 +3117,80 @@
     {% include "fluxos/campos_dados_extraidos.html" %}
 
 {% endif %}
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+        <div class="imp-form-section__copy">
+            <h3 class="imp-card__title">
+                Arquivo da OC no RM
+            </h3>
+            <p class="imp-card__subtitle">
+                Anexe o arquivo da OC consultado no Totvs RM.
+            </p>
+        </div>
+    </div>
+
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="arquivo_oc_rm"
+        >
+
+            {% if modo_execucao and f_arquivo_oc_rm and f_arquivo_oc_rm.valor %}
+                <div class="imp-execution-current-file">
+                    <div>
+                        <strong>Arquivo atual</strong>
+                        <span>Arquivo da OC consultado no RM.</span>
+                    </div>
+                    <a
+                        class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for('download_arquivo', id_arquivo=f_arquivo_oc_rm.id) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Visualizar arquivo
+                    </a>
+                </div>
+            {% endif %}
+
+            <input
+                type="hidden"
+                id="arquivoOcRmFallback"
+                name="arquivo_oc_rm"
+                value=""
+            >
+
+            {% if arquivo_oc_rm_editavel %}
+                <div class="imp-upload">
+                    <input
+                        id="arquivo_oc_rm"
+                        name="arquivo_oc_rm"
+                        type="file"
+                        class="imp-upload__input"
+                        data-impper-file-output="#arquivoOcRmName"
+                    >
+                    <label
+                        class="imp-upload__label"
+                        for="arquivo_oc_rm"
+                    >
+                        <span class="imp-upload__copy">
+                            <strong>Anexe o arquivo da OC</strong>
+                            <span>Selecione o arquivo da OC no RM.</span>
+                        </span>
+                        <span class="imp-upload__action">Selecionar arquivo</span>
+                    </label>
+                </div>
+
+                <div
+                    id="arquivoOcRmName"
+                    class="imp-file-name"
+                >
+                    Nenhum arquivo selecionado.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</section>
