@@ -2,9 +2,10 @@
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
 {% set etapa_atual = etapa_id|default('') %}
+{% set visao_geral = etapa_atual|string|trim == '0' %}
 {% set executor_atual = execucao[0].get('executor_id')|string|trim|lower if execucao else '' %}
 {% set usuario_atual = user_id|string|trim|lower if user_id else '' %}
-{% set oc_pode_editar = pode_editar or (executor_atual and executor_atual == usuario_atual) %}
+{% set oc_pode_editar = not visao_geral and (pode_editar or (executor_atual and executor_atual == usuario_atual)) %}
 {% set passou_central_notas = namespace(valor=false) %}
 
 {% for etapa_historico in historico_etapas|default([]) %}
@@ -66,6 +67,7 @@
 
 {% set exibir_central_notas =
     not modo_execucao
+    or visao_geral
     or etapa_atual in etapas_central_notas
     or (
         etapa_atual in etapas_com_resumo_central
@@ -88,16 +90,19 @@
 
 {% set etapa_financeiro =
     modo_execucao
-    and etapa_atual in [
-        'OC-04',
-        'OC-05-A',
-        'OC-05-B',
-        'OC-05-C',
-        'OC-10',
-        'OC-07',
-        'OC-C-06-A',
-        'OC-C-06-B'
-    ]
+    and (
+        visao_geral
+        or etapa_atual in [
+            'OC-04',
+            'OC-05-A',
+            'OC-05-B',
+            'OC-05-C',
+            'OC-10',
+            'OC-07',
+            'OC-C-06-A',
+            'OC-C-06-B'
+        ]
+    )
 %}
 
 
