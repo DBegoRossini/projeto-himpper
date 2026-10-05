@@ -111,6 +111,7 @@
             const match = contratos.filter(
                 (contrato) => String(contrato["CODCOLIGADA"]) === String(coligada)
             );
+            console.log(match);
 
             contratoSelect.innerHTML = '';
             pagSelect.innerHTML = '';
@@ -149,6 +150,7 @@
             const contratoInfo = match.find(
                 (contrato) => String(contrato["CODIGOCONTRATO"]) === String(selectedContrato)
             );
+            console.log(contratoInfo);
             if (!contratoInfo) return;
 
             const valor = document.getElementById('valor_contrato_PD');
