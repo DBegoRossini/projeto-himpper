@@ -1,0 +1,31 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Vídeos Explicativos
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">
+        Vídeos Explicativos
+    </h1>
+
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Vídeos explicativos disponíveis para
+        {{ info_user.displayName if info_user else "o usuário logado" }}.
+    </p>
+{% endblock %}
+
+{% block main %}
+    {% set user_oid = user.get('oid') or user.get('id') %}
+    <div class="explicativos-container">
+        {% for fluxo in fluxos %}
+            <div class="explicativo-item">
+                <video controls preload="metadata" playsinline>
+                    <source src="{{ url_for('static', filename='vid/' + fluxo.nome + '.mp4') }}" type="video/mp4">
+                    Seu navegador não suporta a reprodução deste vídeo.
+                </video>
+                <h2>{{ fluxo.alias }}</h2>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

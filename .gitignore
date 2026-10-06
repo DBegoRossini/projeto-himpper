@@ -18,6 +18,8 @@ __pycache__/
 *__init__.py
 *app_config.py
 
+.vid/
+
 
 # Logs
 *.log
@@ -31,3 +33,6 @@ __pycache__/
 build/
 *.egg-info/
 flask_session/
+
+# Vídeos (hospedados apenas no servidor)
+api/app/static/vid/

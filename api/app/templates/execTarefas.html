@@ -456,6 +456,35 @@
 
                     {% endif %}
 
+                    {% if pode_editar %}
+
+                        <div class="imp-field">
+
+                            <label
+                                class="imp-label"
+                                for="comentario_conclusao"
+                            >
+                                Comentário
+                                <span class="imp-help">(opcional)</span>
+                            </label>
+
+                            <textarea
+                                id="comentario_conclusao"
+                                name="comentario"
+                                class="form-control"
+                                rows="4"
+                                maxlength="2000"
+                                placeholder="Adicione um comentário sobre esta etapa, se necessário."
+                            ></textarea>
+
+                            <p class="imp-help">
+                                Será registrado no histórico ao concluir a etapa.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
                 </form>
 
             {% else %}
@@ -804,27 +833,6 @@
                             Tem certeza que deseja concluir esta etapa?
                         </p>
 
-                        <div class="imp-field">
-
-                            <label
-                                class="imp-label"
-                                for="comentario_conclusao"
-                            >
-                                Comentário
-                                <span class="imp-help">(opcional)</span>
-                            </label>
-
-                            <textarea
-                                id="comentario_conclusao"
-                                name="comentario"
-                                class="form-control"
-                                rows="4"
-                                maxlength="2000"
-                                placeholder="Adicione um comentário sobre esta etapa, se necessário."
-                            ></textarea>
-
-                        </div>
-
                     </div>
 
                     <div class="modal-footer">
@@ -854,6 +862,53 @@
 
         </div>
 
+    {% endif %}
+
+     {% if pode_comentar %}
+        <section
+            class="imp-execution-section"
+            aria-labelledby="comment-title"
+        >
+            <div class="imp-execution-section__head">
+                <div>
+                    <span class="imp-execution-overline">Comentários</span>
+                    <p class="imp-execution-section__subtitle">
+                        O comentário será registrado na solicitação, separado dos comentários de etapa.
+                    </p>
+                </div>
+            </div>
+
+            {% if comentarios_chamada %}
+                <ul class="list-unstyled mb-3">
+                    {% for c in comentarios_chamada %}
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong>{{ c.usuario }}</strong>
+                            <small class="text-muted">· {{ c.data.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <div style="white-space: pre-line">{{ c.comentario }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <section
+                class="imp-form"
+                data-comment-form
+            >
+                <div class="imp-field">
+                    <label class="imp-label" for="texto_comentario">Comentário</label>
+                    <textarea
+                        id="texto_comentario"
+                        name="texto_comentario"
+                        class="form-control"
+                        rows="3"
+                        maxlength="2000"
+                        required
+                        placeholder="Escreva um comentário..."
+                    ></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="comentar('{{ id_chamada }}', '{{ etapa_id }}')">Adicionar comentário</button>
+            </section>
+        </section>
     {% endif %}
 
      <section
@@ -925,7 +980,7 @@
                                     {% if etapa_historico.comentario %}
                                         <div class="imp-execution-timeline__comment">
                                             <dt>Comentário</dt>
-                                            <dd>{{ etapa_historico.comentario }}</dd>
+                                            <dd style="white-space: pre-line">{{ etapa_historico.comentario }}</dd>
                                         </div>
                                     {% endif %}
                                 </dl>
