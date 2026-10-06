@@ -4,6 +4,10 @@
     Vídeos Explicativos
 {% endblock %}
 
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/explicativos.css') }}"/>
+{% endblock %}
+
 {% block topBar %}
     <h1 class="imp-heading">
         Vídeos Explicativos
@@ -17,15 +21,45 @@
 
 {% block main %}
     {% set user_oid = user.get('oid') or user.get('id') %}
-    <div class="explicativos-container">
-        {% for fluxo in fluxos %}
-            <div class="explicativo-item">
-                <video controls preload="metadata" playsinline>
-                    <source src="{{ url_for('static', filename='vid/' + fluxo.nome + '.mp4') }}" type="video/mp4">
-                    Seu navegador não suporta a reprodução deste vídeo.
-                </video>
-                <h2>{{ fluxo.alias }}</h2>
+    <section class="card imp-card imp-card--accent-orange imp-request-panel">
+        {% if fluxos %}
+            <div class="card-body imp-card__body imp-stack imp-gap-5">
+                <div class="imp-request-toolbar explicativos-toolbar">
+                    <label class="imp-field imp-request-toolbar__search" for="explicativos-search">
+                        <span class="imp-label">Buscar vídeo</span>
+                        <input
+                            class="form-control"
+                            id="explicativos-search"
+                            type="search"
+                            placeholder="Pesquise pelo título"
+                            autocomplete="off"
+                        >
+                    </label>
+                </div>
+
+                <div class="explicativos-grid" id="explicativos-list">
+                    {% for v in fluxos %}
+                        <article class="explicativo-item">
+                            <video controls preload="metadata" playsinline>
+                                <source src="{{ url_for('explicativos_video', video_id=v.video_id) }}" type="video/mp4">
+                                Seu navegador não suporta a reprodução deste vídeo.
+                            </video>
+                            <h2>{{ v.alias }}</h2>
+                        </article>
+                    {% endfor %}
+                </div>
+                <p class="explicativos-empty" id="explicativos-no-results" role="status" hidden>
+                    Nenhum vídeo encontrado com esse título.
+                </p>
             </div>
-        {% endfor %}
-    </div>
+        {% else %}
+            <div class="card-body imp-card__body">
+                <p class="explicativos-empty">Nenhum vídeo explicativo disponível no momento.</p>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block page_scripts %}
+    <script defer src="{{ url_for('static', filename='js/explicativos.js') }}"></script>
 {% endblock %}

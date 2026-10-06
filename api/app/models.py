@@ -64,3 +64,10 @@ class ComentFlows(database.Model):
     usuario = database.Column(database.String(500), nullable=False)
     comentario = database.Column(database.Text, nullable=False)
     data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
+
+class VidFlows(database.Model):
+    __tablename__ = 'vid_flows'
+    id = database.Column(database.Integer, primary_key=True)
+    id_flow = database.Column(database.Integer, database.ForeignKey("flows.id"), nullable=False)
+    base64 = database.Column(database.String(500), nullable=False)
+    data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
