@@ -76,6 +76,7 @@
 %}
 
 {% set f_titulo = formularios_map.get('titulo') if modo_execucao else none %}
+{% set f_observacoes = formularios_map.get('observacoes') if modo_execucao else none %}
 
 {% set titulo_editavel =
     not modo_execucao
@@ -85,6 +86,15 @@
             not f_titulo
             or (f_titulo.editavel|string|lower|trim) in ['1', 'true']
         )
+    )
+%}
+
+{% set observacoes_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_observacoes
+        and (f_observacoes.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -232,6 +242,27 @@
                 {% if titulo_editavel %}required{% endif %}
                 {% if not titulo_editavel %}disabled data-impper-locked="true"{% endif %}
             >
+
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="observacoes"
+        >
+
+            <label class="imp-label" for="observacoes">
+                Observações (opcional)
+            </label>
+
+            <textarea
+                id="observacoes"
+                name="observacoes"
+                class="form-control"
+                rows="4"
+                maxlength="900"
+                placeholder="Inclua informações adicionais, se necessário"
+                {% if not observacoes_editavel %}disabled data-impper-locked="true"{% endif %}
+            >{{ f_observacoes.valor if modo_execucao and f_observacoes and f_observacoes.valor is not none else '' }}</textarea>
 
         </div>
 
