@@ -56,3 +56,11 @@ class Formularios(database.Model):
     tp_campo = database.Column(database.String(50), nullable=False)
     valor = database.Column(database.String(900), nullable=True)
     editavel = database.Column(database.String(1), nullable=False)
+
+class ComentFlows(database.Model):
+    __tablename__ = 'coment_flows'
+    id = database.Column(database.Integer, primary_key=True)
+    id_chamada = database.Column(database.Integer, database.ForeignKey("chamada.id"), nullable=False)
+    usuario = database.Column(database.String(500), nullable=False)
+    comentario = database.Column(database.Text, nullable=False)
+    data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)

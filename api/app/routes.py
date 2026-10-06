@@ -7,8 +7,8 @@ import time
 import threading
 from functools import wraps
 from . import app, auth, database
-from flask import  abort, render_template, redirect, send_file, url_for,  g, session, request as flask_request
-from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios
+from flask import  abort, render_template, redirect, send_file, url_for,  g, session, jsonify, request as flask_request
+from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows
 from sqlalchemy import cast, String, or_, and_
 from datetime import datetime, timedelta, timezone
 import base64
@@ -750,14 +750,35 @@ def execFlow(id_etapa, id_chamada, id_proxet, context):
     return redirect(url_for("caixaentrada"))
 
 
-@app.route("/execucao/<int:id_chamada>/<id_etapa>")
+def usuario_e_responsavel_da_etapa(etapa, user_oid, groups):
+    responsaveis = etapa.responsaveis.split(";") if etapa and etapa.responsaveis else []
+    return user_oid in responsaveis or any(grupo in responsaveis for grupo in groups)
+
+
+@app.route("/execucao/<int:id_chamada>/<id_etapa>", methods=["GET", "POST"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
 def exec_tarefas(id_chamada, id_etapa, context):
     user_oid = context['user'].get("oid") or context['user'].get("id")
     access_token = context['access_token']
-    chamada_raw = Chamada.query.get(id_chamada)
+    chamada_raw = Chamada.query.get_or_404(id_chamada)
     chamada=[]
+    execucao_ativa = (
+        Execucao.query
+        .filter_by(id_chamada=id_chamada, finalizada_em=None)
+        .order_by(Execucao.id.desc())
+        .first()
+    )
+    eh_solicitante = chamada_raw.solicitante == user_oid
+    eh_responsavel_ativo = bool(
+        execucao_ativa
+        and usuario_e_responsavel_da_etapa(
+            Etapas.query.get(execucao_ativa.id_etapa),
+            user_oid,
+            g.info_user.get("groups", []),
+        )
+    )
+    pode_comentar = eh_solicitante or eh_responsavel_ativo
    
     solicitante = requests.get(
             f"https://graph.microsoft.com/v1.0/users/{chamada_raw.solicitante}?$select=displayName",
@@ -882,10 +903,29 @@ def exec_tarefas(id_chamada, id_etapa, context):
         us_atuante = True
     else:
         us_atuante = False
+    comentarios_chamada = []
+    nomes_comentaristas = {}
+    authorization = context["access_token"]
+    for c in ComentFlows.query.filter_by(id_chamada=id_chamada).order_by(ComentFlows.id.asc()).all():
+        if c.usuario not in nomes_comentaristas:
+            resp_nome = requests.get(
+                f"https://graph.microsoft.com/v1.0/users/{c.usuario}?$select=displayName",
+                headers={"Authorization": f"Bearer {authorization}"}
+            )
+            nomes_comentaristas[c.usuario] = (
+                resp_nome.json().get("displayName", "Desconhecido") if resp_nome else "Desconhecido"
+            )
+        comentarios_chamada.append({
+            "usuario": nomes_comentaristas[c.usuario],
+            "comentario": c.comentario,
+            "data": c.data_criacao.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Sao_Paulo")),
+        })
+
     return render_template(
         "execTarefas.html",
         user=context["user"],
         id_chamada=id_chamada,
+        comentarios_chamada=comentarios_chamada,
         chamada=chamada,
         fluxo=fluxo,
         execucao=execucao,
@@ -894,6 +934,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         formularios=formularios,
         formularios_map=formularios_map,
         historico_etapas=historico_etapas,
+        pode_comentar=pode_comentar,
         executor=us_atuante,
         user_id=user_oid,
         form_abertos = [],
@@ -901,6 +942,25 @@ def exec_tarefas(id_chamada, id_etapa, context):
         grupoSign = grupos_sign if fluxo.id == 1 else None,
         colaboradores=colaboradores if fluxo.id == 1 else None
     )
+
+@app.route("/comentar/<int:id_chamada>", methods=["POST"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def comentar(id_chamada, context):
+    comenttxt = ((flask_request.get_json(silent=True) or {}).get("comentario") or "").strip()
+    if not comenttxt:
+        return jsonify({"erro": "Comentário vazio"}), 400
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    comentario = ComentFlows(
+        id_chamada=id_chamada,
+        usuario = user_oid,
+        comentario=comenttxt,
+        data_criacao=datetime.now()
+    )
+    database.session.add(comentario)
+    database.session.commit()
+    return jsonify({"ok": True})
 
 
 @app.route("/arquivo/<int:id_arquivo>")
@@ -925,6 +985,78 @@ def download_arquivo(id_arquivo, context):
         mimetype=mime
     )
 
+@app.route("/historico", methods=["POST", "GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def historico(context):
+    user = context["user"]
+    user_oid = user.get("oid") or user.get("id")
+    groups = g.info_user.get("groups", [])
+    user_job = g.info_user.get("jobTitle", "")
+    user_department = (g.info_user.get("department") or "").strip()
+    subordinados = g.info_user.get("subordinados", [])
+    grupos_conditions = [and_(Etapas.responsaveis.like(f"%{grupo}%"), grupo != '1fa699a0-d6ac-499e-af35-69d7e33e42fb') for grupo in groups]
+
+    ids_mesmo_department = get_users_by_department(
+        user_department,
+        context["access_token"]
+    )
+
+    solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
+    .join(Execucao, Execucao.id_chamada == Chamada.id)\
+    .join(Etapas, Etapas.id == Execucao.id_etapa)\
+    .filter(or_(
+            Chamada.solicitante == f"{user_oid}",
+            Chamada.solicitante.in_(subordinados),
+            Chamada.solicitante.in_(ids_mesmo_department),
+            Etapas.responsaveis == f"{user_oid}",
+            Etapas.responsaveis.like(f"%{user_oid}%"),
+            Etapas.responsaveis.like(f"%{user_job}%"),
+            and_(
+                Etapas.responsaveis == "Solicitante",
+                Chamada.solicitante == f"{user_oid}"
+            ),
+            *grupos_conditions
+        ))\
+    .add_columns(
+        Chamada.id,
+        flows.alias.label("tipo"),
+        Chamada.data.label("abertura_label"),
+        Chamada.status.label("status_label"),
+        Chamada.solicitante.label("solicitante"),
+        flows.titulo
+    ).order_by(Chamada.id.desc()).distinct().all()
+
+    ids_chamada = set()
+    for row in solicitacoes_raw:
+        ids_chamada.add(row.id)
+
+    formularios_por_chamada = {}
+    if ids_chamada:
+        formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
+        for formulario in formularios_raw:
+            formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
+
+
+    solicitacoes = [
+        {
+            "id": row.id,
+            "tipo": row.tipo,
+            "abertura_label": row.abertura_label,
+            "status_label": row.status_label,
+            "status_variant": status_variant_for(row.status_label),
+            "solicitante": row.solicitante,
+            "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
+            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
+        }
+        for row in solicitacoes_raw
+    ]
+
+    return render_template(
+        'historico.html',
+        user=context['user'],
+        solicitacoes=solicitacoes,
+    )
 
 @app.route("/permissoes", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
@@ -1118,77 +1250,22 @@ def permissoes(context):
         erro_permissao=erro_permissao,
     )
 
-@app.route("/historico", methods=["POST", "GET"])
+@app.route("/explicativos", methods=["POST", "GET"])
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
-def historico(context):
-    user = context["user"]
-    user_oid = user.get("oid") or user.get("id")
-    groups = g.info_user.get("groups", [])
-    user_job = g.info_user.get("jobTitle", "")
-    user_department = (g.info_user.get("department") or "").strip()
-    subordinados = g.info_user.get("subordinados", [])
-    grupos_conditions = [and_(Etapas.responsaveis.like(f"%{grupo}%"), grupo != '1fa699a0-d6ac-499e-af35-69d7e33e42fb') for grupo in groups]
+def explicativos(context):
+    groups   = g.info_user.get("groups", [])
+    jobTitle   = g.info_user.get("jobTitle", [])
+    user = context['user']
+    user_id = user.get("oid") or user.get("id")
 
-    ids_mesmo_department = get_users_by_department(
-        user_department,
-        context["access_token"]
-    )
-
-    solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
-    .join(Execucao, Execucao.id_chamada == Chamada.id)\
-    .join(Etapas, Etapas.id == Execucao.id_etapa)\
-    .filter(or_(
-            Chamada.solicitante == f"{user_oid}",
-            Chamada.solicitante.in_(subordinados),
-            Chamada.solicitante.in_(ids_mesmo_department),
-            Etapas.responsaveis == f"{user_oid}",
-            Etapas.responsaveis.like(f"%{user_oid}%"),
-            Etapas.responsaveis.like(f"%{user_job}%"),
-            and_(
-                Etapas.responsaveis == "Solicitante",
-                Chamada.solicitante == f"{user_oid}"
-            ),
-            *grupos_conditions
-        ))\
-    .add_columns(
-        Chamada.id,
-        flows.alias.label("tipo"),
-        Chamada.data.label("abertura_label"),
-        Chamada.status.label("status_label"),
-        Chamada.solicitante.label("solicitante"),
-        flows.titulo
-    ).order_by(Chamada.id.desc()).distinct().all()
-
-    ids_chamada = set()
-    for row in solicitacoes_raw:
-        ids_chamada.add(row.id)
-
-    formularios_por_chamada = {}
-    if ids_chamada:
-        formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
-        for formulario in formularios_raw:
-            formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
-
-
-    solicitacoes = [
-        {
-            "id": row.id,
-            "tipo": row.tipo,
-            "abertura_label": row.abertura_label,
-            "status_label": row.status_label,
-            "status_variant": status_variant_for(row.status_label),
-            "solicitante": row.solicitante,
-            "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
-            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
-        }
-        for row in solicitacoes_raw
-    ]
-
+    fluxos = flows.query.filter(or_(flows.acesso.in_(groups), flows.acesso.like('%' + (jobTitle if jobTitle else '') + '%'), flows.acesso.like('%' + user_id + '%'))).all()
+    print(fluxos)
     return render_template(
-        'historico.html',
-        user=context['user'],
-        solicitacoes=solicitacoes,
+        'explicativos.html',
+        user=user,
+        user_id=user_id,
+        fluxos=fluxos,
     )
 
 @app.route("/logout")

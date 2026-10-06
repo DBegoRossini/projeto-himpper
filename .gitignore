@@ -31,3 +31,6 @@ __pycache__/
 build/
 *.egg-info/
 flask_session/
+
+# Vídeos (hospedados apenas no servidor)
+api/app/static/vid/

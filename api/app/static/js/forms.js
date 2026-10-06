@@ -981,7 +981,7 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   }
 
   const fields = Array.from(document.querySelectorAll('input, textarea, select'))
-      .filter(f => f.name);
+      .filter(f => f.name && !f.closest('[data-comment-form]'));
   const formData = new FormData();
   fields.forEach(field => {
     if (
@@ -1102,4 +1102,20 @@ async function assumir(idChamada, id_etapa) {
 
 function campoPesquisa(document, campo) {
   return window.ImpperSearchSelect.initSearchField(document, campo);
+};
+
+async function comentar(idChamada) {
+  const comentario = document.getElementById('texto_comentario').value;
+  const resp = await fetch(`/comentar/${idChamada}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ comentario })
+  });
+  if (!resp.ok) {
+    alert("Não foi possível adicionar o comentário.");
+    return;
+  }
+  location.reload();
 }
