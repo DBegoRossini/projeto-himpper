@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-ui.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/impper-bootstrap.css') }}"/>
+    {% block extra_styles %}{% endblock %}
     <script defer src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script defer src="{{ url_for('static', filename='dist/impper-ui.js') }}"></script>
 </head>
@@ -77,7 +78,7 @@
         </li>
 
         <li>
-            <a class="imp-nav__link{% if current_endpoint == 'videos' %} is-active{% endif %}" href="{{ url_for('explicativos') }}">
+            <a class="imp-nav__link{% if current_endpoint == 'explicativos' %} is-active{% endif %}" href="{{ url_for('explicativos') }}">
             <span class="imp-nav__icon" aria-hidden="true">&#x1F3A5;&#xFE0E;</span>
             <span class="imp-nav__label">Vídeos explicativos</span>
             </a>
@@ -203,5 +204,6 @@
     </div>
     <footer>
     </footer>
+    {% block page_scripts %}{% endblock %}
 </body>
 </html>

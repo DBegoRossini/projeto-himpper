@@ -1,3 +1,5 @@
+import binascii
+import hashlib
 import os
 import re
 from io import BytesIO
@@ -8,7 +10,7 @@ import threading
 from functools import wraps
 from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, jsonify, request as flask_request
-from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows
+from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows, VidFlows
 from sqlalchemy import cast, String, or_, and_
 from datetime import datetime, timedelta, timezone
 import base64
@@ -1259,8 +1261,11 @@ def explicativos(context):
     user = context['user']
     user_id = user.get("oid") or user.get("id")
 
-    fluxos = flows.query.filter(or_(flows.acesso.in_(groups), flows.acesso.like('%' + (jobTitle if jobTitle else '') + '%'), flows.acesso.like('%' + user_id + '%'))).all()
-    print(fluxos)
+    fluxos = flows.query\
+        .join(VidFlows, VidFlows.id_flow == flows.id)\
+        .filter(or_(flows.acesso.in_(groups), flows.acesso.like('%' + (jobTitle if jobTitle else '') + '%'), flows.acesso.like('%' + user_id + '%')))\
+        .add_columns(VidFlows.id.label("video_id"), flows.alias)\
+        .all()
     return render_template(
         'explicativos.html',
         user=user,
@@ -1268,9 +1273,60 @@ def explicativos(context):
         fluxos=fluxos,
     )
 
+@app.route("/explicativos/video/<int:video_id>", methods=["GET"])
+@auth.login_required(scopes=["User.Read"])
+@with_info_user
+def explicativos_video(video_id, context):
+    groups = g.info_user.get("groups", [])
+    job_title = g.info_user.get("jobTitle", "")
+    user = context["user"]
+    user_id = user.get("oid") or user.get("id")
+
+    video = VidFlows.query\
+        .join(flows, VidFlows.id_flow == flows.id)\
+        .filter(
+            VidFlows.id == video_id,
+            or_(
+                flows.acesso.in_(groups),
+                flows.acesso.like('%' + (job_title if job_title else '') + '%'),
+                flows.acesso.like('%' + user_id + '%'),
+            ),
+        )\
+        .first()
+    if video is None:
+        abort(404)
+
+    encoded_video = video.base64.strip()
+    if encoded_video.startswith("data:"):
+        header, separator, encoded_video = encoded_video.partition(",")
+        if not separator or ";base64" not in header.lower():
+            app.logger.error("O vídeo %s não possui um cabeçalho Base64 válido.", video_id)
+            abort(500)
+
+    encoded_video = "".join(encoded_video.split())
+    try:
+        video_bytes = base64.b64decode(encoded_video, validate=True)
+    except (binascii.Error, ValueError):
+        app.logger.exception("Não foi possível decodificar o vídeo %s armazenado.", video_id)
+        abort(500)
+
+    if not video_bytes:
+        app.logger.error("O vídeo %s está vazio após a decodificação.", video_id)
+        abort(500)
+
+    response = send_file(
+        BytesIO(video_bytes),
+        mimetype="video/mp4",
+        conditional=True,
+        etag=hashlib.sha256(video_bytes).hexdigest(),
+        max_age=86400,
+    )
+    response.headers["Cache-Control"] = "private, max-age=86400"
+    response.vary.add("Cookie")
+    return response
+
 @app.route("/logout")
 def logout():
     session.clear()
     return "ok", 200
 #    return redirect(url_for('index'))
-
