@@ -17,6 +17,7 @@
 {% set f_tratamento = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
 {% set f_tipo_movimento = formularios_map.get('tipo_movimento') if modo_execucao else none %}
 
+{% set f_vencimento = formularios_map.get('vencimento') if modo_execucao else none %}
 {% set f_coligada = formularios_map.get('codcoligada') if modo_execucao else none %}
 {% set f_centro_custo = formularios_map.get('centro_custo') if modo_execucao else none %}
 {% set f_natureza = formularios_map.get('natureza_orcamentaria') if modo_execucao else none %}
@@ -79,6 +80,15 @@
         permitir_edicao_central
         and f_tipo_movimento
         and (f_tipo_movimento.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set vencimento_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao_central
+        and f_vencimento
+        and (f_vencimento.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -650,6 +660,51 @@
     </div>
 
     <div class="imp-form-grid">
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="vencimento"
+        >
+
+            <label
+                class="imp-label"
+                for="vencimento"
+            >
+                O vencimento está:
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <select
+                id="vencimento"
+                name="vencimento"
+                class="form-select"
+                autocomplete="organization"
+                {% if vencimento_editavel %}required{% endif %}
+                {% if not vencimento_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+                <option value="">
+                    Selecione uma coligada
+                </option>
+
+                <option
+                    value="DENTRO_PRAZO"
+                    {% if modo_execucao and f_vencimento and (f_vencimento.valor|string) == 'DENTRO_PRAZO' %}selected{% endif %}
+                >
+                    Dentro do prazo (15 dias+2 dias uteis)
+                </option>
+
+                <option
+                    value="FORA_PRAZO"
+                    {% if modo_execucao and f_vencimento and (f_vencimento.valor|string) == 'FORA_PRAZO' %}selected{% endif %}
+                >
+                    Fora do prazo (-17 dias)
+                </option>
+
+
+            </select>
+
+        </div>
 
         <div
             class="imp-field imp-field--full"
