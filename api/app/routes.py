@@ -1257,13 +1257,14 @@ def permissoes(context):
 @with_info_user
 def explicativos(context):
     groups   = g.info_user.get("groups", [])
+    grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
     jobTitle   = g.info_user.get("jobTitle", [])
     user = context['user']
     user_id = user.get("oid") or user.get("id")
 
     fluxos = flows.query\
         .join(VidFlows, VidFlows.id_flow == flows.id)\
-        .filter(or_(flows.acesso.in_(groups), flows.acesso.like('%' + (jobTitle if jobTitle else '') + '%'), flows.acesso.like('%' + user_id + '%')))\
+        .filter(or_(*grupos_conditions, flows.acesso.like('%' + (jobTitle if jobTitle else '') + '%'), flows.acesso.like('%' + user_id + '%')))\
         .add_columns(VidFlows.id.label("video_id"), flows.alias)\
         .all()
     return render_template(
