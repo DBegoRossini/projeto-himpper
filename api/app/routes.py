@@ -1278,6 +1278,7 @@ def explicativos(context):
 @with_info_user
 def explicativos_video(video_id, context):
     groups = g.info_user.get("groups", [])
+    grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
     job_title = g.info_user.get("jobTitle", "")
     user = context["user"]
     user_id = user.get("oid") or user.get("id")
@@ -1287,9 +1288,9 @@ def explicativos_video(video_id, context):
         .filter(
             VidFlows.id == video_id,
             or_(
-                flows.acesso.in_(groups),
                 flows.acesso.like('%' + (job_title if job_title else '') + '%'),
                 flows.acesso.like('%' + user_id + '%'),
+                *grupos_conditions
             ),
         )\
         .first()
