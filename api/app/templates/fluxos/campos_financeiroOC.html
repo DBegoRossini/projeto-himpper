@@ -6,6 +6,11 @@
    CAMPOS SALVOS
    ========================================================= #}
 
+{% set f_tipo_despesa =
+    formularios_map.get('tipo_despesa')
+    if modo_execucao else none
+%}
+
 {% set f_numero_oc =
     formularios_map.get('numero_oc')
     if modo_execucao else none
@@ -207,6 +212,21 @@
 {# =========================================================
    EDITABILIDADE
    ========================================================= #}
+
+{% set tipo_despesa_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and (
+            etapa_id|string|trim == 'OC-01'
+            or (
+                f_tipo_despesa
+                and (f_tipo_despesa.editavel|string|lower|trim)
+                    in ['1', 'true']
+            )
+        )
+    )
+%}
 
 {% set numero_oc_editavel =
     not modo_execucao
@@ -577,6 +597,33 @@
     )
 %}
 
+{# =========================================================
+   TIPOS DE DESPESA
+   ========================================================= #}
+
+{% set tipos_despesa = [
+    'Nota fiscal - 15 dias',
+    'Despesa consumo sem doc Fiscal - 5 dias úteis',
+    'Despesa consumo com doc Fiscal - 8 dias úteis',
+    'Despesa direta e adiantamento - 8 dias úteis',
+    'Medição de empreiteiro - envio até 25 pgto dia 5',
+    'Imposto e sindicatos - 5 dias úteis',
+    'Cartório/ibti/taxas de aprovação/vt - 2 dias úteis',
+    'Notas cartão de crédito - Envio até o 4° dia do mês',
+    'Caixinha - cartão Alelo',
+    'Distratos - 15 dias',
+    'Fluxo de alteração - 10 dias antes do vencimento original',
+    'Permuta - 15 dias',
+    'Emissão de cartão de credito - até 2 dias úteis para emissão'
+] %}
+
+{% if modo_execucao %}
+
+    {% include "fluxos/campos_dados_extraidos.html" %}
+
+{% endif %}
+
+
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -600,7 +647,62 @@
     <div class="imp-form-grid">
 
 
-        {% include "fluxos/campo_tipo_despesa.html" %}
+        {# =====================================================
+           TIPO DE DESPESA
+           ===================================================== #}
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="tipo_despesa"
+        >
+
+            <label
+                class="imp-label"
+                for="tipo_despesa"
+            >
+                Tipo de despesa
+                <span class="imp-label__required">*</span>
+            </label>
+
+
+            <select
+                id="tipo_despesa"
+                name="tipo_despesa"
+                class="form-select"
+                {% if tipo_despesa_editavel %}required{% endif %}
+                {% if not tipo_despesa_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+                <option value="">
+                    Selecione o tipo de despesa
+                </option>
+
+
+                {% for tipo in tipos_despesa %}
+
+                    <option
+                        value="{{ tipo }}"
+                        {% if
+                            modo_execucao
+                            and f_tipo_despesa
+                            and f_tipo_despesa.valor == tipo
+                        %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ tipo }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
 
         {# =====================================================
            REGRA DOCUMENTAL
@@ -3020,86 +3122,3 @@
     </section>
 
 {% endif %}
-
-{% if modo_execucao %}
-
-    {% include "fluxos/campos_dados_extraidos.html" %}
-
-{% endif %}
-
-<section class="imp-form-section">
-
-    <div class="imp-form-section__head">
-        <div class="imp-form-section__copy">
-            <h3 class="imp-card__title">
-                Arquivo da OC no RM
-            </h3>
-            <p class="imp-card__subtitle">
-                Anexe o arquivo da OC consultado no Totvs RM.
-            </p>
-        </div>
-    </div>
-
-    <div class="imp-form-grid">
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="arquivo_oc_rm"
-        >
-
-            {% if modo_execucao and f_arquivo_oc_rm and f_arquivo_oc_rm.valor %}
-                <div class="imp-execution-current-file">
-                    <div>
-                        <strong>Arquivo atual</strong>
-                        <span>Arquivo da OC consultado no RM.</span>
-                    </div>
-                    <a
-                        class="btn btn-outline-primary btn-sm"
-                        href="{{ url_for('download_arquivo', id_arquivo=f_arquivo_oc_rm.id) }}"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        Visualizar arquivo
-                    </a>
-                </div>
-            {% endif %}
-
-            <input
-                type="hidden"
-                id="arquivoOcRmFallback"
-                name="arquivo_oc_rm"
-                value=""
-            >
-
-            {% if arquivo_oc_rm_editavel %}
-                <div class="imp-upload">
-                    <input
-                        id="arquivo_oc_rm"
-                        name="arquivo_oc_rm"
-                        type="file"
-                        class="imp-upload__input"
-                        data-impper-file-output="#arquivoOcRmName"
-                    >
-                    <label
-                        class="imp-upload__label"
-                        for="arquivo_oc_rm"
-                    >
-                        <span class="imp-upload__copy">
-                            <strong>Anexe o arquivo da OC</strong>
-                            <span>Selecione o arquivo da OC no RM.</span>
-                        </span>
-                        <span class="imp-upload__action">Selecionar arquivo</span>
-                    </label>
-                </div>
-
-                <div
-                    id="arquivoOcRmName"
-                    class="imp-file-name"
-                >
-                    Nenhum arquivo selecionado.
-                </div>
-            {% endif %}
-
-        </div>
-    </div>
-
-</section>

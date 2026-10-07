@@ -456,35 +456,6 @@
 
                     {% endif %}
 
-                    {% if pode_editar %}
-
-                        <div class="imp-field">
-
-                            <label
-                                class="imp-label"
-                                for="comentario_conclusao"
-                            >
-                                Comentário
-                                <span class="imp-help">(opcional)</span>
-                            </label>
-
-                            <textarea
-                                id="comentario_conclusao"
-                                name="comentario"
-                                class="form-control"
-                                rows="4"
-                                maxlength="2000"
-                                placeholder="Adicione um comentário sobre esta etapa, se necessário."
-                            ></textarea>
-
-                            <p class="imp-help">
-                                Será registrado no histórico ao concluir a etapa.
-                            </p>
-
-                        </div>
-
-                    {% endif %}
-
                 </form>
 
             {% else %}
@@ -832,6 +803,31 @@
                         <p class="imp-subtitle">
                             Tem certeza que deseja concluir esta etapa?
                         </p>
+
+                        <div class="imp-field">
+
+                            <label
+                                class="imp-label"
+                                for="comentario_conclusao"
+                            >
+                                Comentário
+                                <span class="imp-help">(opcional)</span>
+                            </label>
+
+                            <textarea
+                                id="comentario_conclusao"
+                                name="comentario"
+                                class="form-control"
+                                rows="4"
+                                maxlength="2000"
+                                placeholder="Adicione um comentário sobre esta etapa, se necessário."
+                            ></textarea>
+
+                            <p class="imp-help">
+                                Será registrado no histórico ao concluir a etapa.
+                            </p>
+
+                        </div>
 
                     </div>
 

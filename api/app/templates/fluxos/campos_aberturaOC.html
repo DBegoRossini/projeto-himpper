@@ -9,9 +9,9 @@
 {% set passou_central_notas = namespace(valor=false) %}
 
 {% set keys = formularios_map.keys() if modo_execucao else [] %}
-{% set f_anexos = [] %}
-{% for key in keys if 'anexo' in key %}
-    {% set _ = f_anexos.append(formularios_map.get(key) if modo_execucao else none) %}
+{% set f_anexos_opicional = [] %}
+{% for key in keys if 'anexo' in key and 'opicional' in key %}
+    {% set _ = f_anexos_opicional.append(formularios_map.get(key) if modo_execucao else none) %}
 {% endfor %}
 
 {% for etapa_historico in historico_etapas|default([]) %}
@@ -109,6 +109,7 @@
     and (
         visao_geral
         or etapa_atual in [
+            'OC-01',
             'OC-04',
             'OC-05-A',
             'OC-05-B',
@@ -121,12 +122,12 @@
     )
 %}
 
-{% set anexos_editavel =
+{% set anexos_opicional_editavel =
     not modo_execucao
     or (
         permitir_edicao
-        and f_anexos
-        and (f_anexos.editavel|string|lower|trim) in ['1', 'true']
+        and f_anexos_opicional
+        and (f_anexos_opicional.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -278,51 +279,12 @@
 
         {% include "fluxos/campos_central_notas.html" %}
 
-        <div
-            data-impper-show-when="oc_emitida:SIM"
-            hidden
-        >
-            <section class="imp-form-section">
-                <div class="imp-form-section__head">
-                    <div class="imp-form-section__copy">
-                        <h3 class="imp-card__title">
-                            Classificação da despesa
-                        </h3>
-                        <p class="imp-card__subtitle">
-                            Selecione o tipo de despesa para encaminhar a solicitação corretamente.
-                        </p>
-                    </div>
-                </div>
-                <div class="imp-form-grid">
-                    {% include "fluxos/campo_tipo_despesa.html" %}
-                </div>
-            </section>
-        </div>
-
     </div>
 
 {% elif exibir_central_notas %}
 
     {% include "fluxos/campos_central_notas.html" %}
 
-{% endif %}
-
-{% if modo_execucao and etapa_atual == 'OC-01' %}
-    <section class="imp-form-section">
-        <div class="imp-form-section__head">
-            <div class="imp-form-section__copy">
-                <h3 class="imp-card__title">
-                    Classificação da despesa
-                </h3>
-                <p class="imp-card__subtitle">
-                    Selecione o tipo de despesa para encaminhar a solicitação corretamente.
-                </p>
-            </div>
-        </div>
-        <div class="imp-form-grid">
-            {% include "fluxos/campo_tipo_despesa.html" %}
-        </div>
-    </section>
 {% endif %}
 
 
@@ -338,7 +300,7 @@
 {% elif not modo_execucao %}
 
     <div
-        data-impper-show-when="tipo_abertura_oc:FINANCEIRO"
+        data-impper-show-when="tipo_abertura_oc:FINANCEIRO || oc_emitida:SIM"
         hidden
     >
 
@@ -369,13 +331,13 @@
                 rows="4"
                 maxlength="900"
                 placeholder="Inclua informações adicionais, se necessário"
-                {% if not observacoes_editavel %}disabled data-impper-locked="true"{% endif %}
+                {% if not observacoes_editavel and etapa_id != 'OC-01' %}disabled data-impper-locked="true"{% endif %}
             >{{ f_observacoes.valor if modo_execucao and f_observacoes and f_observacoes.valor is not none else '' }}</textarea>
         </div>
 
         <div
             class="imp-field imp-field--full"
-            data-field-wrap="anexos"
+            data-field-wrap="anexos_opicional"
         >
 
             <div
@@ -399,15 +361,15 @@
                     class="btn btn-neutral btn-sm align-self-start"
                     id="addAnexoButton"
                     data-add-anexo
-                    {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                    {% if not anexos_opicional_editavel and etapa_id != 'OC-01' %}disabled data-impper-locked="true"{% endif %}
                 >
                     + Adicionar anexo
                 </button>
 
             </div>
 
-            {% if modo_execucao and f_anexos %}
-                {% for anexo in f_anexos %}
+            {% if modo_execucao and f_anexos_opicional %}
+                {% for anexo in f_anexos_opicional %}
                     <div class="imp-execution-current-file">
 
                         <div>
@@ -449,10 +411,10 @@
 
                     <input
                         type="file"
-                        name="anexos"
+                        name="anexos_opicional"
                         class="form-control flex-grow-1"
                         data-anexo-input
-                        {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        {% if not anexos_opicional_editavel and etapa_id != 'OC-01' %}disabled data-impper-locked="true"{% endif %}
                     >
 
                     <button
@@ -461,7 +423,7 @@
                         data-remove-anexo
                         aria-label="Remover Anexo"
                         hidden
-                        {% if not anexos_editavel %}disabled data-impper-locked="true"{% endif %}
+                        {% if not anexos_opicional_editavel and etapa_id != 'OC-01' %}disabled data-impper-locked="true"{% endif %}
                     >
                         Remover
                     </button>
