@@ -394,10 +394,11 @@
 
 
         <div
-            class="imp-field imp-field--full"
+            class="imp-field imp-field--full
+           {% if modo_execucao and numero_oc_editavel %}imp-field--editable{% endif %}"
             data-field-wrap="numero_oc"
 
-            {% if not numero_oc_liberado_por_etapa %}
+            {% if numero_oc_liberado_por_etapa == False %}
                 data-impper-show-when="oc_emitida:SIM"
                 hidden
             {% endif %}
