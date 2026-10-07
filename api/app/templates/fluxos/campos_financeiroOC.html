@@ -6,11 +6,6 @@
    CAMPOS SALVOS
    ========================================================= #}
 
-{% set f_tipo_despesa =
-    formularios_map.get('tipo_despesa')
-    if modo_execucao else none
-%}
-
 {% set f_numero_oc =
     formularios_map.get('numero_oc')
     if modo_execucao else none
@@ -212,16 +207,6 @@
 {# =========================================================
    EDITABILIDADE
    ========================================================= #}
-
-{% set tipo_despesa_editavel =
-    not modo_execucao
-    or (
-        permitir_edicao
-        and f_tipo_despesa
-        and (f_tipo_despesa.editavel|string|lower|trim)
-            in ['1', 'true']
-    )
-%}
 
 {% set numero_oc_editavel =
     not modo_execucao
@@ -592,27 +577,6 @@
     )
 %}
 
-{# =========================================================
-   TIPOS DE DESPESA
-   ========================================================= #}
-
-{% set tipos_despesa = [
-    'Nota fiscal - 15 dias',
-    'Despesa consumo sem doc Fiscal - 5 dias úteis',
-    'Despesa consumo com doc Fiscal - 8 dias úteis',
-    'Despesa direta e adiantamento - 8 dias úteis',
-    'Medição de empreiteiro - envio até 25 pgto dia 5',
-    'Imposto e sindicatos - 5 dias úteis',
-    'Cartório/ibti/taxas de aprovação/vt - 2 dias úteis',
-    'Notas cartão de crédito - Envio até o 4° dia do mês',
-    'Caixinha - cartão Alelo',
-    'Distratos - 15 dias',
-    'Fluxo de alteração - 10 dias antes do vencimento original',
-    'Permuta - 15 dias',
-    'Emissão de cartão de credito - até 2 dias úteis para emissão'
-] %}
-
-
 <section class="imp-form-section">
 
     <div class="imp-form-section__head">
@@ -636,62 +600,7 @@
     <div class="imp-form-grid">
 
 
-        {# =====================================================
-           TIPO DE DESPESA
-           ===================================================== #}
-
-        <div
-            class="imp-field imp-field--full"
-            data-field-wrap="tipo_despesa"
-        >
-
-            <label
-                class="imp-label"
-                for="tipo_despesa"
-            >
-                Tipo de despesa
-                <span class="imp-label__required">*</span>
-            </label>
-
-
-            <select
-                id="tipo_despesa"
-                name="tipo_despesa"
-                class="form-select"
-                {% if tipo_despesa_editavel %}required{% endif %}
-                {% if not tipo_despesa_editavel %}
-                    disabled
-                    data-impper-locked="true"
-                {% endif %}
-            >
-
-                <option value="">
-                    Selecione o tipo de despesa
-                </option>
-
-
-                {% for tipo in tipos_despesa %}
-
-                    <option
-                        value="{{ tipo }}"
-                        {% if
-                            modo_execucao
-                            and f_tipo_despesa
-                            and f_tipo_despesa.valor == tipo
-                        %}
-                            selected
-                        {% endif %}
-                    >
-                        {{ tipo }}
-                    </option>
-
-                {% endfor %}
-
-            </select>
-
-        </div>
-
-
+        {% include "fluxos/campo_tipo_despesa.html" %}
 
         {# =====================================================
            REGRA DOCUMENTAL

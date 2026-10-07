@@ -63,6 +63,22 @@
   grid-column: 1 / -1;
 }
 
+.imp-field--editable input:not([disabled]),
+.imp-field--editable select:not([disabled]),
+.imp-field--editable textarea:not([disabled]) {
+    border-color: #7f94a8;
+    box-shadow: 0 0 0 3px rgba(127, 148, 168, 0.12);
+    background: #fff;
+}
+
+/* Quando clicar, mantém o mesmo destaque */
+.imp-field--editable input:not([disabled]):focus,
+.imp-field--editable select:not([disabled]):focus,
+.imp-field--editable textarea:not([disabled]):focus {
+    border-color: #526b82;
+    box-shadow: 0 0 0 3px rgba(82, 107, 130, 0.18);
+}
+
 .imp-form-meta {
   display: flex;
   flex-wrap: wrap;
