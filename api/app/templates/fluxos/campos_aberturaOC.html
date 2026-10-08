@@ -31,7 +31,8 @@
     'OC-01',
     'OC-02',
     'OC-03',
-    'OC-C-03'
+    'OC-C-03',
+    'OC-C-04-A'
 ] %}
 
 {% set etapas_com_resumo_central = [
@@ -48,6 +49,7 @@
         'numero_oc',
         'tratamento_despesa',
         'tipo_movimento',
+        'vencimento',
         'codcoligada',
         'centro_custo',
         'natureza_orcamentaria',
@@ -280,7 +282,7 @@
         {% include "fluxos/campos_central_notas.html" %}
 
     </div>
-
+ 
 {% elif exibir_central_notas %}
 
     {% include "fluxos/campos_central_notas.html" %}
