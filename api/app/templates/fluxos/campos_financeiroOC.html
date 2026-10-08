@@ -42,8 +42,18 @@
     if modo_execucao else none
 %}
 
+{% set f_empreendimento_medicao_outro =
+    formularios_map.get('empreendimento_medicao_outro')
+    if modo_execucao else none
+%}
+
 {% set f_etapa_medicao =
     formularios_map.get('etapa_medicao')
+    if modo_execucao else none
+%}
+
+{% set f_etapa_medicao_outro =
+    formularios_map.get('etapa_medicao_outro')
     if modo_execucao else none
 %}
 
@@ -278,12 +288,32 @@
     )
 %}
 
+{% set empreendimento_medicao_outro_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_empreendimento_medicao_outro
+        and (f_empreendimento_medicao_outro.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
 {% set etapa_medicao_editavel =
     not modo_execucao
     or (
         permitir_edicao
         and f_etapa_medicao
         and (f_etapa_medicao.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set etapa_medicao_outro_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao
+        and f_etapa_medicao_outro
+        and (f_etapa_medicao_outro.editavel|string|lower|trim)
             in ['1', 'true']
     )
 %}
@@ -1530,7 +1560,8 @@
                     'VILLAS',
                     'CONNECT',
                     'VISTA',
-                    'LINE'
+                    'LINE',
+                    'OUTRO'
                 ] %}
 
                     <option
@@ -1582,6 +1613,68 @@
                 </option>
 
             </select>
+
+        </div>
+
+        <div
+            class="imp-field"
+            data-field-wrap="empreendimento_medicao_outro"
+            data-impper-show-when="empreendimento_medicao:OUTRO"
+        >
+
+            <label
+                class="imp-label"
+                for="empreendimento_medicao_outro"
+            >
+                Empreendimento (outro)
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="empreendimento_medicao_outro"
+                name="empreendimento_medicao_outro"
+                type="text"
+                class="form-control"
+                autocomplete="off"
+                placeholder="Informe a conta"
+                value="{{ f_empreendimento_medicao_outro.valor if modo_execucao and f_empreendimento_medicao_outro and f_empreendimento_medicao_outro.valor is not none else '' }}"
+                {% if empreendimento_medicao_outro_editavel %}required{% endif %}
+                {% if not empreendimento_medicao_outro_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
+
+        </div>
+
+        <div
+            class="imp-field"
+            data-field-wrap="etapa_medicao_outro"
+            data-impper-show-when="empreendimento_medicao:OUTRO"
+        >
+
+            <label
+                class="imp-label"
+                for="etapa_medicao_outro"
+            >
+                Etapa (outro)
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <input
+                id="etapa_medicao_outro"
+                name="etapa_medicao_outro"
+                type="text"
+                class="form-control"
+                autocomplete="off"
+                placeholder="Informe a conta"
+                value="{{ f_etapa_medicao_outro.valor if modo_execucao and f_etapa_medicao_outro and f_etapa_medicao_outro.valor is not none else '' }}"
+                {% if etapa_medicao_outro_editavel %}required{% endif %}
+                {% if not etapa_medicao_outro_editavel %}
+                    disabled
+                    data-impper-locked="true"
+                {% endif %}
+            >
 
         </div>
 

@@ -925,7 +925,6 @@ function validarCamposObrigatorios(root) {
 
 async function enviarFormulario(document, id_fluxo, id_etapa) {
   const botao = document.getElementById('submitButton');
-  botao.disabled = true;
   let form = document.querySelector('form');
   if (!form) {
     form = document
@@ -935,6 +934,7 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
     return;
   }
 
+  botao.disabled = true;
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
       .filter(f => f.name);
   const formData = new FormData();
@@ -965,7 +965,6 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
 
 async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   const botao = document.querySelector('button[type="button"]');
-  botao.disabled = true;
   const form = document.querySelector('form[data-execution-form]') || document;
   const validationRoot = id_proxet === 'Correcao'
     ? document.getElementById('correctionModal')
@@ -980,6 +979,7 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
     return;
   }
 
+  botao.disabled = true;
   const fields = Array.from(document.querySelectorAll('input, textarea, select'))
       .filter(f => f.name && !f.closest('[data-comment-form]'));
   const formData = new FormData();
