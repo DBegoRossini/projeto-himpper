@@ -455,7 +455,57 @@ def solicitacoes(context):
     ids_chamada = set()
     for row in solicitacoes_raw:
         ids_chamada.add(row.id)
+            
+    Etapas_Exibicao = Execucao.query\
+        .join(Etapas, Etapas.id == Execucao.id_etapa)\
+        .add_columns(
+            Etapas.nome.label("nome"),
+            Execucao.id_chamada,
+            Execucao.finalizada_em
+        )\
+        .filter(
+            Execucao.id_chamada.in_(ids_chamada)
+        )\
+        .order_by(
+            Execucao.id_chamada,
+            Execucao.id
+        )\
+        .all() if ids_chamada else []
 
+
+    etapas_por_chamada = {}
+
+    for etapa in Etapas_Exibicao:
+        etapas_por_chamada.setdefault(
+            etapa.id_chamada,
+            []
+        ).append(etapa)
+
+
+    status_etapas_por_chamada = {}
+
+    for id_chamada, etapas in etapas_por_chamada.items():
+
+        etapas_abertas = [
+            etapa
+            for etapa in etapas
+            if etapa.finalizada_em is None
+        ]
+
+        if not etapas_abertas:
+
+            status_etapas_por_chamada[id_chamada] = "Finalizada"
+
+        elif len(etapas_abertas) == 1:
+
+            status_etapas_por_chamada[id_chamada] = etapas_abertas[0].nome
+
+        else:
+
+            status_etapas_por_chamada[id_chamada] = " / ".join(
+                etapa.nome
+                for etapa in etapas_abertas
+            )
     formularios_por_chamada = {}
     if ids_chamada:
         formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
@@ -471,7 +521,8 @@ def solicitacoes(context):
             "status_label": row.status_label,
             "status_variant": status_variant_for(row.status_label),
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
-            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
+            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {})),
+            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada")
         }
         for row in solicitacoes_raw
     ]
@@ -1033,6 +1084,58 @@ def historico(context):
     for row in solicitacoes_raw:
         ids_chamada.add(row.id)
 
+              
+    Etapas_Exibicao = Execucao.query\
+        .join(Etapas, Etapas.id == Execucao.id_etapa)\
+        .add_columns(
+            Etapas.nome.label("nome"),
+            Execucao.id_chamada,
+            Execucao.finalizada_em
+        )\
+        .filter(
+            Execucao.id_chamada.in_(ids_chamada)
+        )\
+        .order_by(
+            Execucao.id_chamada,
+            Execucao.id
+        )\
+        .all() if ids_chamada else []
+
+
+    etapas_por_chamada = {}
+
+    for etapa in Etapas_Exibicao:
+        etapas_por_chamada.setdefault(
+            etapa.id_chamada,
+            []
+        ).append(etapa)
+
+
+    status_etapas_por_chamada = {}
+
+    for id_chamada, etapas in etapas_por_chamada.items():
+
+        etapas_abertas = [
+            etapa
+            for etapa in etapas
+            if etapa.finalizada_em is None
+        ]
+
+        if not etapas_abertas:
+
+            status_etapas_por_chamada[id_chamada] = "Finalizada"
+
+        elif len(etapas_abertas) == 1:
+
+            status_etapas_por_chamada[id_chamada] = etapas_abertas[0].nome
+
+        else:
+
+            status_etapas_por_chamada[id_chamada] = " / ".join(
+                etapa.nome
+                for etapa in etapas_abertas
+            )
+
     formularios_por_chamada = {}
     if ids_chamada:
         formularios_raw = Formularios.query.filter(Formularios.id_chamada.in_(ids_chamada)).all()
@@ -1049,7 +1152,8 @@ def historico(context):
             "status_variant": status_variant_for(row.status_label),
             "solicitante": row.solicitante,
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
-            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))
+            "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {})),
+            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada")
         }
         for row in solicitacoes_raw
     ]

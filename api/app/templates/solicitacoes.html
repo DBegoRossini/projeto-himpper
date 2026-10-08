@@ -341,6 +341,29 @@
 
                                     </th>
 
+                                    <th
+                                        scope="col"
+                                        data-sort-header="etapa"
+                                        aria-sort="none"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="btn p-0 border-0 bg-transparent text-reset fw-semibold"
+                                            data-request-sort-key="etapa"
+                                        >
+                                            Etapa
+
+                                            <span
+                                                data-sort-indicator
+                                                aria-hidden="true"
+                                            >
+                                                ↕
+                                            </span>
+                                        </button>
+
+                                    </th>
+
 
                                     <th
                                         scope="col"
@@ -421,7 +444,8 @@
                                                 solicitacao.tipo ~ ' ' ~
                                                 solicitacao.status_label ~ ' ' ~
                                                 solicitacao.protocolo ~ ' ' ~
-                                                solicitacao.titulo
+                                                solicitacao.titulo ~ ' ' ~
+                                                solicitacao.etapa
                                             )|lower
                                         }}"
                                     >
@@ -451,6 +475,16 @@
 
                                         <td data-label="Abertura">
                                             {{ abertura_label }}
+                                        </td>
+
+                                        <td data-label="Etapa">
+
+                                            <span
+                                                class="badge rounded-pill imp-badge imp-badge--{{ solicitacao.status_variant }}"
+                                            >
+                                                {{ solicitacao.etapa }}
+                                            </span>
+
                                         </td>
 
 
