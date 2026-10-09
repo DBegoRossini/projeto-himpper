@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 from redis import Redis
+from datetime import timedelta
 
 load_dotenv()
 
@@ -29,7 +30,7 @@ SS_PATH = os.getenv("ss_path")
 SS_USER = os.getenv("ss_user")
 SECRET_KEY = os.getenv("SECRET_KEY")
 SESSION_FILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "flask_session")
-PERMANENT_SESSION_LIFETIME = 1800
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=120)
 PREFERRED_URL_SCHEME = "https"
 redis_url = os.getenv("SESSION_REDIS_URL") or os.getenv("REDIS_URL")
 if not redis_url:
