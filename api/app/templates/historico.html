@@ -414,6 +414,51 @@
     <script>
         var etapas = {{ etapas | tojson }};
         var execSteps = {{ execucoes | tojson }};
+
+        function filterRequests() {
+            const fluxo = document.getElementById('requestFlowFilter').value;
+            const etapa = document.getElementById('requestStepFilter');
+
+            etapa.innerHTML = '';
+            const optTodos = document.createElement('option');
+            optTodos.value = '';
+            optTodos.textContent = 'Todos';
+            etapa.appendChild(optTodos);
+
+            for (const cont of etapas.filter((e) => String(e["id_flow"]) === String(fluxo))) {
+                const option = document.createElement('option');
+                option.value = cont["id"];
+                option.textContent = cont["nome"];
+                etapa.appendChild(option);
+            }
+
+            showStepFilter();
+        }
+
+        function showStepFilter() {
+            const etapa = document.getElementById('requestStepFilter').value;
+            const exec = document.getElementById('requestExecStepFilter');
+            const visivel = etapa !== '';
+
+            document.getElementById('stepStartDateFilter').closest('div').hidden = !visivel;
+            document.getElementById('stepEndDateFilter').closest('div').hidden = !visivel;
+            exec.closest('div').hidden = !visivel;
+
+            exec.innerHTML = '';
+            const optTodos = document.createElement('option');
+            optTodos.value = '';
+            optTodos.textContent = 'Todos';
+            exec.appendChild(optTodos);
+
+            for (const cont of execSteps.filter((e) => String(e["id_etapa"]) === String(etapa))) {
+                const option = document.createElement('option');
+                option.value = cont["execID"];
+                option.textContent = cont["executor"];
+                exec.appendChild(option);
+            }
+
+            document.dispatchEvent(new Event('request-filters-change'));
+        }
     </script>
 
 
@@ -585,6 +630,16 @@
 
                                         data-owner="{{ solicitacao.escopo }}"
 
+                                        data-request-flow="{{ solicitacao.id_fluxo }}"
+
+                                        data-request-date="{{
+                                            solicitacao.abertura_label.isoformat()
+                                            if solicitacao.abertura_label
+                                            else ''
+                                        }}"
+
+                                        data-request-executions="{{ solicitacao.execucoes|tojson|forceescape }}"
+
                                         data-original-order="{{ loop.index0 }}"
 
 
@@ -699,6 +754,16 @@
                                 data-status="{{ solicitacao.status_label }}"
 
                                 data-owner="{{ solicitacao.escopo }}"
+
+                                data-request-flow="{{ solicitacao.id_fluxo }}"
+
+                                data-request-date="{{
+                                    solicitacao.abertura_label.isoformat()
+                                    if solicitacao.abertura_label
+                                    else ''
+                                }}"
+
+                                data-request-executions="{{ solicitacao.execucoes|tojson|forceescape }}"
 
                                 data-original-order="{{ loop.index0 }}"
 

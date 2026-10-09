@@ -1125,6 +1125,7 @@ def historico(context):
         ))\
     .add_columns(
         Chamada.id,
+        Chamada.id_fluxo.label("id_fluxo"),
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
@@ -1142,7 +1143,10 @@ def historico(context):
         .add_columns(
             Etapas.nome.label("nome"),
             Execucao.id_chamada,
-            Execucao.finalizada_em
+            Execucao.id_etapa,
+            Execucao.iniciada_em,
+            Execucao.finalizada_em,
+            Execucao.executor
         )\
         .filter(
             Execucao.id_chamada.in_(ids_chamada)
@@ -1198,6 +1202,7 @@ def historico(context):
     solicitacoes = [
         {
             "id": row.id,
+            "id_fluxo": row.id_fluxo,
             "tipo": row.tipo,
             "abertura_label": row.abertura_label,
             "status_label": row.status_label,
@@ -1205,7 +1210,16 @@ def historico(context):
             "solicitante": row.solicitante,
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
             "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {})),
-            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada")
+            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada"),
+            "execucoes": [
+                {
+                    "id_etapa": execucao.id_etapa,
+                    "iniciada_em": execucao.iniciada_em.isoformat() if execucao.iniciada_em else "",
+                    "finalizada_em": execucao.finalizada_em.isoformat() if execucao.finalizada_em else "",
+                    "executor": execucao.executor or ""
+                }
+                for execucao in etapas_por_chamada.get(row.id, [])
+            ]
         }
         for row in solicitacoes_raw
     ]
