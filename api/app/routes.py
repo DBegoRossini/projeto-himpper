@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, jsonify, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows, VidFlows
-from sqlalchemy import cast, String, or_, and_
+from sqlalchemy import cast, String, or_, and_, func
 from datetime import datetime, timedelta, timezone
 import base64
 
@@ -74,6 +74,60 @@ def escopo_solicitacao(solicitante, user_oid, subordinados):
     if solicitante in subordinados:
         return "subordinate"
     return "peer"
+
+
+def condicoes_visao_grupo(grupos):
+    grupos_normalizados = {
+        str(grupo).strip().lower()
+        for grupo in grupos
+        if grupo and str(grupo).strip()
+    }
+    if not grupos_normalizados:
+        return []
+
+    visao_grupo_normalizada = func.concat(
+        ";",
+        func.lower(func.replace(flows.visao_grupo, " ", "")),
+        ";",
+    )
+    return [
+        visao_grupo_normalizada.like(f"%;{grupo};%")
+        for grupo in grupos_normalizados
+    ]
+
+
+def usuario_compartilha_visao_grupo(solicitante, visao_grupo, grupos_usuario, access_token):
+    grupos_visao = {
+        grupo.strip().lower()
+        for grupo in (visao_grupo or "").split(";")
+        if grupo.strip()
+    }
+    grupos_compartilhados = grupos_visao.intersection(
+        str(grupo).strip().lower()
+        for grupo in grupos_usuario
+        if grupo and str(grupo).strip()
+    )
+    if not grupos_compartilhados:
+        return False
+
+    grupos_solicitante = {
+        str(grupo).strip().lower()
+        for grupo in get_groups_membership(solicitante, access_token)
+    }
+    return bool(grupos_compartilhados.intersection(grupos_solicitante))
+
+
+def incluir_solicitacoes_visao_grupo(solicitacoes, solicitacoes_grupo, grupos_usuario, access_token):
+    por_id = {solicitacao.id: solicitacao for solicitacao in solicitacoes}
+    for solicitacao in solicitacoes_grupo:
+        if solicitacao.id not in por_id and usuario_compartilha_visao_grupo(
+            solicitacao.solicitante,
+            solicitacao.visao_grupo,
+            grupos_usuario,
+            access_token,
+        ):
+            por_id[solicitacao.id] = solicitacao
+    return sorted(por_id.values(), key=lambda solicitacao: solicitacao.id, reverse=True)
 
 
 def get_groups_membership(user_id, access_token):
@@ -430,11 +484,13 @@ def index(*, context):
 def solicitacoes(context):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
+    access_token = context["access_token"]
+    groups = g.info_user.get("groups", [])
     subordinados = g.info_user.get("subordinados", [])
     user_department = (g.info_user.get("department") or "").strip()
     ids_mesmo_department = get_users_by_department(
         user_department,
-        context["access_token"]
+        access_token
     )
 
     solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
@@ -453,6 +509,33 @@ def solicitacoes(context):
         Chamada.solicitante,
         flows.titulo
     ).order_by(Chamada.id.desc()).distinct().all()
+
+    condicoes_grupo = condicoes_visao_grupo(groups)
+    if condicoes_grupo:
+        solicitacoes_grupo_raw = Chamada.query.join(
+            flows, flows.id == Chamada.id_fluxo
+        ).join(
+            Execucao, Execucao.id_chamada == Chamada.id
+        ).filter(
+            or_(*condicoes_grupo)
+        ).add_columns(
+            Chamada.id,
+            Chamada.id_fluxo.label("id_fluxo"),
+            flows.alias.label("tipo"),
+            Chamada.data.label("abertura_label"),
+            Chamada.status.label("status_label"),
+            Chamada.solicitante.label("solicitante"),
+            flows.titulo,
+            flows.visao_grupo.label("visao_grupo"),
+        ).order_by(
+            Chamada.id.desc()
+        ).distinct().all()
+        solicitacoes_raw = incluir_solicitacoes_visao_grupo(
+            solicitacoes_raw,
+            solicitacoes_grupo_raw,
+            groups,
+            access_token,
+        )
 
     ids_chamada = set()
     for row in solicitacoes_raw:
@@ -541,8 +624,6 @@ def solicitacoes(context):
         }
         for row in solicitacoes_raw
     ]
-    access_token = context['access_token']
-
     fluxos = flows.query.all()
     etapas = [
         {"id": e.id, "id_flow": e.id_flow, "nome": e.nome}
@@ -1086,7 +1167,7 @@ def download_arquivo(id_arquivo, context):
     return send_file(
         file_io,
         as_attachment=False,
-        download_name=f'{data.campo} - {data.id_chamada}.{mime.split("/")[-1]}',
+        download_name=f'{data.id_chamada} - {data.campo}.{mime.split("/")[-1]}',
         mimetype=mime
     )
 
@@ -1096,6 +1177,7 @@ def download_arquivo(id_arquivo, context):
 def historico(context):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
+    access_token = context["access_token"]
     groups = g.info_user.get("groups", [])
     user_job = g.info_user.get("jobTitle", "")
     user_department = (g.info_user.get("department") or "").strip()
@@ -1104,7 +1186,7 @@ def historico(context):
 
     ids_mesmo_department = get_users_by_department(
         user_department,
-        context["access_token"]
+        access_token
     )
 
     solicitacoes_raw = Chamada.query.join(flows, flows.id == Chamada.id_fluxo)\
@@ -1132,6 +1214,35 @@ def historico(context):
         Chamada.solicitante.label("solicitante"),
         flows.titulo
     ).order_by(Chamada.id.desc()).distinct().all()
+
+    condicoes_grupo = condicoes_visao_grupo(groups)
+    if condicoes_grupo:
+        solicitacoes_grupo_raw = Chamada.query.join(
+            flows, flows.id == Chamada.id_fluxo
+        ).join(
+            Execucao, Execucao.id_chamada == Chamada.id
+        ).join(
+            Etapas, Etapas.id == Execucao.id_etapa
+        ).filter(
+            or_(*condicoes_grupo)
+        ).add_columns(
+            Chamada.id,
+            Chamada.id_fluxo.label("id_fluxo"),
+            flows.alias.label("tipo"),
+            Chamada.data.label("abertura_label"),
+            Chamada.status.label("status_label"),
+            Chamada.solicitante.label("solicitante"),
+            flows.titulo,
+            flows.visao_grupo.label("visao_grupo"),
+        ).order_by(
+            Chamada.id.desc()
+        ).distinct().all()
+        solicitacoes_raw = incluir_solicitacoes_visao_grupo(
+            solicitacoes_raw,
+            solicitacoes_grupo_raw,
+            groups,
+            access_token,
+        )
 
     ids_chamada = set()
     for row in solicitacoes_raw:
@@ -1223,8 +1334,6 @@ def historico(context):
         }
         for row in solicitacoes_raw
     ]
-    access_token = context['access_token']
-
     fluxos = flows.query.all()
     etapas = [
         {"id": e.id, "id_flow": e.id_flow, "nome": e.nome}

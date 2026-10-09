@@ -5,7 +5,7 @@ from datetime import timedelta
 
 load_dotenv()
 
-"""
+
 AUTHORITY = os.getenv("AUTHORITY")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
@@ -43,3 +43,4 @@ SESSION_PERMANENT = False
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_HTTPONLY = True
+"""

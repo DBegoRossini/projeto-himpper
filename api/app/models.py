@@ -11,6 +11,7 @@ class flows(database.Model):
     descricao = database.Column(database.String(500), nullable=False)
     area_responsavel = database.Column(database.String(100), nullable=False)
     acesso = database.Column(database.String(300), nullable=False)
+    visao_grupo = database.Column(database.Text, nullable=True)
     versao = database.Column(database.String(3), nullable=False)
     titulo = database.Column(database.String(100), nullable=False)
 
