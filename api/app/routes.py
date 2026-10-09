@@ -8,6 +8,7 @@ import requests
 import time
 import threading
 from functools import wraps
+from concurrent.futures import ThreadPoolExecutor
 from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, jsonify, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows, VidFlows
@@ -445,6 +446,7 @@ def solicitacoes(context):
         ))\
     .add_columns(
         Chamada.id,
+        Chamada.id_fluxo.label("id_fluxo"),
         flows.alias.label("tipo"),
         Chamada.data.label("abertura_label"),
         Chamada.status.label("status_label"),
@@ -461,7 +463,10 @@ def solicitacoes(context):
         .add_columns(
             Etapas.nome.label("nome"),
             Execucao.id_chamada,
-            Execucao.finalizada_em
+            Execucao.id_etapa,
+            Execucao.iniciada_em,
+            Execucao.finalizada_em,
+            Execucao.executor
         )\
         .filter(
             Execucao.id_chamada.in_(ids_chamada)
@@ -516,21 +521,68 @@ def solicitacoes(context):
     solicitacoes = [
         {
             "id": row.id,
+            "id_fluxo": row.id_fluxo,
             "tipo": row.tipo,
             "abertura_label": row.abertura_label,
             "status_label": row.status_label,
             "status_variant": status_variant_for(row.status_label),
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
             "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {})),
-            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada")
+            "etapa" :  status_etapas_por_chamada.get(row.id, "Finalizada"),
+            "execucoes": [
+                {
+                    "id_etapa": execucao.id_etapa,
+                    "iniciada_em": execucao.iniciada_em.isoformat() if execucao.iniciada_em else "",
+                    "finalizada_em": execucao.finalizada_em.isoformat() if execucao.finalizada_em else "",
+                    "executor": execucao.executor or ""
+                }
+                for execucao in etapas_por_chamada.get(row.id, [])
+            ]
         }
         for row in solicitacoes_raw
+    ]
+    access_token = context['access_token']
+
+    fluxos = flows.query.all()
+    etapas = [
+        {"id": e.id, "id_flow": e.id_flow, "nome": e.nome}
+        for e in Etapas.query.all()
+    ]
+
+    pares_exec = (
+        database.session.query(Execucao.id_etapa, Execucao.executor)
+        .filter(Execucao.executor.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    def buscar_nome(exec_id):
+        try:
+            resp = requests.get(
+                f"https://graph.microsoft.com/v1.0/users/{exec_id}?$select=displayName",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=10,
+            )
+            return resp.json().get("displayName") or "Desconhecido"
+        except (requests.RequestException, ValueError):
+            return "Desconhecido"
+
+    ids_executores = list({p.executor for p in pares_exec})
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        nomes = dict(zip(ids_executores, pool.map(buscar_nome, ids_executores)))
+
+    execucoes = [
+        {"id_etapa": p.id_etapa, "execID": p.executor, "executor": nomes[p.executor]}
+        for p in pares_exec
     ]
 
     return render_template(
         "solicitacoes.html",
         user=user,
-        solicitacoes=solicitacoes
+        solicitacoes=solicitacoes,
+        fluxos=fluxos,
+        etapas=etapas,
+        execucoes=execucoes
     )
 
 
@@ -1157,11 +1209,48 @@ def historico(context):
         }
         for row in solicitacoes_raw
     ]
+    access_token = context['access_token']
+
+    fluxos = flows.query.all()
+    etapas = [
+        {"id": e.id, "id_flow": e.id_flow, "nome": e.nome}
+        for e in Etapas.query.all()
+    ]
+
+    pares_exec = (
+        database.session.query(Execucao.id_etapa, Execucao.executor)
+        .filter(Execucao.executor.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    def buscar_nome(exec_id):
+        try:
+            resp = requests.get(
+                f"https://graph.microsoft.com/v1.0/users/{exec_id}?$select=displayName",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=10,
+            )
+            return resp.json().get("displayName") or "Desconhecido"
+        except (requests.RequestException, ValueError):
+            return "Desconhecido"
+
+    ids_executores = list({p.executor for p in pares_exec})
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        nomes = dict(zip(ids_executores, pool.map(buscar_nome, ids_executores)))
+
+    execucoes = [
+        {"id_etapa": p.id_etapa, "execID": p.executor, "executor": nomes[p.executor]}
+        for p in pares_exec
+    ]
 
     return render_template(
         'historico.html',
         user=context['user'],
         solicitacoes=solicitacoes,
+        etapas=etapas,
+        execucoes=execucoes,
+        fluxos=fluxos,
     )
 
 @app.route("/permissoes", methods=["POST", "GET"])

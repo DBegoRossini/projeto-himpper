@@ -334,6 +334,41 @@
           "[data-request-status-filter]"
         );
 
+      const flowFilter =
+        document.querySelector(
+          "[data-request-flow-filter]"
+        );
+
+      const stepFilter =
+        document.querySelector(
+          "[data-request-step-filter]"
+        );
+
+      const stepStartDateFilter =
+        document.querySelector(
+          "[data-step-start-date-filter]"
+        );
+
+      const stepEndDateFilter =
+        document.querySelector(
+          "[data-step-end-date-filter]"
+        );
+
+      const stepExecutorFilter =
+        document.querySelector(
+          "[data-request-executor-step-filter]"
+        );
+
+      const requestStartDateFilter =
+        document.querySelector(
+          "[data-request-start-date-filter]"
+        );
+
+      const requestEndDateFilter =
+        document.querySelector(
+          "[data-request-end-date-filter]"
+        );
+
 
       if (!searchField) {
         return;
@@ -345,6 +380,16 @@
           document.querySelectorAll(
             "[data-request-row]"
           )
+        );
+
+      const executionsByRow =
+        new Map(
+          rows.map(row => [
+            row,
+            JSON.parse(
+              row.dataset.requestExecutions || "[]"
+            )
+          ])
         );
 
 
@@ -463,6 +508,27 @@
             statusFilter?.value
           );
 
+        const selectedFlow =
+          flowFilter?.value || "";
+
+        const selectedStep =
+          stepFilter?.value || "";
+
+        const selectedStepExecutor =
+          stepExecutorFilter?.value || "";
+
+        const stepStartDate =
+          stepStartDateFilter?.value || "";
+
+        const stepEndDate =
+          stepEndDateFilter?.value || "";
+
+        const requestStartDate =
+          requestStartDateFilter?.value || "";
+
+        const requestEndDate =
+          requestEndDateFilter?.value || "";
+
 
         rows.forEach(row => {
 
@@ -515,12 +581,48 @@
             status ===
               selectedStatus;
 
+          const matchesFlow =
+            !selectedFlow ||
+            row.dataset.requestFlow === selectedFlow;
+
+          const requestDate =
+            row.dataset.requestDate?.slice(0, 10) || "";
+
+          const matchesRequestDate =
+            (!requestStartDate ||
+              (requestDate && requestDate >= requestStartDate)) &&
+            (!requestEndDate ||
+              (requestDate && requestDate <= requestEndDate));
+
+          const matchesStep =
+            !selectedStep ||
+            (executionsByRow.get(row) || []).some(execution => {
+              const startedDate =
+                execution.iniciada_em?.slice(0, 10) || "";
+
+              const finishedDate =
+                execution.finalizada_em?.slice(0, 10) || "";
+
+              return (
+                String(execution.id_etapa) === selectedStep &&
+                (!selectedStepExecutor ||
+                  execution.executor === selectedStepExecutor) &&
+                (!stepStartDate ||
+                  (startedDate && startedDate >= stepStartDate)) &&
+                (!stepEndDate ||
+                  (finishedDate && finishedDate <= stepEndDate))
+              );
+            });
+
 
           const visible =
             matchesSearch &&
             matchesRequester &&
             matchesOwner &&
-            matchesStatus;
+            matchesStatus &&
+            matchesFlow &&
+            matchesRequestDate &&
+            matchesStep;
 
 
           row.hidden =
@@ -653,6 +755,24 @@
           sync
         );
 
+      [
+        stepStartDateFilter,
+        stepEndDateFilter,
+        stepExecutorFilter,
+        requestStartDateFilter,
+        requestEndDateFilter
+      ].forEach(filter => {
+        filter?.addEventListener(
+          "change",
+          sync
+        );
+      });
+
+      document.addEventListener(
+        "request-filters-change",
+        sync
+      );
+
       sync();
     };
 
@@ -674,3 +794,61 @@
   }
 
 })();
+
+function filterRequests() {
+const fluxo = document.getElementById('requestFlowFilter').value;
+const etapa = document.getElementById('requestStepFilter');
+opcond = etapas.filter(
+            (etapa) => String(etapa["id_flow"]) === String(fluxo)
+        )
+
+    etapa.innerHTML = '';
+    const optTodos = document.createElement('option');
+    optTodos.value = '';
+    optTodos.textContent = 'Todos';
+    etapa.appendChild(optTodos);
+    for (const cont of opcond) {
+            const option = document.createElement('option');
+            const codEtapa = cont["id"];
+
+            option.value = codEtapa;
+            option.textContent = cont["nome"];
+            etapa.appendChild(option);
+        }
+
+    showStepFilter();
+};
+function showStepFilter() {
+    const etapa = document.getElementById('requestStepFilter').value;
+    const iniData = document.getElementById('stepStartDateFilter');
+    const endData = document.getElementById('stepEndDateFilter');
+    const exec = document.getElementById('requestExecStepFilter');
+
+    const iniContainer = iniData.closest('div');
+    const endContainer = endData.closest('div');
+    const execStepContainer = exec.closest('div');
+
+    const visivel = etapa !== '';
+
+    iniContainer.hidden = !visivel;
+    endContainer.hidden = !visivel;
+    execStepContainer.hidden = !visivel;
+
+    opExec = execSteps.filter(
+        (execucao) => String(execucao["id_etapa"]) === String(etapa)
+    );
+    exec.innerHTML = '';
+    const optTodos = document.createElement('option');
+    optTodos.value = '';
+    optTodos.textContent = 'Todos';
+    exec.appendChild(optTodos);
+    for (const cont of opExec) {
+            const option = document.createElement('option');
+            const codEtapa = cont["execID"];
+
+            option.value = codEtapa;
+            option.textContent = cont["executor"];
+            exec.appendChild(option);
+        }
+    document.dispatchEvent(new Event('request-filters-change'));
+};

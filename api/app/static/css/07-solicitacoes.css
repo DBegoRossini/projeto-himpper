@@ -90,9 +90,44 @@
 
 .imp-request-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(14rem, 1fr) minmax(12rem, 0.8fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(14rem, 1fr) minmax(12rem, 0.8fr) auto;
   gap: var(--imp-space-4);
   align-items: end;
+}
+
+.imp-request-toolbar__filter-button {
+  align-self: end;
+  display: inline-flex;
+  min-width: 3rem;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.5rem;
+}
+
+.imp-request-toolbar__filter-button > span {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.imp-request-filters-modal .modal-dialog {
+  width: min(28rem, 100%);
+  max-width: none;
+  height: 100%;
+  margin: 0 0 0 auto;
+}
+
+.imp-request-filters-modal .modal-content {
+  height: 100%;
+  border-radius: var(--imp-radius-xl) 0 0 var(--imp-radius-xl);
+}
+
+.imp-request-filters-modal.fade .modal-dialog {
+  transform: translateX(100%);
+}
+
+.imp-request-filters-modal.show .modal-dialog {
+  transform: none;
 }
 
 .imp-request-toolbar__search,
