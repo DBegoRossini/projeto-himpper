@@ -252,6 +252,163 @@
 
                     </label>
 
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary imp-request-toolbar__filter-button"
+                        aria-label="Abrir filtros adicionais"
+                        title="Abrir filtros adicionais"
+                        data-bs-toggle="modal"
+                        data-bs-target="#requestAdditionalFilters"
+                    >
+                        <span aria-hidden="true">⚲</span>
+                    </button>
+
+                </div>
+
+                <div
+                    class="modal fade imp-request-filters-modal"
+                    id="requestAdditionalFilters"
+                    tabindex="-1"
+                    aria-labelledby="requestAdditionalFiltersLabel"
+                    aria-hidden="true"
+                >
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2
+                                    class="modal-title fs-5"
+                                    id="requestAdditionalFiltersLabel"
+                                >
+                                    Filtros adicionais
+                                </h2>
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Fechar"
+                                ></button>
+                            </div>
+                            <div class="modal-body imp-stack imp-gap-5">
+
+                                <div>
+                                    <label for="requestFlowFilter">
+                                        Fluxo
+                                    </label>
+                                    <select
+                                        id="requestFlowFilter"
+                                        class="form-select"
+                                        data-request-flow-filter
+                                        onchange="filterRequests()"
+                                    >
+                                        <option value="">
+                                            Todos
+                                        </option>
+                                        {% for flow in fluxos %}
+                                            <option value="{{ flow.id }}">
+                                                {{ flow.alias }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="requestStepFilter">
+                                        Etapa
+                                    </label>
+                                    <select
+                                        id="requestStepFilter"
+                                        class="form-select"
+                                        name="requestStepFilter"
+                                        data-request-step-filter
+                                        onchange="showStepFilter()"
+                                    >
+                                        <option value="">
+                                            Todos
+                                        </option>
+                                        
+                                    </select>
+                                </div>
+
+                                <div
+                                    hidden
+                                >
+                                    <label for="stepStartDateFilter">
+                                        Data Início da ETAPA
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="stepStartDateFilter"
+                                        class="form-control"
+                                        data-step-start-date-filter
+                                    >
+                                    </input>
+                                </div>
+
+                                <div
+                                    hidden
+                                >
+                                    <label for="stepEndDateFilter">
+                                        Data Fim da ETAPA
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="stepEndDateFilter"
+                                        class="form-control"
+                                        data-step-end-date-filter
+                                    >
+                                    </input>
+                                </div>
+
+                                <div
+                                    hidden
+                                >
+                                    <label for="requestExecStepFilter">
+                                        Executor da etapa
+                                    </label>
+                                    <select
+                                        id="requestExecStepFilter"
+                                        class="form-select"
+                                        name="requestExecStepFilter"
+                                        data-request-executor-step-filter
+                                    >
+                                        <option value="">
+                                            Todos
+                                        </option>
+                                        
+                                    </select>
+                                </div>
+
+                                <div
+                                >
+                                    <label for="requestEndDateFilter">
+                                        Data Inicio da SOLICITAÇÃO
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="requestStartDateFilter"
+                                        class="form-control"
+                                        data-request-start-date-filter
+                                    >
+                                    </input>
+                                </div>
+
+                                <div
+                                >
+                                    <label for="requestEndDateFilter">
+                                        Data Fim da SOLICITAÇÃO
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="requestEndDateFilter"
+                                        class="form-control"
+                                        data-request-end-date-filter
+                                    >
+                                    </input>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -422,6 +579,16 @@
 
                                         data-owner="{{ solicitacao.escopo }}"
 
+                                        data-request-flow="{{ solicitacao.id_fluxo }}"
+
+                                        data-request-date="{{
+                                            solicitacao.abertura_label.isoformat()
+                                            if solicitacao.abertura_label
+                                            else ''
+                                        }}"
+
+                                        data-request-executions="{{ solicitacao.execucoes|tojson|forceescape }}"
+
                                         data-original-order="{{ loop.index0 }}"
 
 
@@ -536,6 +703,16 @@
                                 data-status="{{ solicitacao.status_label }}"
 
                                 data-owner="{{ solicitacao.escopo }}"
+
+                                data-request-flow="{{ solicitacao.id_fluxo }}"
+
+                                data-request-date="{{
+                                    solicitacao.abertura_label.isoformat()
+                                    if solicitacao.abertura_label
+                                    else ''
+                                }}"
+
+                                data-request-executions="{{ solicitacao.execucoes|tojson|forceescape }}"
 
                                 data-original-order="{{ loop.index0 }}"
 
@@ -705,9 +882,13 @@
             </footer>
 
         </article>
+          </section>
 
-    </section>
-
+    
+    <script>
+        var etapas = {{ etapas | tojson }};
+        var execSteps = {{ execucoes | tojson }};
+    </script>
 
     <script
         defer

@@ -156,9 +156,9 @@
             const valor = document.getElementById('valor_contrato_PD');
             const fornecedor = document.getElementById('fornecedor');
             const valor_atual = document.getElementById('valor_atual');
-            valor.value = contratoInfo["VALORCONTRATO"];
+            valor.value = 'R$' + contratoInfo["VALORCONTRATO"];
             fornecedor.value = contratoInfo["FORNECEDOR"];
-            valor_atual.value = parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
+            valor_atual.value ='R$' +  parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
         }
 
         async function valor_solictado(){
