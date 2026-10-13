@@ -375,14 +375,13 @@
       }
 
 
-      const rows =
+      let rows =
         Array.from(
           document.querySelectorAll(
             "[data-request-row]"
           )
         );
-
-      const executionsByRow =
+      let executionsByRow =
         new Map(
           rows.map(row => [
             row,
@@ -687,6 +686,92 @@
         }
 
       };
+
+      const refreshInboxData = async () => {
+        const response = await fetch(window.location.href, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Não foi possível atualizar as pendências.");
+        }
+
+        const page = new DOMParser().parseFromString(
+          await response.text(),
+          "text/html"
+        );
+        const updatedTableBody =
+          page.querySelector("[data-request-table] tbody");
+        const updatedMobileList =
+          page.querySelector("[data-request-mobile-list]");
+
+        if (!updatedTableBody || !updatedMobileList) {
+          throw new Error("A resposta não contém os dados atualizados da fila.");
+        }
+
+        tableBody.replaceChildren(...updatedTableBody.childNodes);
+        mobileList.replaceChildren(...updatedMobileList.childNodes);
+        rows = Array.from(
+          document.querySelectorAll("[data-request-row]")
+        );
+        executionsByRow = new Map(
+          rows.map(row => [
+            row,
+            JSON.parse(row.dataset.requestExecutions || "[]")
+          ])
+        );
+        sync();
+      };
+
+      document.addEventListener("click", async event => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+
+        const link = target.closest("[data-request-assume]");
+        if (!(link instanceof HTMLAnchorElement)) {
+          return;
+        }
+
+        event.preventDefault();
+        if (link.dataset.pending === "true") {
+          return;
+        }
+
+        link.dataset.pending = "true";
+        link.setAttribute("aria-disabled", "true");
+        link.classList.add("disabled");
+
+        try {
+          const response = await fetch(link.href, {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          });
+
+          if (!response.ok) {
+            const result = await response.json();
+            throw new Error(
+              result.erro || "Não foi possível assumir a pendência."
+            );
+          }
+
+          await refreshInboxData();
+        } catch (error) {
+          window.alert(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível atualizar a fila."
+          );
+          delete link.dataset.pending;
+          link.removeAttribute("aria-disabled");
+          link.classList.remove("disabled");
+        }
+      });
 
       document
         .querySelectorAll(

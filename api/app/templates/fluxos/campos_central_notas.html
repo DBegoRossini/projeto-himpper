@@ -408,7 +408,7 @@
                 class="imp-label"
                 for="numero_oc"
             >
-                Número da OC
+                Número do identificador da OC
                 <span class="imp-label__required">*</span>
             </label>
 
@@ -419,19 +419,7 @@
                 class="form-control"
                 autocomplete="off"
                 inputmode="numeric"
-                maxlength="8"
-                pattern="\d{8}"
-                oninput="
-                    this.value = this.value
-                        .replace(/\D/g, '')
-                        .slice(0, 8);
-                "
-                onblur="
-                    if (this.value) {
-                        this.value = this.value.padStart(8, '0');
-                    }
-                "
-                placeholder="Informe o número da Ordem de Compra"
+                placeholder="Informe o número do Identificador da Ordem de Compra"
                 value="{{ f_numero_oc.valor if modo_execucao and f_numero_oc and f_numero_oc.valor is not none else '' }}"
                 {% if numero_oc_editavel %}required{% endif %}
                 {% if not numero_oc_editavel %}
@@ -441,7 +429,7 @@
             >
 
             <p class="imp-help">
-                Informe o número da OC que já foi emitida para esta despesa.
+                Informe o número do Identificador da OC que já foi emitida para esta despesa (não o N° do Movimento, mas o Identificador).
             </p>
 
         </div>

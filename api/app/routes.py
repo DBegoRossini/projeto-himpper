@@ -756,10 +756,16 @@ def assumir_tarefa(context, id_chamada, id_etapa):
     user = context["user"]
     user_oid = user.get("oid") or user.get("id")
     execucao = Execucao.query.filter(Execucao.id_chamada==id_chamada, Execucao.id_etapa==id_etapa, Execucao.finalizada_em.is_(None)).first()
-    if execucao:
-        execucao.executor = user_oid
-        execucao.assumida_em = datetime.utcnow()
-        database.session.commit()
+    if not execucao:
+        if flask_request.method == "POST":
+            return jsonify({"ok": False, "erro": "Pendência não encontrada."}), 404
+        return redirect(url_for("caixaentrada"))
+
+    execucao.executor = user_oid
+    execucao.assumida_em = datetime.utcnow()
+    database.session.commit()
+    if flask_request.method == "POST":
+        return jsonify({"ok": True})
     return redirect(url_for("caixaentrada"))
 
 @app.route("/abandonar/<int:id_chamada>/<id_etapa>")
