@@ -394,16 +394,6 @@ def inject_info_user():
         "notificacoes": getattr(g, 'notificacoes', [])
     }
 
-@app.route("/_debug/request")
-def _debug_request():
-    from flask import request
-    return {
-        "host": request.host,
-        "scheme": request.scheme,
-        "is_secure": request.is_secure,
-        "url_root": request.url_root
-    }
-
 @app.route("/")
 @auth.login_required(scopes=["User.Read"])
 @with_info_user
@@ -1167,7 +1157,7 @@ def download_arquivo(id_arquivo, context):
     return send_file(
         file_io,
         as_attachment=False,
-        download_name=f'{data.id_chamada} - {data.campo}.{mime.split("/")[-1]}',
+        download_name=f'#{data.id_chamada}  - {data.campo}.{mime.split("/")[-1]}',
         mimetype=mime
     )
 
