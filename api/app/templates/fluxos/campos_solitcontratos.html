@@ -963,32 +963,112 @@
 
 
         <div
-            class="imp-field"
+            class="imp-field imp-field--full"
             data-field-wrap="cnpj_contratada"
+            data-search-field="cnpj_contratada"
         >
 
-            <label
-                class="imp-label"
-                for="cnpj_contratada"
+            <div
+                class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
             >
-                CNPJ Contratada
-                <span class="imp-label__required">*</span>
-            </label>
+
+                <div>
+
+                    <span class="imp-label">
+                        Fornecedor
+                        <span class="imp-label__required">*</span>
+                    </span>
+
+                    <p class="imp-help mb-0">
+                        Selecione pelo menos um fornecedor. Se o que procura não estiver aqui, solicite a inclusão dele no RM pelo fluxo Cadastro de Fornecedores.
+                    </p>
+
+                </div>
+
+            </div>
+
 
             <input
-                class="form-control"
-                type="text"
+                type="hidden"
                 id="cnpj_contratada"
                 name="cnpj_contratada"
-                placeholder="00.000.000/0000-00"
-                data-impper-mask="cnpj"
                 value="{{ f_cnpj_contratada.valor if modo_execucao and f_cnpj_contratada and f_cnpj_contratada.valor is not none else '' }}"
-                {% if cnpj_contratada_editavel %}required{% endif %}
-                {% if not cnpj_contratada_editavel %}
-                    disabled
-                    data-impper-locked="true"
-                {% endif %}
+                data-cnpj_contratada-value
             >
+
+
+            <select
+                data-cnpj_contratada-source
+                hidden
+                disabled
+            >
+
+                {% if g.fornUnic is defined %}
+
+                    {% for key, label in g.fornUnic %}
+
+                        <option
+                            value="{{ key }}"
+                            data-label="{{ label }}"
+                        >
+                            {{ key }} - {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+
+            <div
+                class="imp-nature-list"
+                id="cnpjContratadaList"
+                data-cnpj_contratada-list
+            >
+
+                <div
+                    class="imp-nature-row"
+                    data-cnpj_contratada-row
+                >
+
+                    <div
+                        class="imp-search-select position-relative flex-grow-1"
+                        data-cnpj_contratada-combobox
+                    >
+
+                        <input
+                            type="search"
+                            class="form-control"
+                            placeholder="Pesquise por código ou descrição"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            data-cnpj_contratada-search
+                            {% if not cnpj_contratada_editavel %}
+                                disabled
+                                data-impper-locked="true"
+                            {% endif %}
+                        >
+
+                        <input
+                            type="hidden"
+                            value=""
+                            data-cnpj_contratada-selected-value
+                        >
+
+                        <div
+                            class="dropdown-menu w-100 imp-search-select__menu"
+                            role="listbox"
+                            data-cnpj_contratada-dropdown
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
