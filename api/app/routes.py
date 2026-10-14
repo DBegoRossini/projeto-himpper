@@ -47,13 +47,16 @@ def status_variant_for(status_label):
     return STATUS_VARIANTS.get((status_label or "").strip().lower(), "info")
 
 
-def normalizar_datetime_utc(valor):
+def normalizar_datetime_utc(valor: datetime | str) -> datetime:
+    if isinstance(valor, str):
+        valor = re.sub(r"\s+([+-]\d{4})$", r"\1", valor.strip())
+        valor = datetime.fromisoformat(valor.replace("Z", "+00:00"))
     if valor.tzinfo is None:
         return valor.replace(tzinfo=timezone.utc)
     return valor.astimezone(timezone.utc)
 
 
-def normalizar_datetime_local(valor):
+def normalizar_datetime_local(valor: datetime | str | None) -> datetime | None:
     if valor is None:
         return None
     return normalizar_datetime_utc(valor).astimezone(ZoneInfo("America/Sao_Paulo"))
