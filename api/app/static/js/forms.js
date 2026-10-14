@@ -955,10 +955,20 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
     id_etapa = 'Cancelado'
   }
 
-  const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    const response = await fetch(`/flow/${id_fluxo}/${id_etapa}`, {
+      method: 'POST',
+      body: formData
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (error) {
+    console.error(error);
+    botao.disabled = false;
+    alert('Não foi possível enviar o formulário. Tente novamente.');
+    return;
+  }
   window.location.href = `/novasolicitacao`;
   return formData;
 };
