@@ -2269,7 +2269,7 @@
                                 <tr data-destinatario-row>
 
                                     <td>
-                                        <select
+                                        <input
                                             type="text"
                                             name="destinatarios{{ loop.index0 }}"
                                             class="form-control"
@@ -2279,11 +2279,6 @@
                                             {% if destinatarios_editavel %}required{% endif %}
                                             {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                         >
-                                         <option value="">Selecione um destinatário</option>
-                                        {% for colaborador in colaboradores %}
-                                            <option value="{{ colaborador.mail }}" {% if f_destinatario and f_destinatario.valor == colaborador.mail %}selected{% endif %}>{{ colaborador.displayName }} ({{ colaborador.mail}})</option>
-                                        {% endfor %}
-                                    </select>
                                         
                                     </td>
 
@@ -2327,7 +2322,7 @@
                             <tr data-destinatario-row>
 
                                 <td>
-                                    <select
+                                    <input
                                         type="text"
                                         name="destinatarios0"
                                         class="form-control"
@@ -2336,11 +2331,7 @@
                                         {% if destinatarios_editavel %}required{% endif %}
                                         {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                     >
-                                        <option value="">Selecione um destinatário</option>
-                                        {% for colaborador in colaboradores %}
-                                            <option value="{{ colaborador.mail }}" {% if f_destinatario and f_destinatario.valor == colaborador.mail %}selected{% endif %}>{{ colaborador.displayName }}</option>
-                                        {% endfor %}
-                                    </select>
+                    
                                 </td>
 
                                 <td>
