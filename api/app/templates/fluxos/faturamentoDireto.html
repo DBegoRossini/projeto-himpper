@@ -155,9 +155,16 @@
             const valor = document.getElementById('valor_contrato_PD');
             const fornecedor = document.getElementById('fornecedor');
             const valor_atual = document.getElementById('valor_atual');
-            valor.value = 'R$' + contratoInfo["VALORCONTRATO"];
+            const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            const formatarMoeda = (numero) => 'R$' + formatadorMoeda.format(numero);
+            valor.value = formatarMoeda(Number(contratoInfo["VALORCONTRATO"]));
             fornecedor.value = contratoInfo["FORNECEDOR"];
-            valor_atual.value ='R$' +  parseFloat(contratoInfo["VALORCONTRATO"]) - parseFloat(contratoInfo["SALDOCONTRATO"]);
+            valor_atual.value = formatarMoeda(
+                Number(contratoInfo["VALORCONTRATO"]) - Number(contratoInfo["SALDOCONTRATO"])
+            );
         }
 
         async function valor_solictado(){
