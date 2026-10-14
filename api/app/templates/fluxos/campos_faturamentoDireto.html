@@ -348,8 +348,8 @@
 
         <div
             class="imp-field imp-field--full"
-            data-field-wrap="condPag"
-            data-search-field="condPag"
+            data-field-wrap="contrato"
+            data-search-field="contrato"
                 class="imp-field imp-field--full d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
             >
 
@@ -532,8 +532,8 @@
                 <input
                     id="valor_solicitado"
                     name="valor_solicitado"
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputmode="numeric"
                     class="form-control"
                     autocomplete="off"
                     placeholder="00,00"
@@ -544,6 +544,7 @@
                         data-impper-locked="true"
                     {% endif %}
                     onchange="valor_solictado()"
+                    oninput="mascaraRS(this)"
                 >
                 <p class="imp-help mb-0">O valor deve ser maior ou igual a 10000</p>
 
@@ -565,17 +566,18 @@
                 <input
                     id="saldo"
                     name="saldo"
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputmode="numeric"
                     class="form-control"
                     autocomplete="off"
-                    placeholder="00,00"
+                    placeholder="R$00,00"
                     value="{{ f_saldo.valor if modo_execucao and f_saldo and f_saldo.valor is not none else '' }}"
                     {% if saldo_editavel %}required{% endif %}
                     {% if not saldo_editavel %}
                         disabled
                         data-impper-locked="true"
                     {% endif %}
+                    oninput="mascaraRS(this)"
                     >
 
             </div>

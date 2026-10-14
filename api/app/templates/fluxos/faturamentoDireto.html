@@ -133,9 +133,8 @@
 
             for (const pag of opcond) {
                 const option = document.createElement('option');
-                const codigoPag = pag["VALOR"];
 
-                option.value = codigoPag;
+                option.value = pag["LABEL"];
                 option.textContent = pag["LABEL"];
                 pagSelect.appendChild(option);
             }
@@ -164,7 +163,8 @@
         async function valor_solictado(){
             const valorSolicitado = document.getElementById('valor_solicitado').value;
             const botao = document.getElementById('submitButton');
-            if (parseFloat(valorSolicitado) < 10000) {
+            const numero = parseFloat(valorSolicitado.replace(/[^\d,]/g, "").replace(",", "."));
+            if (isNaN(numero) || numero < 10000) {
                 alert("O valor solicitado deve ser maior ou igual a 10000");
                 botao.disabled = true;
                 return false;
@@ -172,6 +172,13 @@
                 botao.disabled = false;
             }
         }
+
+        function mascaraRS(el){
+            let v = el.value.replace(/\D/g, "");
+            v = (v / 100).toFixed(2).replace(".", ",");
+            el.value = "R$ " + v;
+        }
+        window.mascaraRS = mascaraRS;
     </script>
 
 {% endblock %}
