@@ -53,6 +53,12 @@ def normalizar_datetime_utc(valor):
     return valor.astimezone(timezone.utc)
 
 
+def normalizar_datetime_local(valor):
+    if valor is None:
+        return None
+    return normalizar_datetime_utc(valor).astimezone(ZoneInfo("America/Sao_Paulo"))
+
+
 def montar_titulo_pendencia(template, formularios_map):
     """Substitui na string flows.titulo (ex: 'stand - empreendimento - data') cada nome
     de campo pelo valor preenchido no formulário da chamada, preservando os separadores."""
@@ -264,7 +270,7 @@ def carregar_notificacoes_usuario(user_id):
         {
             "id": n.id,
             "mensagem": n.mensagem,
-            "enviada_em": n.data_criacao if n.data_criacao else None
+            "enviada_em": normalizar_datetime_local(n.data_criacao),
         }
         for n in notificacoes
     ]
@@ -441,7 +447,11 @@ def index(*, context):
             "fluxo_nome": row.fluxo_nome,
             "id_chamada": row.id_chamada,
             "id_flow": row.id_flow,
-            "prazo_limite": row.iniciada_em + timedelta(hours=row.sla) if row.iniciada_em else None
+            "prazo_limite": (
+                normalizar_datetime_local(row.iniciada_em) + timedelta(hours=row.sla)
+                if row.iniciada_em
+                else None
+            )
         })
     solicitacoes = (
     database.session.query(Chamada)
@@ -460,6 +470,16 @@ def index(*, context):
     .distinct(Chamada.id)
     .all()
 )
+    solicitacoes = [
+        {
+            "id": row.id,
+            "fluxo_nome": row.fluxo_nome,
+            "iniciada_em": normalizar_datetime_local(row.iniciada_em),
+            "status": row.status,
+            "nome": row.nome,
+        }
+        for row in solicitacoes
+    ]
     return render_template(
         'home.html',
         user=user,
@@ -596,7 +616,7 @@ def solicitacoes(context):
             "id": row.id,
             "id_fluxo": row.id_fluxo,
             "tipo": row.tipo,
-            "abertura_label": row.abertura_label,
+            "abertura_label": normalizar_datetime_local(row.abertura_label),
             "status_label": row.status_label,
             "status_variant": status_variant_for(row.status_label),
             "escopo": escopo_solicitacao(row.solicitante, user_oid, subordinados),
@@ -605,8 +625,16 @@ def solicitacoes(context):
             "execucoes": [
                 {
                     "id_etapa": execucao.id_etapa,
-                    "iniciada_em": execucao.iniciada_em.isoformat() if execucao.iniciada_em else "",
-                    "finalizada_em": execucao.finalizada_em.isoformat() if execucao.finalizada_em else "",
+                    "iniciada_em": (
+                        normalizar_datetime_local(execucao.iniciada_em).isoformat()
+                        if execucao.iniciada_em
+                        else ""
+                    ),
+                    "finalizada_em": (
+                        normalizar_datetime_local(execucao.finalizada_em).isoformat()
+                        if execucao.finalizada_em
+                        else ""
+                    ),
                     "executor": execucao.executor or ""
                 }
                 for execucao in etapas_por_chamada.get(row.id, [])
@@ -723,7 +751,7 @@ def caixaentrada(context):
     pendencias = []
     for row in pendencias_raw:
         prazo = (
-            normalizar_datetime_utc(row.iniciada_em) + timedelta(hours=row.sla)
+            normalizar_datetime_local(row.iniciada_em) + timedelta(hours=row.sla)
             if row.iniciada_em
             else None
         )
@@ -731,7 +759,7 @@ def caixaentrada(context):
                 "protocolo":   row.id,
                 "solicitante": nomes.get(row.solicitante, "Desconhecido"),
                 "tipo":        row.fluxo_nome,
-                "recebida_em": row.data_solicitacao,
+                "recebida_em": normalizar_datetime_local(row.data_solicitacao),
                 "etapa": row.etapa_nome,
                 "id_etapa": row.id_etapa,
                 "status_label": row.status,
@@ -971,7 +999,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
             "id_fluxo": chamada_raw.id_fluxo,
             "status": chamada_raw.status,
             "solicitante": solicitante.json().get("displayName", "Desconhecido") if solicitante else None,
-            "data": chamada_raw.data,
+            "data": normalizar_datetime_local(chamada_raw.data),
     })
     fluxo = flows.query.get(chamada[0]["id_fluxo"]) if chamada else None
     if fluxo.id == 1:
@@ -1024,9 +1052,9 @@ def exec_tarefas(id_chamada, id_etapa, context):
             "id": execucao_registro.id,
             "id_etapa": execucao_registro.id_etapa,
             "nome": etapa_registro.nome if etapa_registro else execucao_registro.id_etapa,
-            "iniciada_em": execucao_registro.iniciada_em.astimezone(ZoneInfo("America/Sao_Paulo")),
-            "assumida_em": execucao_registro.assumida_em,
-            "finalizada_em": execucao_registro.finalizada_em,
+            "iniciada_em": normalizar_datetime_local(execucao_registro.iniciada_em),
+            "assumida_em": normalizar_datetime_local(execucao_registro.assumida_em),
+            "finalizada_em": normalizar_datetime_local(execucao_registro.finalizada_em),
             "executor": executor_nome,
             "comentario": getattr(execucao_registro, "comentario", None),
             "atual": execucao_registro.id_etapa == id_etapa,
@@ -1048,11 +1076,11 @@ def exec_tarefas(id_chamada, id_etapa, context):
                 "id": exec_raw.id,
                 "id_chamada": exec_raw.id_chamada,
                 "id_etapa": exec_raw.id_etapa,
-                "iniciada_em": exec_raw.iniciada_em,
-                "finalizada_em": exec_raw.finalizada_em,
+                "iniciada_em": normalizar_datetime_local(exec_raw.iniciada_em),
+                "finalizada_em": normalizar_datetime_local(exec_raw.finalizada_em),
                 "executor": executor.json().get("displayName", "Desconhecido") if executor else None,
                 "executor_id": exec_raw.executor,
-                "assumida_em": exec_raw.assumida_em,
+                "assumida_em": normalizar_datetime_local(exec_raw.assumida_em),
                 "etapas_correcao": etapas_correcao
             })
     etapa = Etapas.query.get(execucao[0]["id_etapa"]) if execucao else None
@@ -1100,7 +1128,7 @@ def exec_tarefas(id_chamada, id_etapa, context):
         comentarios_chamada.append({
             "usuario": nomes_comentaristas[c.usuario],
             "comentario": c.comentario,
-            "data": c.data_criacao.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Sao_Paulo")),
+            "data": normalizar_datetime_local(c.data_criacao),
         })
 
     return render_template(
@@ -1138,7 +1166,7 @@ def comentar(id_chamada, context):
         id_chamada=id_chamada,
         usuario = user_oid,
         comentario=comenttxt,
-        data_criacao=datetime.now()
+        data_criacao=datetime.utcnow()
     )
     database.session.add(comentario)
     database.session.commit()
@@ -1311,7 +1339,7 @@ def historico(context):
             "id": row.id,
             "id_fluxo": row.id_fluxo,
             "tipo": row.tipo,
-            "abertura_label": row.abertura_label,
+            "abertura_label": normalizar_datetime_local(row.abertura_label),
             "status_label": row.status_label,
             "status_variant": status_variant_for(row.status_label),
             "solicitante": row.solicitante,
@@ -1321,8 +1349,16 @@ def historico(context):
             "execucoes": [
                 {
                     "id_etapa": execucao.id_etapa,
-                    "iniciada_em": execucao.iniciada_em.isoformat() if execucao.iniciada_em else "",
-                    "finalizada_em": execucao.finalizada_em.isoformat() if execucao.finalizada_em else "",
+                    "iniciada_em": (
+                        normalizar_datetime_local(execucao.iniciada_em).isoformat()
+                        if execucao.iniciada_em
+                        else ""
+                    ),
+                    "finalizada_em": (
+                        normalizar_datetime_local(execucao.finalizada_em).isoformat()
+                        if execucao.finalizada_em
+                        else ""
+                    ),
                     "executor": execucao.executor or ""
                 }
                 for execucao in etapas_por_chamada.get(row.id, [])
