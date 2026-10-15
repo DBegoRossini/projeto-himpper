@@ -733,7 +733,8 @@ def caixaentrada(context):
         Etapas.sla,
         Etapas.id.label("id_etapa"),
         Chamada.solicitante,
-        flows.titulo
+        flows.titulo,
+        flows.subtitulo
     ).order_by(Chamada.id.asc()).distinct().all()
 
     ids_para_nome = set()
@@ -768,6 +769,7 @@ def caixaentrada(context):
                 "status_label": row.status,
                 "executor": row.executor,
                 "exec_name": nomes.get(row.executor) if row.executor else None,
+                "subtitulo": row.subtitulo,
                 "prazo": prazo,
                 "atrasada": prazo is not None and now > prazo,
                 "titulo": montar_titulo_pendencia(row.titulo, formularios_por_chamada.get(row.id, {}))

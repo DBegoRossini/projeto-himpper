@@ -130,6 +130,7 @@
         permitir_edicao
         and f_anexos_opicional
         and (f_anexos_opicional.editavel|string|lower|trim) in ['1', 'true']
+        or etapa_atual == 'OC-C-03'
     )
 %}
 

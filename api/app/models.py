@@ -14,6 +14,7 @@ class flows(database.Model):
     visao_grupo = database.Column(database.Text, nullable=True)
     versao = database.Column(database.String(3), nullable=False)
     titulo = database.Column(database.String(100), nullable=False)
+    subtitulo = database.Column(database.String(100), nullable=False)
 
 class Chamada(database.Model):
     __tablename__ = 'chamada'
