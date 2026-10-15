@@ -934,7 +934,7 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
     return;
   }
 
-  botao.disabled = true;
+ // botao.disabled = true;
   const fields = Array.from(form.querySelectorAll('input, textarea, select'))
       .filter(f => f.name);
   const formData = new FormData();
@@ -989,7 +989,7 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
     return;
   }
 
-  botao.disabled = true;
+  // botao.disabled = true;
   const fields = Array.from(document.querySelectorAll('input, textarea, select'))
       .filter(f => f.name && !f.closest('[data-comment-form]'));
   const formData = new FormData();
@@ -1047,7 +1047,7 @@ function abrirModalConclusao(id_proxet) {
 
 function confirmarConclusao(document, id_chamada, id_etapa) {
   const botao = document.getElementById('confirmButton');
-  botao.disabled = true;
+  //botao.disabled = true;
   const id_proxet = 'Aprovado';
 
 
