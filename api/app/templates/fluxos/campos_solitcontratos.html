@@ -1,6 +1,21 @@
 {% set modo_execucao = modo_execucao|default(false) %}
 {% set permitir_edicao = permitir_edicao|default(true) %}
 
+{% macro data_assinatura_formatada(valor) -%}
+    {%- if valor and 'T' in (valor|string) -%}
+        {%- set partes_data_hora = (valor|string).split('T') -%}
+        {%- set partes_data = partes_data_hora[0].split('-') -%}
+        {%- set partes_hora = partes_data_hora[1].split(':') -%}
+        {%- if partes_data|length == 3 and partes_hora|length >= 2 -%}
+            {{- partes_data[2] }}/{{ partes_data[1] }}/{{ partes_data[0] }} {{ partes_hora[0] }}:{{ partes_hora[1] -}}
+        {%- else -%}
+            {{- valor -}}
+        {%- endif -%}
+    {%- else -%}
+        {{- valor or '' -}}
+    {%- endif -%}
+{%- endmacro %}
+
 
 {# =========================================================
    REGISTROS DO FORMULÁRIO
@@ -2302,12 +2317,17 @@
 
                                     <td>
                                         <input
-                                            type="text"
+                                            type="hidden"
                                             name="assinado_em{{ loop.index0 }}"
-                                            class="form-control"
-                                            placeholder="Assinado em"
                                             data-assinado-em-input
                                             value="{{ f_assinado.valor if f_assinado and f_assinado.valor is not none else '' }}"
+                                            {% if not destinatarios_editavel %}disabled{% endif %}
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Assinado em"
+                                            value="{{ data_assinatura_formatada(f_assinado.valor) if f_assinado and f_assinado.valor is not none else '' }}"
                                             readonly
                                             {% if not destinatarios_editavel %}disabled data-impper-locked="true"{% endif %}
                                         >
@@ -2351,11 +2371,15 @@
 
                                 <td>
                                     <input
-                                        type="text"
+                                        type="hidden"
                                         name="assinado_em0"
+                                        data-assinado-em-input
+                                        disabled
+                                    >
+                                    <input
+                                        type="text"
                                         class="form-control"
                                         placeholder="Assinado em"
-                                        data-assinado-em-input
                                         readonly
                                         disabled data-impper-locked="true"
                                     >
