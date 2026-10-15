@@ -1,0 +1,73 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+{# =========================================================
+   REGISTROS DO FORMULÁRIO
+   ========================================================= #}
+
+{% set keys = formularios_map.keys() if modo_execucao else [] %}
+
+{% set f_dias = [] %}
+{% set horarios_manha = [] %}
+{% set horarios_tarde = [] %}
+
+{% for key in keys if 'dias' in key %}
+    {% set _ = f_dias.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
+{% for key in keys if 'horarios_manha' in key %}
+    {% set _ = horarios_manha.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
+{% for key in keys if 'horarios_tarde' in key %}
+    {% set _ = horarios_tarde.append(formularios_map.get(key) if modo_execucao else none) %}
+{% endfor %}
+
+{# =========================================================
+   PERMISSÕES DE EDIÇÃO
+   ========================================================= #}
+
+{% set dias_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and f_dias
+        and (f_dias.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set horarios_manha_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and horarios_manha
+        and (horarios_manha.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+{% set horarios_tarde_editavel =
+    not modo_execucao
+    or etapa_id == 'EC-01-C'
+    or (
+        permitir_edicao
+        and horarios_tarde
+        and (horarios_tarde.editavel|string|lower|trim)
+            in ['1', 'true']
+    )
+%}
+
+
+<section class="imp-form-section" hidden>
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="intervalos"
+        >
+            <!-- Conteúdo do campo de anexos aqui -->
+        </div>
+    </div>
+</section>

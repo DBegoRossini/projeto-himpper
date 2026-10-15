@@ -546,7 +546,15 @@
 
 
                                     <td data-label="Tipo">
-                                        {% if pendencia.titulo %}
+                                        {% if pendencia.titulo and pendencia.subtitulo %}
+                                            <span class="imp-request-tipo">
+                                                <span class="badge rounded-pill imp-badge">
+                                                    {{ pendencia.subtitulo }}
+                                                </span>
+                                                <small>{{ pendencia.titulo }}</small>
+                                                <smaller>{{ pendencia.tipo }}</smaller>
+                                            </span>
+                                        {% elif pendencia.titulo and not pendencia.subtitulo %}
                                             <span class="imp-request-tipo">
                                                 <span>{{ pendencia.titulo }}</span>
                                                 <small>{{ pendencia.tipo }}</small>
