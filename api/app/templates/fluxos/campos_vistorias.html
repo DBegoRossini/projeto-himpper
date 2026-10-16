@@ -214,14 +214,14 @@
                                                 {% set dt_editavel = permitir_edicao and (etapa_id == 'VS-01' or (campo_dt and (campo_dt.editavel|string|lower|trim) in ['1', 'true'])) %}
                                                 {% set horario_editavel = permitir_edicao and (etapa_id == 'VS-01' or (campo_horario and (campo_horario.editavel|string|lower|trim) in ['1', 'true'])) %}
                                                 <tr data-lote-row>
-                                                    <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-quadra" value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}" {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}></td>
+                                                    <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-quadra" value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}" {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %} data-lote-field='quadra'></td>
                                                     <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-lote" value="{{ campo_lote.valor if campo_lote and campo_lote.valor is not none else '' }}" {% if lote_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}></td>
                                                     {% if etapa_id == 'VS-01' %}
                                                         <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote }}-dt" value="{{ campo_dt.valor if campo_dt and campo_dt.valor is not none else '' }}" {% if not dt_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote }}-horario" value="{{ campo_horario.valor if campo_horario and campo_horario.valor is not none else '' }}" {% if not horario_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td class="text-end text-nowrap">
                                                             {% if permitir_edicao %}
-                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('quadra'))">Agendar</button>
+                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('[data-lote-row]'))">Agendar</button>
                                                                 <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
                                                             {% endif %}
                                                         </td>
@@ -452,7 +452,7 @@
     {% endif %}
     <td class="text-end text-nowrap">
     {% if etapa_id == "VS-01" %}
-      <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('quadra'))">Agendar</button>
+      <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('[data-lote-row]'))">Agendar</button>
       <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
     {% endif %}
       <button type="button" class="btn btn-outline-danger btn-sm" data-remove-lote aria-label="Remover lote">&times;</button>
@@ -463,6 +463,6 @@
 
 <script>
     async function agendarVist(row) {
-  console.log(row.querySelectorAll("[data-lote-field='quadra']"));
+        console.log(row.querySelectorAll("[data-lote-field='quadra']"));
 }
 </script>
