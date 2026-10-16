@@ -3,7 +3,9 @@
 
 {% set numero_oc_liberado_por_etapa =
     etapa_id|default('') == 'OC-01'
+    or etapa_id|default('') == 'OC-C-06-B'
     or etapa_id|string|trim == '0'
+    or (f_numero_oc.editavel|string|lower|trim) in ['1', 'true']
 %}
 {% set consulta_central_notas =
     modo_execucao
