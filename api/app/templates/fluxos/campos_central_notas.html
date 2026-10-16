@@ -1,12 +1,6 @@
 {% set modo_execucao = modo_execucao|default(false) %}
 {% set permitir_edicao_central = permitir_edicao|default(true) %}
 
-{% set numero_oc_liberado_por_etapa =
-    etapa_id|default('') == 'OC-01'
-    or etapa_id|default('') == 'OC-C-06-B'
-    or etapa_id|string|trim == '0'
-    or (f_numero_oc.editavel|string|lower|trim) in ['1', 'true']
-%}
 {% set consulta_central_notas =
     modo_execucao
     and etapa_id|default('') in ['OC-04', 'OC-C-06-B']
@@ -16,6 +10,12 @@
 {% set f_nota = formularios_map.get('nota_fiscal_recibo_emitidos') if modo_execucao else none %}
 {% set f_oc_emitida = formularios_map.get('oc_emitida') if modo_execucao else none %}
 {% set f_numero_oc = formularios_map.get('numero_oc') if modo_execucao else none %}
+{% set numero_oc_liberado_por_etapa =
+    etapa_id|default('') == 'OC-01'
+    or etapa_id|default('') == 'OC-C-06-B'
+    or etapa_id|default('')|string|trim == '0'
+    or (f_numero_oc is not none and (f_numero_oc.editavel|default('')|string|lower|trim) in ['1', 'true'])
+%}
 {% set f_tratamento = formularios_map.get('tratamento_despesa') if modo_execucao else none %}
 {% set f_tipo_movimento = formularios_map.get('tipo_movimento') if modo_execucao else none %}
 
