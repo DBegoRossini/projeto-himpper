@@ -221,7 +221,7 @@
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote }}-horario" value="{{ campo_horario.valor if campo_horario and campo_horario.valor is not none else '' }}" {% if not horario_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td class="text-end text-nowrap">
                                                             {% if permitir_edicao %}
-                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('[data-lote-row]'))">Agendar</button>
+                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
                                                                 <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
                                                             {% endif %}
                                                         </td>
@@ -452,7 +452,7 @@
     {% endif %}
     <td class="text-end text-nowrap">
     {% if etapa_id == "VS-01" %}
-      <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist(this.closest('[data-lote-row]'))">Agendar</button>
+      <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
       <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
     {% endif %}
       <button type="button" class="btn btn-outline-danger btn-sm" data-remove-lote aria-label="Remover lote">&times;</button>
@@ -462,7 +462,50 @@
 </template>
 
 <script>
-    async function agendarVist(row) {
-        console.log(row.querySelectorAll("[data-lote-field='quadra']"));
-}
+    async function agendarVist(lote, id_etapa, id_chamada, id_proxet) {
+        console.log('lote: ' + lote);
+        
+        const fields = Array.from(document.querySelectorAll('input, textarea, select'))
+            .filter(f => f.name && !f.closest('[data-comment-form]'));
+        const formData = new FormData();
+        fields.forEach(field => {
+            if (
+            field.name === 'comentario'
+            && !['Aprovado', 'Finalizado'].includes(id_proxet)
+            ) {
+            return;
+            }
+
+            if (field.type === 'file' && field.files.length === 0){
+            return field.files.length;
+            } else if (field.type === 'file' && field.files.length > 0) {
+            Array.from(field.files || []).forEach(file => {
+                if (file.size > 0) formData.append(field.name, file);
+            });
+            } else if (field.type !== 'radio' || field.checked){
+            formData.append(field.name, field.value);
+            }
+        });
+
+        if (id_proxet === 'Correcao'){
+            const etapaSelect = document.getElementById('correctionTarget');
+            id_proxet = etapaSelect.value
+        }
+
+        if (['Aprovado', 'Finalizado'].includes(id_proxet)) {
+            const comentario = document.getElementById('comentario_conclusao');
+            const valorComentario = comentario?.value?.trim() || '';
+
+            formData.set('comentario', valorComentario);
+            formData.set('correction_reason', valorComentario);
+        }
+
+        console.log(id_etapa);
+        const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
+            method: 'POST',
+            body: formData
+        });
+        window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
+        return formData;
+};
 </script>
