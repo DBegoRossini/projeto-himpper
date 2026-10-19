@@ -651,7 +651,7 @@
                 .map((checkbox) => checkbox.value.trim())
                 .filter(Boolean);
 
-            document.getElementById('popup-novas-permissoes').value = valores.join(',');
+            document.getElementById('popup-novas-permissoes').value = valores.join(';');
             updateSelection('etapas');
 
             const tbody = document.getElementById('popup-etapa-permissoes-list');
@@ -709,7 +709,7 @@
                 .map((checkbox) => (checkbox.value || '').trim())
                 .filter(Boolean);
 
-            document.getElementById('popup-novas-permissoes').value = valores.join(',');
+            document.getElementById('popup-novas-permissoes').value = valores.join(';');
             updateSelection('dia');
         }
 
@@ -746,7 +746,7 @@
                 `;
             }
 
-            document.getElementById('popup-novas-permissoes').value = restantes.join(',');
+            document.getElementById('popup-novas-permissoes').value = restantes.join(';');
         }
 
         function trocarAbaPopup(aba) {

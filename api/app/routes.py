@@ -1513,7 +1513,7 @@ def permissoes(context):
             "id": fluxo.id,
             "nome": fluxo.nome,
             "versao": fluxo.versao,
-            "acesso_ids": ",".join(ids_fluxo),
+            "acesso_ids": ";".join(ids_fluxo),
             "acesso": ", ".join(nomes_fluxo) if nomes_fluxo else "Não informado",
             "alias": fluxo.alias,
             "area_responsavel": fluxo.area_responsavel,
@@ -1574,7 +1574,7 @@ def permissoes(context):
 
         elif tipo_permissao == "fluxo":
             ids_normalizados = normalizar_ids_acesso(nova_permissao_raw)
-            nova_permissao = ",".join(ids_normalizados)
+            nova_permissao = ";".join(ids_normalizados)
         else:
             nova_permissao = None
 
