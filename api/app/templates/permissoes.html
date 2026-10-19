@@ -316,6 +316,12 @@
                                                 <span>{{ permissao.tipo }}: {{ permissao.displayName }} ({{ permissao.id }})</span>
                                         </label>
                                         {% endfor %}
+                                        {% for cargo in cargos_permissoes | default([], true) %}
+                                        <label class="dropdown-option imp-permission-picker__option" data-permission-option>
+                                            <input type="checkbox" value="{{ cargo }}" data-access-kind="jobTitle" onchange="sincronizarNovasPermissoes()">
+                                            <span>Cargo (jobTitle): {{ cargo }}</span>
+                                        </label>
+                                        {% endfor %}
                                         <div class="imp-permission-picker__empty" id="dia-empty" hidden>Nenhuma permissão encontrada.</div>
                                     </div>
                                     <input type="hidden" name="dias_selecionados" id="dia-hidden">
@@ -387,12 +393,6 @@
                         </div>
                     </section>
                     <div id="etapas-opcoes-adicionais" hidden>
-                        {% for cargo in cargos_permissoes | default([], true) %}
-                        <label class="dropdown-option imp-permission-picker__option" data-permission-option>
-                            <input type="checkbox" value="{{ cargo }}" data-access-kind="jobTitle">
-                            <span>Cargo (jobTitle): {{ cargo }}</span>
-                        </label>
-                        {% endfor %}
                         {% for valor in valores_especiais_etapa | default([], true) %}
                         <label class="dropdown-option imp-permission-picker__option" data-permission-option>
                             <input type="checkbox" value="{{ valor }}" data-access-kind="especial">
