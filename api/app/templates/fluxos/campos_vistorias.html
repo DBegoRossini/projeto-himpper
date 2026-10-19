@@ -60,13 +60,11 @@
 %}
 {% set dt_editavel =
     not modo_execucao
-    or etapa_id == 'VS-01'
-    or (permitir_edicao and f_dt and (f_dt.editavel|string|lower|trim) in ['1', 'true'])
+    or (permitir_edicao and etapa_id == 'VS-01' and f_dt and (f_dt.editavel|string|lower|trim) in ['1', 'true'])
 %}
 {% set horario_editavel =
-    not modo_execucao
-    or etapa_id == 'VS-01'
-    or (permitir_edicao and f_horario and (f_horario.editavel|string|lower|trim) in ['1', 'true'])
+    not modo_execucao 
+    or (permitir_edicao and etapa_id == 'VS-01' and f_horario and (f_horario.editavel|string|lower|trim) in ['1', 'true'])
 %}
 
 <section class="imp-form-section">
@@ -211,8 +209,8 @@
                                                 {% set campo_horario = formularios_map.get(prefixo_lote ~ '-horario') %}
                                                 {% set quadra_editavel = permitir_edicao and campo_quadra and (campo_quadra.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 {% set lote_editavel = permitir_edicao and campo_lote and (campo_lote.editavel|string|lower|trim) in ['1', 'true'] %}
-                                                {% set dt_editavel = permitir_edicao and (etapa_id == 'VS-01' or (campo_dt and (campo_dt.editavel|string|lower|trim) in ['1', 'true'])) %}
-                                                {% set horario_editavel = permitir_edicao and (etapa_id == 'VS-01' or (campo_horario and (campo_horario.editavel|string|lower|trim) in ['1', 'true'])) %}
+                                                {% set dt_editavel = permitir_edicao and etapa_id == 'VS-01' and campo_dt and (campo_dt.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                {% set horario_editavel = permitir_edicao and etapa_id == 'VS-01' and campo_horario and (campo_horario.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 <tr data-lote-row>
                                                     <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-quadra" value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}" {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %} data-lote-field='quadra'></td>
                                                     <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-lote" value="{{ campo_lote.valor if campo_lote and campo_lote.valor is not none else '' }}" {% if lote_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}></td>
@@ -220,7 +218,7 @@
                                                         <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote }}-dt" value="{{ campo_dt.valor if campo_dt and campo_dt.valor is not none else '' }}" {% if not dt_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote }}-horario" value="{{ campo_horario.valor if campo_horario and campo_horario.valor is not none else '' }}" {% if not horario_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td class="text-end text-nowrap">
-                                                            {% if permitir_edicao %}
+                                                            {% if dt_editavel and horario_editavel %}
                                                                 <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
                                                                 <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
                                                             {% endif %}
@@ -451,7 +449,7 @@
     </td>
     {% endif %}
     <td class="text-end text-nowrap">
-    {% if etapa_id == "VS-01" %}
+    {% if etapa_id == "VS-01" and dt_editavel and horario_editavel %}
       <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
       <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
     {% endif %}
@@ -486,6 +484,7 @@
             formData.append(field.name, field.value);
             }
         });
+        formData.set('lote', lote);
 
         if (id_proxet === 'Correcao'){
             const etapaSelect = document.getElementById('correctionTarget');
