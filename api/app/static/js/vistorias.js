@@ -5,10 +5,103 @@
   const blocosList = form.querySelector("[data-blocos-list]");
   const blocoTpl   = document.getElementById("blocoTemplate");
   const loteTpl    = document.getElementById("loteTemplate");
+  const empreendimentos = Array.isArray(window.infoempreend)
+    ? window.infoempreend.filter(item => item && typeof item === "object")
+    : [];
 
   const SITUACOES = {
     agendar:  { value: "agendado",  badge: "text-bg-success" },
     devolver: { value: "devolvido", badge: "text-bg-warning" }
+  };
+
+  const getEmpreendimentoRows = value =>
+    empreendimentos.filter(item =>
+      String(item.CODEMP ?? "").trim() === String(value).trim() ||
+      String(item.NOME ?? "").trim() === String(value).trim()
+    );
+
+  const getDistinctOptions = (items, field, selectedValue = "") => {
+    const values = [...new Set(
+      items
+        .map(item => String(item[field] ?? "").trim())
+        .filter(Boolean)
+    )];
+
+    if (selectedValue && !values.includes(String(selectedValue))) {
+      values.push(String(selectedValue));
+    }
+
+    return values.map(value => ({ value, label: value }));
+  };
+
+  const renderOptions = (select, options, placeholder, preserveValue) => {
+    const selectedValue = preserveValue
+      ? select.dataset.currentValue ?? select.value
+      : "";
+    const locked = select.dataset.impperLocked === "true";
+
+    select.innerHTML = "";
+
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.textContent = placeholder;
+    select.appendChild(placeholderOption);
+
+    options.forEach(({ value, label }) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    });
+
+    select.value = selectedValue;
+    select.dataset.currentValue = select.value;
+    select.disabled = locked || options.length === 0;
+  };
+
+  const updateLoteOptions = (row, preserveValue) => {
+    const bloco = row.closest("[data-bloco]");
+    const empreendimento = bloco.querySelector('[data-field="empreendimento"]');
+    const quadra = row.querySelector('[data-lote-field="quadra"]');
+    const lote = row.querySelector('[data-lote-field="lote"]');
+    const rows = quadra.value
+      ? getEmpreendimentoRows(empreendimento.value).filter(item =>
+        String(item.QUADRA ?? "").trim() === quadra.value
+      )
+      : [];
+    const selectedLote = preserveValue
+      ? lote.dataset.currentValue ?? lote.value
+      : "";
+
+    renderOptions(
+      lote,
+      getDistinctOptions(rows, "LOTE", selectedLote),
+      "Selecione o lote",
+      preserveValue
+    );
+  };
+
+  const updateBlocoOptions = (bloco, preserveValue) => {
+    const empreendimento = bloco.querySelector('[data-field="empreendimento"]');
+    const rows = getEmpreendimentoRows(empreendimento.value);
+
+    bloco.querySelectorAll('[data-lote-field="quadra"]').forEach(quadra => {
+      const row = quadra.closest("[data-lote-row]");
+      const lote = row.querySelector('[data-lote-field="lote"]');
+      const selectedQuadra = preserveValue
+        ? quadra.dataset.currentValue ?? quadra.value
+        : "";
+
+      renderOptions(
+        quadra,
+        getDistinctOptions(rows, "QUADRA", selectedQuadra),
+        "Selecione a quadra",
+        preserveValue
+      );
+
+      updateLoteOptions(row, preserveValue);
+      lote.dataset.currentValue = lote.value;
+    });
   };
 
   // Reindexa nomes (blocos-i-campo / blocos-i-lotes-j-campo), títulos e botões remover
@@ -33,9 +126,10 @@
   };
 
   const addLote = bloco => {
-    bloco.querySelector("[data-lotes-list]")
-         .appendChild(loteTpl.content.cloneNode(true));
+    const row = loteTpl.content.cloneNode(true);
+    bloco.querySelector("[data-lotes-list]").appendChild(row);
     reindex();
+    updateBlocoOptions(bloco, true);
   };
 
   const addBloco = () => {
@@ -90,8 +184,32 @@
 
   // data_fim >= data_inicio (escopado ao bloco)
   form.addEventListener("change", e => {
-    if (e.target.dataset.field === "data_inicio") {
-      const fim = e.target.closest("[data-bloco]").querySelector('[data-field="data_fim"]');
+    const target = e.target;
+    const bloco = target.closest("[data-bloco]");
+
+    if (target.dataset.field === "empreendimento") {
+      bloco.querySelectorAll("[data-lote-field]").forEach(field => {
+        field.dataset.currentValue = "";
+      });
+      updateBlocoOptions(bloco, false);
+      return;
+    }
+
+    if (target.dataset.loteField === "quadra") {
+      target.dataset.currentValue = target.value;
+      const lote = target.closest("[data-lote-row]").querySelector('[data-lote-field="lote"]');
+      lote.dataset.currentValue = "";
+      updateLoteOptions(target.closest("[data-lote-row]"), false);
+      return;
+    }
+
+    if (target.dataset.loteField === "lote") {
+      target.dataset.currentValue = target.value;
+      return;
+    }
+
+    if (target.dataset.field === "data_inicio") {
+      const fim = bloco.querySelector('[data-field="data_fim"]');
       fim.min = e.target.value;
     }
   });
@@ -103,5 +221,12 @@
     }
   });
 
-  addBloco(); // estado inicial
+  if (!blocosList.querySelector("[data-bloco]")) {
+    addBloco();
+  } else {
+    reindex();
+    blocosList.querySelectorAll(":scope > [data-bloco]").forEach(bloco => {
+      updateBlocoOptions(bloco, true);
+    });
+  }
 })();

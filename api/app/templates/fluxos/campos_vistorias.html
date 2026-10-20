@@ -67,6 +67,14 @@
     or (permitir_edicao and etapa_id == 'VS-01' and f_horario and (f_horario.editavel|string|lower|trim) in ['1', 'true'])
 %}
 
+{% if g.infoEmpreendUnic is defined and g.infoEmpreendUnic %}
+    {% set infoempreend = g.infoEmpreendUnic %}
+{% endif %}
+
+<script>
+    window.infoempreend = {{ infoempreend|tojson }};
+</script>
+
 <section class="imp-form-section">
     <div class="imp-form-grid">
         <div
@@ -152,19 +160,11 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Empreendimento</label>
-                                        <select class="form-select" name="{{ prefixo }}-empreendimento" {% if empreendimento_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
+                                        <select class="form-select" name="{{ prefixo }}-empreendimento" data-field="empreendimento" {% if empreendimento_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
                                             <option value="">Selecione</option>
-                                            <option value="CASA_PIETRA" {% if campo_empreendimento and campo_empreendimento.valor == 'CASA_PIETRA' %}selected{% endif %}>Casa Pietra</option>
-                                            <option value="CONNECT" {% if campo_empreendimento and campo_empreendimento.valor == 'CONNECT' %}selected{% endif %}>Connect Impper</option>
-                                            <option value="LEGACY" {% if campo_empreendimento and campo_empreendimento.valor == 'LEGACY' %}selected{% endif %}>Legacy Impper</option>
-                                            <option value="PRIME" {% if campo_empreendimento and campo_empreendimento.valor == 'PRIME' %}selected{% endif %}>Prime Impper</option>
-                                            <option value="LINE" {% if campo_empreendimento and campo_empreendimento.valor == 'LINE' %}selected{% endif %}>Line Impper</option>
-                                            <option value="RAIZES" {% if campo_empreendimento and campo_empreendimento.valor == 'RAIZES' %}selected{% endif %}>Raízes Impperial</option>
-                                            <option value="PRIME_LINE" {% if campo_empreendimento and campo_empreendimento.valor == 'PRIME_LINE' %}selected{% endif %}>Prime/Line Impper</option>
-                                            <option value="RESERVA" {% if campo_empreendimento and campo_empreendimento.valor == 'RESERVA' %}selected{% endif %}>Reserva Impperial</option>
-                                            <option value="VISTA" {% if campo_empreendimento and campo_empreendimento.valor == 'VISTA' %}selected{% endif %}>Vista Impper</option>
-                                            <option value="VILLAS_DAMHA" {% if campo_empreendimento and campo_empreendimento.valor == 'VILLAS_DAMHA' %}selected{% endif %}>Villas Damha Impper</option>
-                                            <option value="CENTRAL_DE_VENDAS" {% if campo_empreendimento and campo_empreendimento.valor == 'CENTRAL_DE_VENDAS' %}selected{% endif %}>Central de Vendas</option>
+                                            {% for valor, label in g.empreendimentosUnic %}
+                                                <option value="{{ valor }}" {% if campo_empreendimento and (campo_empreendimento.valor|string) == (valor|string) %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                     <div class="col-md-3">
@@ -204,8 +204,28 @@
                                                 {% set dt_editavel = permitir_edicao and etapa_id == 'VS-01' and campo_dt and (campo_dt.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 {% set horario_editavel = permitir_edicao and etapa_id == 'VS-01' and campo_horario and (campo_horario.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 <tr data-lote-row>
-                                                    <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-quadra" value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}" {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %} data-lote-field='quadra'></td>
-                                                    <td><input type="text" class="form-control form-control-sm" name="{{ prefixo_lote }}-lote" value="{{ campo_lote.valor if campo_lote and campo_lote.valor is not none else '' }}" {% if lote_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}></td>
+                                                    <td>
+                                                        <select
+                                                            class="form-select form-select-sm"
+                                                            name="{{ prefixo_lote }}-quadra"
+                                                            data-lote-field="quadra"
+                                                            data-current-value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}"
+                                                            {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}
+                                                        >
+                                                            <option value="">Selecione a quadra</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select
+                                                            class="form-select form-select-sm"
+                                                            name="{{ prefixo_lote }}-lote"
+                                                            data-lote-field="lote"
+                                                            data-current-value="{{ campo_lote.valor if campo_lote and campo_lote.valor is not none else '' }}"
+                                                            {% if lote_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}
+                                                        >
+                                                            <option value="">Selecione o lote</option>
+                                                        </select>
+                                                    </td>
                                                     {% if etapa_id == 'VS-01' %}
                                                         <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote }}-dt" value="{{ campo_dt.valor if campo_dt and campo_dt.valor is not none else '' }}" {% if not dt_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote }}-horario" value="{{ campo_horario.valor if campo_horario and campo_horario.valor is not none else '' }}" {% if not horario_editavel %}disabled data-impper-locked="true"{% endif %}></td>
@@ -266,81 +286,13 @@
             {% if not empreendimento_editavel %}disabled data-impper-locked="true"{% endif %}
           >
             <option value="">Selecione</option>
-            <option value="CASA_PIETRA"
-            {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CASA_PIETRA' %}selected{% endif %}>
-                Casa Pietra
-            </option>
-
-            <option
-                value="CONNECT"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CONNECT' %}selected{% endif %}
-            >
-                Connect Impper
-            </option>
-
-            <option
-                value="LEGACY"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'LEGACY' %}selected{% endif %}
-            >
-                Legacy Impper
-            </option>
-
-            <option
-                value="PRIME"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'PRIME' %}selected{% endif %}
-            >
-                Prime Impper
-            </option>
-
-            <option
-                value="LINE"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'LINE' %}selected{% endif %}
-            >
-                Line Impper
-            </option>
-
-            <option
-                value="RAIZES"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'RAIZES' %}selected{% endif %}
-
-            >
-                Raízes Impperial
-            </option>
-
-            <option
-                value="PRIME_LINE"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'PRIME_LINE' %}selected{% endif %}
-            >
-                Prime/Line Impper
-            </option>
-
-            <option
-                value="RESERVA"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'RESERVA' %}selected{% endif %}
-            >
-                Reserva Impperial
-            </option>
-
-            <option
-                value="VISTA"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'VISTA' %}selected{% endif %}
-            >
-                Vista Impper
-            </option>
-
-            <option
-                value="VILLAS_DAMHA"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'VILLAS_DAMHA' %}selected{% endif %}
-            >
-                Villas Damha Impper
-            </option>
-
-            <option
-                value="CENTRAL_DE_VENDAS"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == 'CENTRAL_DE_VENDAS' %}selected{% endif %}
-            >
-                Central de Vendas
-            </option>
+            {% for valor, label in g.empreendimentosUnic %}
+              <option value="{{ valor }}"
+                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == valor %}selected{% endif %}
+              >
+                {{ label }}
+              </option>
+            {% endfor %}
           </select>
         </div>
 
@@ -395,18 +347,22 @@
 <template id="loteTemplate">
   <tr data-lote-row>
     <td>
-      <input type="text" class="form-control form-control-sm" data-lote-field="quadra"
-        value="{{ f_quadra.valor if modo_execucao and f_quadra and f_quadra.valor is not none else '' }}"
+      <select class="form-select form-select-sm" data-lote-field="quadra"
+        data-current-value=""
         {% if quadra_editavel %}required{% endif %}
         {% if not quadra_editavel %}disabled data-impper-locked="true"{% endif %}
       >
+        <option value="" disabled selected>Selecione a quadra</option>
+      </select>
     </td>
     <td>
-      <input type="text" class="form-control form-control-sm" data-lote-field="lote"
-        value="{{ f_lote.valor if modo_execucao and f_lote and f_lote.valor is not none else '' }}"
+      <select class="form-select form-select-sm" data-lote-field="lote"
+        data-current-value=""
         {% if lote_editavel %}required{% endif %}
         {% if not lote_editavel %}disabled data-impper-locked="true"{% endif %}
       >
+        <option value="" disabled selected>Selecione o lote</option>
+      </select>
     </td>
     {% if etapa_id == "VS-01" %}
     <td>

@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 import base64
 
 INFO_USER_CACHE_VERSION = 2
-URL_RM = "https://imperialempreendimentos166032.rm.cloudtotvs.com.br:8051"
+URL_RM = "https://imperialempreendimentos166031.rm.cloudtotvs.com.br:8051"
 
 # Caches em memória para evitar 1 chamada ao Graph por linha do banco (N+1).
 GROUPS_CACHE_TTL = 600
@@ -367,11 +367,19 @@ def carregar_info_form(id_fluxo):
             headers={"Authorization": f"Basic {credentials}"}
         )
         g.condpagamentoUnic = condpagamento.json()
+    elif id_fluxo == '11':
+        print("Carregando informações do empreendimento")
+        g.infoEmpreend = requests.get(
+            f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/AUT.CR.1/1/G",
+            headers={"Authorization": f"Basic {credentials}"}
+        )
+        g.infoEmpreendUnic = g.infoEmpreend.json()
     coligadas = {}
     movimentos = {}
     ccusto = {}
     fornecedores = {}
     contratos = {}
+    empreendimentos = {}
     dados =  g.coligMov.json()
     
     destinos = {
@@ -380,6 +388,7 @@ def carregar_info_form(id_fluxo):
         "CENTRO DE CUSTO": ccusto,
         "FORNECEDOR": fornecedores,
         "CONTRATO": contratos,
+        "EMPREENDIMENTO": empreendimentos,
     }
     for colig in dados:
         destino = destinos.get(colig.get("TIPO"))
@@ -395,6 +404,7 @@ def carregar_info_form(id_fluxo):
     g.ccustoUnic = ccusto.items()
     g.fornUnic = fornecedores.items()
     g.contratosUnic = contratos.items()
+    g.empreendimentosUnic = empreendimentos.items()
 
 @app.context_processor
 def inject_info_user():
