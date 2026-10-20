@@ -821,10 +821,12 @@ def novasolicitacao(context):
     user = context["user"]
     groups   = g.info_user.get("groups", [])
     user_oid = user.get("oid") or user.get("id")
+    jobTitle = g.info_user.get("jobTitle")
     grupos_conditions = [flows.acesso.like(f"%{grupo}%") for grupo in groups]
     fluxos = flows.query.filter(\
         or_(
             flows.acesso.like(f"%{user_oid}%"),
+            flows.acesso.like(f"%{jobTitle}%"),
             *grupos_conditions)).all()
     print(fluxos)
     return render_template(
