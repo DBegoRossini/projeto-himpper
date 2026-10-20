@@ -172,14 +172,6 @@
                                         <input type="time" class="form-control" name="{{ prefixo }}-manha_inicio" value="{{ campo_manha_inicio.valor if campo_manha_inicio and campo_manha_inicio.valor is not none else '' }}" {% if manha_inicio_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
                                     </div>
                                     <div class="col-md-3">
-                                        <label class="form-label">Manhã: fim</label>
-                                        <input type="time" class="form-control" name="{{ prefixo }}-manha_fim" value="{{ campo_manha_fim.valor if campo_manha_fim and campo_manha_fim.valor is not none else '' }}" {% if manha_fim_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Tarde: início</label>
-                                        <input type="time" class="form-control" name="{{ prefixo }}-tarde_inicio" value="{{ campo_tarde_inicio.valor if campo_tarde_inicio and campo_tarde_inicio.valor is not none else '' }}" {% if tarde_inicio_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
-                                    </div>
-                                    <div class="col-md-3">
                                         <label class="form-label">Tarde: fim</label>
                                         <input type="time" class="form-control" name="{{ prefixo }}-tarde_fim" value="{{ campo_tarde_fim.valor if campo_tarde_fim and campo_tarde_fim.valor is not none else '' }}" {% if tarde_fim_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
                                     </div>
@@ -358,24 +350,6 @@
             value="{{ f_manha_inicio.valor if modo_execucao and f_manha_inicio and f_manha_inicio.valor is not none else '' }}"
             {% if manha_inicio_editavel %}required{% endif %}
             {% if not manha_inicio_editavel %}disabled data-impper-locked="true"{% endif %}
-          >
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Manhã: fim</label>
-          <input type="time" class="form-control" data-field="manha_fim"
-            value="{{ f_manha_fim.valor if modo_execucao and f_manha_fim and f_manha_fim.valor is not none else '' }}"
-            {% if manha_fim_editavel %}required{% endif %}
-            {% if not manha_fim_editavel %}disabled data-impper-locked="true"{% endif %}
-          >
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Tarde: início</label>
-          <input type="time" class="form-control" data-field="tarde_inicio"
-            value="{{ f_tarde_inicio.valor if modo_execucao and f_tarde_inicio and f_tarde_inicio.valor is not none else '' }}"
-            {% if tarde_inicio_editavel %}required{% endif %}
-            {% if not tarde_inicio_editavel %}disabled data-impper-locked="true"{% endif %}
           >
         </div>
 
