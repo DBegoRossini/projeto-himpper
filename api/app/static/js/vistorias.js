@@ -81,6 +81,27 @@
     );
   };
 
+  const fillCliente = (row, preserveValue = false) => {
+    const cliente = row.querySelector('[data-lote-field="cliente"]');
+    if (!cliente) return;
+
+    const bloco = row.closest("[data-bloco]");
+    const empreendimento = bloco.querySelector('[data-field="empreendimento"]').value;
+    const quadra = row.querySelector('[data-lote-field="quadra"]').value;
+    const lote = row.querySelector('[data-lote-field="lote"]').value;
+
+    const match = lote && getEmpreendimentoRows(empreendimento).find(item =>
+      String(item.QUADRA ?? "").trim() === quadra &&
+      String(item.LOTE ?? "").trim() === lote
+    );
+
+    if (match) {
+      cliente.value = String(match.CLIENTE ?? "").trim();
+    } else if (!preserveValue) {
+      cliente.value = "";
+    }
+  };
+
   const updateBlocoOptions = (bloco, preserveValue) => {
     const empreendimento = bloco.querySelector('[data-field="empreendimento"]');
     const rows = getEmpreendimentoRows(empreendimento.value);
@@ -102,6 +123,90 @@
       updateLoteOptions(row, preserveValue);
       lote.dataset.currentValue = lote.value;
     });
+  };
+
+  const normalizeText = value =>
+    String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+  const initEmpreendimentoSearch = bloco => {
+    const box = bloco.querySelector("[data-empreendimento-combobox]");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "true";
+
+    const search = box.querySelector("[data-empreendimento-search]");
+    const hidden = box.querySelector('[data-field="empreendimento"]');
+    const menu = box.querySelector("[data-empreendimento-dropdown]");
+    const options = Array.from(
+      box.querySelectorAll("[data-empreendimento-source] option")
+    ).map(option => ({
+      value: option.value,
+      label: option.textContent.trim()
+    }));
+
+    const display = option => `${option.value} - ${option.label}`;
+    const closeMenu = () => {
+      menu.classList.remove("show");
+      search.setAttribute("aria-expanded", "false");
+    };
+
+    const render = () => {
+      if (search.disabled) return;
+
+      const term = normalizeText(search.value);
+      const filtered = options.filter(option =>
+        normalizeText(display(option)).includes(term)
+      );
+
+      menu.innerHTML = "";
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "imp-search-select__empty";
+        empty.textContent = "Nenhuma opção encontrada.";
+        menu.appendChild(empty);
+      }
+
+      filtered.forEach(option => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "dropdown-item imp-search-select__option";
+        item.textContent = display(option);
+        item.addEventListener("mousedown", e => e.preventDefault());
+        item.addEventListener("click", () => {
+          search.value = display(option);
+          search.setCustomValidity("");
+          hidden.value = option.value;
+          hidden.dispatchEvent(new Event("change", { bubbles: true }));
+          closeMenu();
+        });
+        menu.appendChild(item);
+      });
+
+      menu.classList.add("show");
+      search.setAttribute("aria-expanded", "true");
+    };
+
+    const initial = options.find(option =>
+      option.value === hidden.value || option.label === hidden.value
+    );
+    if (initial) search.value = display(initial);
+
+    search.addEventListener("focus", render);
+    search.addEventListener("input", () => {
+      if (hidden.value) {
+        hidden.value = "";
+        hidden.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      search.setCustomValidity(
+        search.value.trim() ? "Selecione uma opção da lista." : ""
+      );
+      render();
+    });
+    search.addEventListener("blur", closeMenu);
   };
 
   // Reindexa nomes (blocos-i-campo / blocos-i-lotes-j-campo), títulos e botões remover
@@ -134,6 +239,7 @@
 
   const addBloco = () => {
     blocosList.appendChild(blocoTpl.content.cloneNode(true));
+    initEmpreendimentoSearch(blocosList.lastElementChild);
     addLote(blocosList.lastElementChild);   // todo bloco nasce com 1 lote
   };
 
@@ -192,6 +298,9 @@
         field.dataset.currentValue = "";
       });
       updateBlocoOptions(bloco, false);
+      bloco.querySelectorAll("[data-lote-row]").forEach(row =>
+        fillCliente(row, true)
+      );
       return;
     }
 
@@ -200,11 +309,13 @@
       const lote = target.closest("[data-lote-row]").querySelector('[data-lote-field="lote"]');
       lote.dataset.currentValue = "";
       updateLoteOptions(target.closest("[data-lote-row]"), false);
+      fillCliente(target.closest("[data-lote-row]"));
       return;
     }
 
     if (target.dataset.loteField === "lote") {
       target.dataset.currentValue = target.value;
+      fillCliente(target.closest("[data-lote-row]"));
       return;
     }
 
@@ -226,7 +337,9 @@
   } else {
     reindex();
     blocosList.querySelectorAll(":scope > [data-bloco]").forEach(bloco => {
+      initEmpreendimentoSearch(bloco);
       updateBlocoOptions(bloco, true);
+      bloco.querySelectorAll("[data-lote-row]").forEach(fillCliente);
     });
   }
 })();

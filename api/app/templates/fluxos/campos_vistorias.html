@@ -9,11 +9,10 @@
 {% set f_data_fim = formularios_map.get('data_fim') if modo_execucao else none %}
 {% set f_empreendimento = formularios_map.get('empreendimento') if modo_execucao else none %}
 {% set f_manha_inicio = formularios_map.get('manha_inicio') if modo_execucao else none %}
-{% set f_manha_fim = formularios_map.get('manha_fim') if modo_execucao else none %}
-{% set f_tarde_inicio = formularios_map.get('tarde_inicio') if modo_execucao else none %}
 {% set f_tarde_fim = formularios_map.get('tarde_fim') if modo_execucao else none %}
 {% set f_quadra = formularios_map.get('quadra') if modo_execucao else none %}
 {% set f_lote = formularios_map.get('lote') if modo_execucao else none %}
+{% set f_cliente = formularios_map.get('cliente') if modo_execucao else none %}
 {% set f_dt = formularios_map.get('dt') if modo_execucao else none %}
 {% set f_horario = formularios_map.get('horario') if modo_execucao else none %}
 
@@ -37,14 +36,7 @@
     not modo_execucao
     or (permitir_edicao and f_manha_inicio and (f_manha_inicio.editavel|string|lower|trim) in ['1', 'true'])
 %}
-{% set manha_fim_editavel =
-    not modo_execucao
-    or (permitir_edicao and f_manha_fim and (f_manha_fim.editavel|string|lower|trim) in ['1', 'true'])
-%}
-{% set tarde_inicio_editavel =
-    not modo_execucao
-    or (permitir_edicao and f_tarde_inicio and (f_tarde_inicio.editavel|string|lower|trim) in ['1', 'true'])
-%}
+
 {% set tarde_fim_editavel =
     not modo_execucao
     or (permitir_edicao and f_tarde_fim and (f_tarde_fim.editavel|string|lower|trim) in ['1', 'true'])
@@ -62,14 +54,74 @@
     not modo_execucao
     or (permitir_edicao and etapa_id == 'VS-01' and f_dt and (f_dt.editavel|string|lower|trim) in ['1', 'true'])
 %}
+{% set cliente_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_cliente and (f_cliente.editavel|string|lower|trim) in ['1', 'true'])
+%}
 {% set horario_editavel =
     not modo_execucao 
     or (permitir_edicao and etapa_id == 'VS-01' and f_horario and (f_horario.editavel|string|lower|trim) in ['1', 'true'])
 %}
 
-{% if g.infoEmpreendUnic is defined and g.infoEmpreendUnic %}
-    {% set infoempreend = g.infoEmpreendUnic %}
-{% endif %}
+{% set rotulos = {} %}
+{% for opt_valor, opt_label in (g.empreendimentosUnic or []) %}
+    {% set _ = rotulos.update({ (opt_valor|string): (opt_label|string) }) %}
+{% endfor %}
+
+{% set infoempreend = [] %}
+{% for item in (g.infoEmpreendUnic or []) %}
+    {% set _ = infoempreend.append(dict(item, NOME=rotulos.get(item.CODEMP|string, item.NOME))) %}
+{% endfor %}
+
+{% macro empreendimento_search(name, valor, editavel) %}
+    {# Texto exibido no campo de busca, calculado no servidor para aparecer mesmo sem JS #}
+    {% set emp = namespace(texto='') %}
+    {% for opt_valor, opt_label in (g.empreendimentosUnic or []) %}
+        {% if valor and (valor|string) == (opt_valor|string) %}
+            {% set emp.texto = (opt_valor|string) ~ ' - ' ~ (opt_label|string) %}
+        {% endif %}
+    {% endfor %}
+    {% if not emp.texto and valor %}
+        {% set emp.texto = valor|string %}
+    {% endif %}
+
+    <div class="imp-search-select position-relative" data-empreendimento-combobox>
+        <select data-empreendimento-source hidden disabled>
+            {% for opt_valor, opt_label in (g.empreendimentosUnic or []) %}
+                <option value="{{ opt_label }}"
+                    {% if (valor|string) == (opt_label|string) %}selected{% endif %}
+                >{{ opt_label }}</option>
+            {% endfor %}
+        </select>
+
+        <input
+            type="search"
+            class="form-control"
+            placeholder="Pesquise por código ou descrição"
+            autocomplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            value="{{ emp.texto }}"
+            data-empreendimento-search
+            {% if editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}
+        >
+
+        <input
+            type="hidden"
+            {% if name %}name="{{ name }}"{% endif %}
+            data-field="empreendimento"
+            value="{{ valor }}"
+            {% if not editavel %}disabled data-impper-locked="true"{% endif %}
+        >
+
+        <div
+            class="dropdown-menu w-100 imp-search-select__menu"
+            role="listbox"
+            data-empreendimento-dropdown
+        ></div>
+    </div>
+{% endmacro %}
 
 <script>
     window.infoempreend = {{ infoempreend|tojson }};
@@ -122,15 +174,11 @@
                         {% set campo_data_fim = formularios_map.get(prefixo ~ '-data_fim') %}
                         {% set campo_empreendimento = formularios_map.get(prefixo ~ '-empreendimento') %}
                         {% set campo_manha_inicio = formularios_map.get(prefixo ~ '-manha_inicio') %}
-                        {% set campo_manha_fim = formularios_map.get(prefixo ~ '-manha_fim') %}
-                        {% set campo_tarde_inicio = formularios_map.get(prefixo ~ '-tarde_inicio') %}
                         {% set campo_tarde_fim = formularios_map.get(prefixo ~ '-tarde_fim') %}
                         {% set data_inicio_editavel = permitir_edicao and campo_data_inicio and (campo_data_inicio.editavel|string|lower|trim) in ['1', 'true'] %}
                         {% set data_fim_editavel = permitir_edicao and campo_data_fim and (campo_data_fim.editavel|string|lower|trim) in ['1', 'true'] %}
                         {% set empreendimento_editavel = permitir_edicao and campo_empreendimento and (campo_empreendimento.editavel|string|lower|trim) in ['1', 'true'] %}
                         {% set manha_inicio_editavel = permitir_edicao and campo_manha_inicio and (campo_manha_inicio.editavel|string|lower|trim) in ['1', 'true'] %}
-                        {% set manha_fim_editavel = permitir_edicao and campo_manha_fim and (campo_manha_fim.editavel|string|lower|trim) in ['1', 'true'] %}
-                        {% set tarde_inicio_editavel = permitir_edicao and campo_tarde_inicio and (campo_tarde_inicio.editavel|string|lower|trim) in ['1', 'true'] %}
                         {% set tarde_fim_editavel = permitir_edicao and campo_tarde_fim and (campo_tarde_fim.editavel|string|lower|trim) in ['1', 'true'] %}
                         {% set lote_indices = namespace(indices=[]) %}
                         {% for formulario in formularios %}
@@ -160,12 +208,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Empreendimento</label>
-                                        <select class="form-select" name="{{ prefixo }}-empreendimento" data-field="empreendimento" {% if empreendimento_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}>
-                                            <option value="">Selecione</option>
-                                            {% for valor, label in g.empreendimentosUnic %}
-                                                <option value="{{ valor }}" {% if campo_empreendimento and (campo_empreendimento.valor|string) == (valor|string) %}selected{% endif %}>{{ label }}</option>
-                                            {% endfor %}
-                                        </select>
+                                        {{ empreendimento_search(prefixo ~ '-empreendimento', campo_empreendimento.valor if campo_empreendimento and campo_empreendimento.valor is not none else '', empreendimento_editavel) }}
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Manhã: início</label>
@@ -185,6 +228,7 @@
                                             <tr>
                                                 <th>Quadra</th>
                                                 <th>Lote</th>
+                                                <th>Cliente</th>
                                                 {% if etapa_id == 'VS-01' %}
                                                     <th>Data</th>
                                                     <th>Horário</th>
@@ -197,8 +241,11 @@
                                                 {% set prefixo_lote = prefixo ~ '-lotes-' ~ j %}
                                                 {% set campo_quadra = formularios_map.get(prefixo_lote ~ '-quadra') %}
                                                 {% set campo_lote = formularios_map.get(prefixo_lote ~ '-lote') %}
+                                                {% set campo_cliente = formularios_map.get(prefixo_lote ~ '-cliente') %}
                                                 {% set campo_dt = formularios_map.get(prefixo_lote ~ '-dt') %}
                                                 {% set campo_horario = formularios_map.get(prefixo_lote ~ '-horario') %}
+                                                {% set valor_quadra = campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' %}
+                                                {% set valor_lote = campo_lote.valor if campo_lote and campo_lote.valor is not none else '' %}
                                                 {% set quadra_editavel = permitir_edicao and campo_quadra and (campo_quadra.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 {% set lote_editavel = permitir_edicao and campo_lote and (campo_lote.editavel|string|lower|trim) in ['1', 'true'] %}
                                                 {% set dt_editavel = permitir_edicao and etapa_id == 'VS-01' and campo_dt and (campo_dt.editavel|string|lower|trim) in ['1', 'true'] %}
@@ -209,10 +256,13 @@
                                                             class="form-select form-select-sm"
                                                             name="{{ prefixo_lote }}-quadra"
                                                             data-lote-field="quadra"
-                                                            data-current-value="{{ campo_quadra.valor if campo_quadra and campo_quadra.valor is not none else '' }}"
-                                                            {% if quadra_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}
+                                                            data-current-value="{{ valor_quadra }}"
+                                                            disabled data-impper-locked="true"
                                                         >
                                                             <option value="">Selecione a quadra</option>
+                                                            {% if valor_quadra != '' %}
+                                                                <option value="{{ valor_quadra }}" selected>{{ valor_quadra }}</option>
+                                                            {% endif %}
                                                         </select>
                                                     </td>
                                                     <td>
@@ -220,11 +270,21 @@
                                                             class="form-select form-select-sm"
                                                             name="{{ prefixo_lote }}-lote"
                                                             data-lote-field="lote"
-                                                            data-current-value="{{ campo_lote.valor if campo_lote and campo_lote.valor is not none else '' }}"
+                                                            data-current-value="{{ valor_lote }}"
                                                             {% if lote_editavel %}required{% else %}disabled data-impper-locked="true"{% endif %}
                                                         >
                                                             <option value="">Selecione o lote</option>
+                                                            {% if valor_lote != '' %}
+                                                                <option value="{{ valor_lote }}" selected>{{ valor_lote }}</option>
+                                                            {% endif %}
                                                         </select>
+                                                    </td>
+                                                    <td>
+                                                        <input 
+                                                            type="text" 
+                                                            class="form-control form-control-sm" 
+                                                            name="{{ prefixo_lote }}-cliente" 
+                                                            value="{{ campo_cliente.valor if campo_cliente and campo_cliente.valor is not none else '' }}" {% if not cliente_editavel %}disabled data-impper-locked="true"{% endif %}>
                                                     </td>
                                                     {% if etapa_id == 'VS-01' %}
                                                         <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote }}-dt" value="{{ campo_dt.valor if campo_dt and campo_dt.valor is not none else '' }}" {% if not dt_editavel %}disabled data-impper-locked="true"{% endif %}></td>
@@ -232,7 +292,7 @@
                                                         <td class="text-end text-nowrap">
                                                             {% if dt_editavel and horario_editavel %}
                                                                 <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
-                                                                <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
+                                                                <button type="button" class="btn btn-warning btn-sm" data-action="devolver" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Devolver')">Devolver</button>
                                                             {% endif %}
                                                         </td>
                                                     {% endif %}
@@ -281,19 +341,7 @@
 
         <div class="col-md-6">
           <label class="form-label">Empreendimento</label>
-          <select class="form-select" data-field="empreendimento"
-            {% if empreendimento_editavel %}required{% endif %}
-            {% if not empreendimento_editavel %}disabled data-impper-locked="true"{% endif %}
-          >
-            <option value="">Selecione</option>
-            {% for valor, label in g.empreendimentosUnic %}
-              <option value="{{ valor }}"
-                {% if modo_execucao and f_empreendimento and (f_empreendimento.valor|string) == valor %}selected{% endif %}
-              >
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
+          {{ empreendimento_search('', f_empreendimento.valor if modo_execucao and f_empreendimento and f_empreendimento.valor is not none else '', empreendimento_editavel) }}
         </div>
 
         <div class="col-md-3">
@@ -328,6 +376,7 @@
             <tr>
               <th>Quadra</th>
               <th>Lote</th>
+              <th>Cliente</th>
               {% if etapa_id == "VS-01" %}
               <th>Data</th>
               <th>Horário</th>
@@ -364,6 +413,12 @@
         <option value="" disabled selected>Selecione o lote</option>
       </select>
     </td>
+    <td>
+      <input type="text" class="form-control form-control-sm" data-lote-field="cliente"
+        value="{{ f_cliente.valor if modo_execucao and f_cliente and f_cliente.valor is not none else '' }}"
+        disabled data-impper-locked="true"
+      >
+    </td>
     {% if etapa_id == "VS-01" %}
     <td>
       <input type="date" class="form-control form-control-sm" data-lote-field="dt"
@@ -381,13 +436,149 @@
     <td class="text-end text-nowrap">
     {% if etapa_id == "VS-01" and dt_editavel and horario_editavel %}
       <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Agendar')">Agendar</button>
-      <button type="button" class="btn btn-warning btn-sm" data-action="devolver">Devolver</button>
+      <button type="button" class="btn btn-warning btn-sm" data-action="devolver" onclick="agendarVist('{{ prefixo_lote }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Devolver')">Devolver</button>
     {% endif %}
       <button type="button" class="btn btn-outline-danger btn-sm" data-remove-lote aria-label="Remover lote">&times;</button>
     </td>
 
   </tr>
 </template>
+
+
+<section class="imp-form-section">
+    <div class="imp-form-grid">
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="intervalos"
+        >
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+                    <span class="imp-label">
+                        Intervalos - Correção
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="d-flex flex-column gap-3" data-blocos-list>
+                {% if modo_execucao %}
+                    {% set bloco_indices = namespace(indices=[]) %}
+                    {% for formulario in formularios %}
+                        {% if formulario.campo.startswith('blocos-') %}
+                            {% set indice = formulario.campo.split('-')[1]|int %}
+                            {% if indice not in bloco_indices.indices %}
+                                {% set _ = bloco_indices.indices.append(indice) %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for i in bloco_indices.indices|sort %}
+                        {% set prefixo = 'blocos-' ~ i %}
+                        {% set lote_indices = namespace(indices=[]) %}
+                        {% for formulario in formularios %}
+                            {% set partes = formulario.campo.split('-') %}
+                            {% if partes|length > 3 and partes[0] == 'blocos' and partes[1]|int == i and                             partes[2] == 'lotes' and partes[-1] == 'c' %}
+                                {% set indice_lote = partes[3]|int %}
+                                {% if indice_lote not in lote_indices.indices %}
+                                    {% set _ = lote_indices.indices.append(indice_lote) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+                                                    {% if lote_indices.indices %}
+                                                    <section class="card" data-bloco-correcoes>
+                            <header class="card-header d-flex justify-content-between align-items-center">
+                                <strong data-bloco-correcoes-title>Correções</strong>
+                            </header>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                                    <strong>Lotes</strong>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Quadra</th>
+                                                <th>Lote</th>
+                                                <th>Cliente</th>
+                                                {% if etapa_id == 'VS-C-02' %}
+                                                    <th>Data</th>
+                                                    <th>Horário</th>
+                                                    <th class="text-end">Ações</th>
+                                                {% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for j in lote_indices.indices|sort %}
+                                                {% set prefixo_lote_c = prefixo ~ '-lotes-' ~ j %}
+                                                {% set campo_quadra_c = formularios_map.get(prefixo_lote_c ~ '-quadra-c') %}
+                                                {% set campo_lote_c = formularios_map.get(prefixo_lote_c ~ '-lote-c') %}
+                                                {% set campo_cliente_c = formularios_map.get(prefixo_lote_c ~ '-cliente-c') %}
+                                                {% set campo_dt_c = formularios_map.get(prefixo_lote_c ~ '-dt-c') %}
+                                                {% set campo_horario_c = formularios_map.get(prefixo_lote_c ~ '-horario-c') %}
+                                                {% set valor_quadra_c = campo_quadra_c.valor if campo_quadra_c and campo_quadra_c.valor is not none else '' %}
+                                                {% set valor_lote_c = campo_lote_c.valor if campo_lote_c and campo_lote_c.valor is not none else '' %}
+                                                {% set valor_cliente_c = campo_cliente_c.valor if campo_cliente_c and campo_cliente_c.valor is not none else '' %}
+                                                {% set quadra_editavel_c = permitir_edicao and campo_quadra_c and (campo_quadra_c.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                {% set lote_editavel_c = permitir_edicao and campo_lote_c and (campo_lote_c.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                {% set cliente_editavel_c = permitir_edicao and campo_cliente_c and (campo_cliente_c.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                {% set dt_editavel_c = permitir_edicao and etapa_id == 'VS-C-02' and campo_dt_c and (campo_dt_c.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                {% set horario_editavel_c = permitir_edicao and etapa_id == 'VS-C-02' and campo_horario_c and (campo_horario_c.editavel|string|lower|trim) in ['1', 'true'] %}
+                                                <tr data-lote-row>
+                                                    <td>
+                                                        <select
+                                                            class="form-select form-select-sm"
+                                                            name="{{ prefixo_lote_c }}-quadra-c"
+                                                            data-lote-field="quadra_c"
+                                                            data-current-value="{{ valor_quadra_c }}"
+                                                            disabled data-impper-locked="true"
+                                                        >
+                                                            <option value="{{ valor_quadra_c }}" selected>{{ valor_quadra_c }}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select
+                                                            class="form-select form-select-sm"
+                                                            name="{{ prefixo_lote_c }}-lote-c"
+                                                            data-lote-field="lote_c"
+                                                            data-current-value="{{ valor_lote_c }}"
+                                                            disabled data-impper-locked="true"
+                                                        >
+                                                            <option value="{{ valor_lote_c }}" selected>{{ valor_lote_c }}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input 
+                                                            type="text" 
+                                                            class="form-control form-control-sm" 
+                                                            name="{{ prefixo_lote_c }}-cliente-c" 
+                                                            value="{{ campo_cliente_c.valor if campo_cliente_c and campo_cliente_c.valor is not none else '' }}" {% if not cliente_editavel_c %}disabled data-impper-locked="true"{% endif %}>
+                                                    </td>
+                                                    {% if etapa_id == 'VS-C-02' %}
+                                                        <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote_c }}-dt-c" value="{{ campo_dt_c.valor if campo_dt_c and campo_dt_c.valor is not none else '' }}" {% if not dt_editavel_c %}disabled data-impper-locked="true"{% endif %}></td>
+                                                        <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote_c }}-horario-c" value="{{ campo_horario_c.valor if campo_horario_c and campo_horario_c.valor is not none else '' }}" {% if not horario_editavel_c %}disabled data-impper-locked="true"{% endif %}></td>
+                                                        <td class="text-end text-nowrap">
+                                                            {% if dt_editavel_c and horario_editavel_c %}
+                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="enviarCorrecao('{{ prefixo_lote_c }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Enviar')">Enviar</button>
+                                                            {% endif %}
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
 
 <script>
     async function agendarVist(lote, id_etapa, id_chamada, id_proxet) {

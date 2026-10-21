@@ -1127,5 +1127,16 @@ async function comentar(idChamada) {
     alert("Não foi possível adicionar o comentário.");
     return;
   }
-  location.reload();
+  // Atualiza apenas a lista de comentários, preservando o formulário
+  const campo = document.getElementById('texto_comentario');
+  const lista = document.getElementById('lista-comentarios');
+  try {
+    const pagina = await fetch(location.href, { credentials: "same-origin" });
+    const html = await pagina.text();
+    const nova = new DOMParser().parseFromString(html, "text/html").getElementById('lista-comentarios');
+    if (lista && nova) lista.innerHTML = nova.innerHTML;
+  } catch (e) {
+    alert("Comentário adicionado, mas não foi possível atualizar a lista.");
+  }
+  if (campo) campo.value = "";
 }
