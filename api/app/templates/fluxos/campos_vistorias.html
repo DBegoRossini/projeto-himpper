@@ -560,7 +560,7 @@
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote_c }}-horario-c" value="{{ campo_horario_c.valor if campo_horario_c and campo_horario_c.valor is not none else '' }}" {% if not horario_editavel_c %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td class="text-end text-nowrap">
                                                             {% if dt_editavel_c and horario_editavel_c %}
-                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="enviarCorrecao('{{ prefixo_lote_c }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Enviar')">Enviar</button>
+                                                                <button type="button" class="btn btn-success btn-sm" data-action="agendar" onclick="agendarVist('{{ prefixo_lote_c }}', '{{ etapa_id }}', '{{ id_chamada }}', 'Correcao')">Enviar</button>
                                                             {% endif %}
                                                         </td>
                                                     {% endif %}
