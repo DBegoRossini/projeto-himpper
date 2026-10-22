@@ -8,7 +8,7 @@ from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 import redis as redis_lib
 from sqlalchemy import MetaData
-"""
+
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 app.config.from_object("app_config")
@@ -48,7 +48,15 @@ else:
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "connect_args": {"options": "-csearch_path=public"}
+    "pool_pre_ping": True,
+    "pool_recycle": 280,
+    "connect_args": {
+        "options": "-csearch_path=public",
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    },
 }
 
 DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
@@ -112,3 +120,4 @@ if all(app.config.get(key) for key in ("AUTHORITY", "CLIENT_ID", "CLIENT_SECRET"
     )
 
 from app import routes
+"""
