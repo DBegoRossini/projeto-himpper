@@ -286,7 +286,7 @@
                                                             name="{{ prefixo_lote }}-cliente" 
                                                             value="{{ campo_cliente.valor if campo_cliente and campo_cliente.valor is not none else '' }}" {% if not cliente_editavel %}disabled data-impper-locked="true"{% endif %}>
                                                     </td>
-                                                    {% if etapa_id == 'VS-01' %}
+                                                    {% if etapa_id == 'VS-01' or etapa_id == 'VS-C-02' or etapa_id == '0' %}
                                                         <td><input type="date" class="form-control form-control-sm" name="{{ prefixo_lote }}-dt" value="{{ campo_dt.valor if campo_dt and campo_dt.valor is not none else '' }}" {% if not dt_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td><input type="time" class="form-control form-control-sm" name="{{ prefixo_lote }}-horario" value="{{ campo_horario.valor if campo_horario and campo_horario.valor is not none else '' }}" {% if not horario_editavel %}disabled data-impper-locked="true"{% endif %}></td>
                                                         <td class="text-end text-nowrap">
@@ -657,7 +657,13 @@
             method: 'POST',
             body: formData
         });
-        location.reload();
+        if (etapa_id == 'VS-C-02'){
+            window.location.href = '/caixa-de-entrada';
+        }else{
+            location.reload();
+        }
+
         return formData;
-};
+    }
+
 </script>
