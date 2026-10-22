@@ -973,6 +973,8 @@ async function enviarFormulario(document, id_fluxo, id_etapa) {
   return formData;
 };
 
+let enviandoEtapa = false;
+
 async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   const botao = document.querySelector('button[type="button"]');
   const form = document.querySelector('form[data-execution-form]') || document;
@@ -989,7 +991,13 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
     return;
   }
 
-  // botao.disabled = true;
+  if (enviandoEtapa) {
+    return;
+  }
+  enviandoEtapa = true;
+  const botoesEnvio = Array.from(document.querySelectorAll('button[onclick]'))
+    .filter(b => /enviarEtapa|confirmarConclusao|abrirModalConclusao/.test(b.getAttribute('onclick')));
+  botoesEnvio.forEach(b => { b.disabled = true; });
   const fields = Array.from(document.querySelectorAll('input, textarea, select'))
       .filter(f => f.name && !f.closest('[data-comment-form]'));
   const formData = new FormData();
@@ -1026,10 +1034,18 @@ async function enviarEtapa(document, id_chamada, id_etapa, id_proxet) {
   }
 
   console.log(id_etapa);
-  const response = await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    await fetch(`/exec/${id_etapa}/${id_chamada}/${id_proxet}`, {
+      method: 'POST',
+      body: formData
+    });
+  } catch (error) {
+    console.error(error);
+    enviandoEtapa = false;
+    botoesEnvio.forEach(b => { b.disabled = false; });
+    alert('Não foi possível enviar a etapa. Tente novamente.');
+    return;
+  }
   window.location.href = `/exec/${String(id_etapa)}/${id_chamada}/${id_proxet}`;
   return formData;
 };

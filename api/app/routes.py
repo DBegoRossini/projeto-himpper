@@ -12,12 +12,16 @@ from concurrent.futures import ThreadPoolExecutor
 from . import app, auth, database
 from flask import  abort, render_template, redirect, send_file, url_for,  g, session, jsonify, request as flask_request
 from app.models import flows, Chamada, Etapas, Execucao, Notificacoes, Formularios, ComentFlows, VidFlows
+from app.prazos import adicionar_horas_uteis
 from sqlalchemy import cast, String, or_, and_, func
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 import base64
 
 INFO_USER_CACHE_VERSION = 2
 URL_RM = "https://imperialempreendimentos166031.rm.cloudtotvs.com.br:8051"
+FERIADOS_RM_CACHE_TTL = 21600
+_FERIADOS_RM_CACHE = {"timestamp": 0, "datas": None}
+_feriados_rm_cache_lock = threading.Lock()
 
 # Caches em memória para evitar 1 chamada ao Graph por linha do banco (N+1).
 GROUPS_CACHE_TTL = 600
@@ -265,6 +269,60 @@ def _obter_coligmov(credentials):
         _COLIGMOV_CACHE["timestamp"] = now
     return resp
 
+
+def _obter_feriados_rm():
+    agora = time.time()
+    with _feriados_rm_cache_lock:
+        if (
+            _FERIADOS_RM_CACHE["datas"] is not None
+            and agora - _FERIADOS_RM_CACHE["timestamp"] < FERIADOS_RM_CACHE_TTL
+        ):
+            return set(_FERIADOS_RM_CACHE["datas"])
+
+        rm_user = os.getenv("rm_user")
+        rm_senha = os.getenv("rm_senha")
+        if not rm_user or not rm_senha:
+            abort(503, description="Credenciais do TOTVS RM não configuradas.")
+
+        try:
+            senha = base64.b64decode(rm_senha).decode()
+        except (ValueError, UnicodeDecodeError):
+            abort(503, description="Credencial de senha do TOTVS RM inválida.")
+
+        credentials = base64.b64encode(f"{rm_user}:{senha}".encode()).decode()
+        try:
+            response = requests.get(
+                f"{URL_RM}/api/framework/v1/consultaSQLServer/RealizaConsulta/FIN.3/1/G",
+                headers={"Authorization": f"Basic {credentials}"},
+                timeout=10,
+            )
+            response.raise_for_status()
+            rows = response.json()
+        except requests.exceptions.JSONDecodeError:
+            abort(503, description="A consulta de feriados do TOTVS RM retornou JSON inválido.")
+        except requests.exceptions.RequestException:
+            abort(503, description="Não foi possível consultar os feriados no TOTVS RM.")
+        except ValueError:
+            abort(503, description="A consulta de feriados do TOTVS RM retornou JSON inválido.")
+
+        if not isinstance(rows, list):
+            abort(503, description="A consulta FIN.3 do TOTVS RM deve retornar uma lista.")
+
+        try:
+            datas_feriados = []
+            for row in rows:
+                if not isinstance(row, dict) or not isinstance(row.get("DIAFERIADO"), str):
+                    raise ValueError("Registro de feriado sem DIAFERIADO válido.")
+                datas_feriados.append(date.fromisoformat(row["DIAFERIADO"][:10]))
+        except (KeyError, TypeError, ValueError):
+            abort(503, description="A consulta FIN.3 deve retornar datas válidas no campo DIAFERIADO.")
+
+        feriados = set(datas_feriados)
+        _FERIADOS_RM_CACHE["timestamp"] = agora
+        _FERIADOS_RM_CACHE["datas"] = frozenset(feriados)
+        return feriados
+
+
 def carregar_notificacoes_usuario(user_id):
     notificacoes = Notificacoes.query.filter_by(usuario=user_id)\
         .order_by(Notificacoes.data_criacao.desc()).all()
@@ -450,6 +508,7 @@ def index(*, context):
     ).all()
 )
     minhas_tarefas = []
+    feriados = _obter_feriados_rm() if tarefas_raw else set()
     for row in tarefas_raw:
         minhas_tarefas.append({
             "chamada":    row.Chamada,
@@ -461,7 +520,11 @@ def index(*, context):
             "id_chamada": row.id_chamada,
             "id_flow": row.id_flow,
             "prazo_limite": (
-                normalizar_datetime_local(row.iniciada_em) + timedelta(hours=row.sla)
+                adicionar_horas_uteis(
+                    normalizar_datetime_local(row.iniciada_em),
+                    row.sla,
+                    feriados,
+                )
                 if row.iniciada_em
                 else None
             )
@@ -763,9 +826,14 @@ def caixaentrada(context):
             formularios_por_chamada.setdefault(formulario.id_chamada, {})[formulario.campo] = formulario
 
     pendencias = []
+    feriados = _obter_feriados_rm() if pendencias_raw else set()
     for row in pendencias_raw:
         prazo = (
-            normalizar_datetime_local(row.iniciada_em) + timedelta(hours=row.sla)
+            adicionar_horas_uteis(
+                normalizar_datetime_local(row.iniciada_em),
+                row.sla,
+                feriados,
+            )
             if row.iniciada_em
             else None
         )

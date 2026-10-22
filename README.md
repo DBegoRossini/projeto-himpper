@@ -127,4 +127,5 @@ As páginas e os formulários dos fluxos estão em `api/app/templates/`.
 - Configure todos os segredos por variáveis de ambiente; não os registre no controle de versão.
 - A integração com o Microsoft Graph depende das permissões concedidas ao aplicativo Microsoft.
 - Os webhooks n8n e a integração RM dependem de conectividade e credenciais válidas.
+- Os prazos contam horas úteis entre 08h e 18h, de segunda a sexta, sem intervalo. A consulta SQL `FIN.3` do TOTVS RM deve retornar uma lista de registros com o campo `DIAFERIADO` em formato de data ISO; os feriados são atualizados em cache a cada seis horas.
 - `CriarBanco.py` cria as tabelas dos modelos, mas não substitui a carga de dados de fluxos, etapas e permissões necessária para o uso funcional da aplicação.
