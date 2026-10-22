@@ -492,7 +492,7 @@
 
                                     data-sort-solicitante="{{ pendencia.solicitante }}"
 
-                                    data-sort-tipo="{{ pendencia.tipo }}"
+                                    data-sort-tipo="{{ pendencia.titulo or pendencia.tipo }}"
 
                                     data-sort-recebida="{{
                                         pendencia.recebida_em.isoformat()
@@ -725,7 +725,7 @@
 
                             data-sort-solicitante="{{ pendencia.solicitante }}"
 
-                            data-sort-tipo="{{ pendencia.tipo }}"
+                            data-sort-tipo="{{ pendencia.titulo or pendencia.tipo }}"
 
                             data-sort-recebida="{{
                                 pendencia.recebida_em.isoformat()
