@@ -332,6 +332,7 @@
 
         </div>
 
+        {% if etapa_id|default('')|string|trim == 'OC-01' %}
         <div
             class="imp-field imp-field--full"
             data-field-wrap="pronta_fin"
@@ -380,6 +381,7 @@
             </div>
 
         </div>
+        {% endif %}
 
 
         <div
