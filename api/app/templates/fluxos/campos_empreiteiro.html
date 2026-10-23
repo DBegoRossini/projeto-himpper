@@ -1,0 +1,138 @@
+{% set modo_execucao = modo_execucao|default(false) %}
+{% set permitir_edicao = permitir_edicao|default(true) %}
+
+{# =========================================================
+   REGISTROS DO FORMULÁRIO
+   ========================================================= #}
+
+{% set f_coligada = formularios_map.get('coligada') if modo_execucao else none %}
+{% set f_concorrencia = formularios_map.get('concorrencia') if modo_execucao else none %}
+{% set f_tp_solicitacao = formularios_map.get('tp_solicitacao') if modo_execucao else none %}
+{% set f_dt_inicio = formularios_map.get('dt_inicio') if modo_execucao else none %}
+{% set f_vl_estimado = formularios_map.get('vl_estimado') if modo_execucao else none %}
+{% set f_et_orcamentaria = formularios_map.get('et_orcamentaria') if modo_execucao else none %}
+{% set f_saldo_verba = formularios_map.get('saldo_verba') if modo_execucao else none %}
+{% set f_carta_convite = formularios_map.get('carta_convite') if modo_execucao else none %}
+{% set f_tp_contratacao = formularios_map.get('tp_contratacao') if modo_execucao else none %}
+
+{# =========================================================
+   PERMISSÕES DE EDIÇÃO
+   ========================================================= #}
+
+{% set coligada_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_coligada and (f_coligada.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set concorrencia_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_concorrencia and (f_concorrencia.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set tp_solicitacao_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_tp_solicitacao and (f_tp_solicitacao.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set dt_inicio_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_dt_inicio and (f_dt_inicio.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set vl_estimado_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_vl_estimado and (f_vl_estimado.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set et_orcamentaria_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_et_orcamentaria and (f_et_orcamentaria.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set saldo_verba_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_saldo_verba and (f_saldo_verba.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set carta_convite_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_carta_convite and (f_carta_convite.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+{% set tp_contratacao_editavel =
+    not modo_execucao
+    or (permitir_edicao and f_tp_contratacao and (f_tp_contratacao.editavel|string|lower|trim) in ['1', 'true'])
+%}
+
+<section class="imp-form-section">
+
+    <div class="imp-form-section__head">
+
+        <div class="imp-form-section__copy">
+
+            <h3 class="imp-card__title">
+                Identificação da solicitação
+            </h3>
+
+            <p class="imp-card__subtitle">
+                Primeiro, precisamos entender em qual situação esta despesa se encontra.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="imp-form-grid">
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="codcoligada"
+        >
+
+            <label
+                class="imp-label"
+                for="codcoligada"
+            >
+                Coligada
+                <span class="imp-label__required">*</span>
+            </label>
+
+            <select
+                id="codcoligada"
+                name="codcoligada"
+                class="form-select"
+                autocomplete="organization"
+                {% if coligada_editavel %}required{% endif %}
+                {% if not coligada_editavel %}disabled data-impper-locked="true"{% endif %}
+            >
+
+                <option value="">
+                    Selecione uma coligada
+                </option>
+
+                {% if g.coligadasUnic is defined %}
+
+                    {% for key, label in g.coligadasUnic %}
+
+                        <option
+                            value="{{ key }}"
+                            {% if modo_execucao and f_coligada and (f_coligada.valor|string) == (key|string) %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </select>
+
+            <p class="imp-help">
+                Escolha a empresa responsável pela compra.
+            </p>
+
+        </div>
+
+        </div>
+    </div>
+</section>
