@@ -1,0 +1,109 @@
+{% extends "index.html" %}
+
+{% block titulo %}
+    Contratação de Empreiteiro
+{% endblock %}
+
+{% block topBar %}
+    <h1 class="imp-heading">Contratação de Empreiteiro</h1>
+    <p class="imp-subtitle imp-topbar__subtitle">
+        Preencha as informações abaixo para solicitar a contratação de um empreiteiro.
+    </p>
+{% endblock %}
+
+{% block main %}
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/06-forms.css') }}"
+    >
+
+    <section class="imp-stack imp-gap-6 imp-form-page">
+        <div>
+            <span class="imp-kicker">Empreiteiro</span>
+            <h2 class="imp-title">Nova solicitação</h2>
+        </div>
+
+        <div class="imp-form-shell">
+            <form
+                id="supplierForm"
+                class="imp-form"
+                novalidate
+                data-id-fluxo="{{ request.view_args.get('id_fluxo', '') }}"
+                data-id-etapa-inicial="VS-00"
+            >
+                {% include "fluxos/campos_empreiteiro.html" %}
+
+                <div class="imp-form-actions">
+
+                    <div class="imp-form-note">
+
+                        Campos com
+                        <span class="imp-label__required">*</span>
+                        são obrigatórios.
+
+                    </div>
+
+
+                    <div class="imp-cluster">
+
+                        <button
+                            type="button"
+                            id="submitButton"
+                            class="btn btn-primary"
+                            onclick="enviarFormulario(
+                                document,
+                                12,
+                                'CE-00'
+                            )"
+                        >
+
+                            <span
+                                class="imp-spinner imp-spinner--sm imp-spinner--light"
+                                id="submitSpinner"
+                                hidden
+                            ></span>
+
+                            <span id="submitLabel">
+                                Enviar solicitação
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <div
+            class="imp-form-message"
+            id="submitted-form"
+            hidden
+        >
+
+            <p class="imp-help">
+                Protocolo
+            </p>
+
+            <h3
+                class="imp-card__title"
+                id="submitted-header"
+            >
+                Solicitação enviada
+            </h3>
+
+            <p id="submitted-content">
+                Sua solicitação foi registrada com sucesso.
+            </p>
+
+        </div>
+
+    </section>
+    
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+
+{% endblock %}

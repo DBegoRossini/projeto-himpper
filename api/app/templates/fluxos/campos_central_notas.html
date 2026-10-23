@@ -38,6 +38,7 @@
 {% set f_dados_bancarios = formularios_map.get('dados_bancarios') if modo_execucao else none %}
 {% set f_boleto_emitido = formularios_map.get('boleto_emitido') if modo_execucao else none %}
 {% set f_arquivo_boleto = formularios_map.get('arquivo_boleto') if modo_execucao else none %}
+{% set f_pronta_fin = formularios_map.get('pronta_fin') if modo_execucao else none %}
 
 
 {% set nota_editavel =
@@ -46,6 +47,15 @@
         permitir_edicao_central
         and f_nota
         and (f_nota.editavel|string|lower|trim) in ['1', 'true']
+    )
+%}
+
+{% set pronta_fin_editavel =
+    not modo_execucao
+    or (
+        permitir_edicao_central
+        and f_pronta_fin
+        and (f_pronta_fin.editavel|string|lower|trim) in ['1', 'true']
     )
 %}
 
@@ -316,6 +326,55 @@
 
                     </span>
 
+                </label>
+
+            </div>
+
+        </div>
+
+        <div
+            class="imp-field imp-field--full"
+            data-field-wrap="pronta_fin"
+        >
+
+            <span class="imp-label">
+                Solicitação deve ir direto para o financeiro após aprovação?
+                <span class="imp-label__required">*</span>
+            </span>
+
+            <div
+                class="imp-choice-grid imp-choice-grid--two"
+                role="radiogroup"
+                aria-label="Ir direto para o financeiro"
+            >
+
+                <label class="imp-choice">
+                    <input
+                        type="radio"
+                        name="pronta_fin"
+                        value="SIM"
+                        {% if pronta_fin_editavel %}required{% endif %}
+                        {% if modo_execucao and f_pronta_fin and f_pronta_fin.valor == 'SIM' %}checked{% endif %}
+                        {% if not pronta_fin_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Sim</span>
+                    </span>
+                </label>
+
+                <label class="imp-choice">
+                    <input
+                        type="radio"
+                        name="pronta_fin"
+                        value="NAO"
+                        {% if modo_execucao and f_pronta_fin and f_pronta_fin.valor == 'NAO' %}checked{% endif %}
+                        {% if not pronta_fin_editavel %}disabled data-impper-locked="true"{% endif %}
+                    >
+                    <span class="imp-choice__content">
+                        <span class="imp-choice__dot"></span>
+                        <span class="imp-choice__text">Não</span>
+                    </span>
                 </label>
 
             </div>
